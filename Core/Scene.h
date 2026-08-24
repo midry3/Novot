@@ -11,10 +11,10 @@ protected:
 	std::vector<std::shared_ptr<Scene>> scenes;
 	int ID = 0;
 	bool visible = true;
-	virtual void _Load() = 0;
-	virtual void _Release() = 0;
-	virtual void _Update(float dt) = 0;
-	virtual void _Draw() const = 0;
+	virtual void _Load() {};
+	virtual void _Release() {};
+	virtual void _Update(float dt) {};
+	virtual void _Draw() const {};
 	template <std::derived_from<Asset> T>
 	std::shared_ptr<T> LoadAsset(const std::string& path) {
 		return AssetLoader.LoadAsset<T>(path, ID);

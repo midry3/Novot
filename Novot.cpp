@@ -1,4 +1,5 @@
 ﻿#include "Novot.h"
+#include <DxLib.h>
 #include <chrono>
 
 void _Novot::Update(float dt) {

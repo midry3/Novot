@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -178,10 +178,6 @@
     <ClCompile Include="Core\Asset\Texture\SpriteSheet.cpp" />
     <ClCompile Include="Debugger\Debugger.cpp" />
     <ClCompile Include="Novot.cpp" />
-    <ClCompile Include="Parser\ScriptParser\NVTLexer.cpp" />
-    <ClCompile Include="Parser\ScriptParser\ScriptParser.cpp" />
-    <ClCompile Include="Parser\TableManager\TableManager.cpp" />
-    <ClCompile Include="VM\VM.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Asset\AssetLoader.h" />
@@ -214,10 +210,6 @@
     <ClInclude Include="Debugger\Debugger.h" />
     <ClInclude Include="Core\NovotCore.h" />
     <ClInclude Include="Novot.h" />
-    <ClInclude Include="Parser\ScriptParser\NVTLexer.h" />
-    <ClInclude Include="Parser\ScriptParser\ScriptParser.h" />
-    <ClInclude Include="Parser\TableManager\TableManager.h" />
-    <ClInclude Include="VM\VM.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\command\1.turn" />
