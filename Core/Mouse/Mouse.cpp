@@ -1,0 +1,53 @@
+﻿#include "Mouse.h"
+#include <NovotCore.h>
+#include <DxLib.h>
+
+void  _Mouse::UpdateMouseEvent() {
+	int x, y;
+	auto input = GetMouseInput();
+	auto preEvent = _currentMouseEvent;
+	GetMousePoint(&x, &y);
+	_currentMouseEvent.position = Vector2D(static_cast<double>(x), static_cast<double>(y));
+	_currentMouseEvent.delta = _currentMouseEvent.position - preEvent.position;
+	if (input & MOUSE_INPUT_LEFT) {
+		_currentMouseEvent.button = MouseButton::Left;
+		if (_currentMouseEvent.state == MouseButtonState::Released) {
+			_currentMouseEvent.state = MouseButtonState::Pressed;
+		}
+		else {
+			_currentMouseEvent.state = MouseButtonState::Pressed;
+		}
+	}
+	else if (input & MOUSE_INPUT_RIGHT) {
+		_currentMouseEvent.button = MouseButton::Right;
+		if (_currentMouseEvent.state == MouseButtonState::Released) {
+			_currentMouseEvent.state = MouseButtonState::Pressed;
+		}
+		else {
+			_currentMouseEvent.state = MouseButtonState::Pressed;
+		}
+	}
+	else if (input & MOUSE_INPUT_MIDDLE) {
+		_currentMouseEvent.button = MouseButton::Middle;
+		if (_currentMouseEvent.state == MouseButtonState::Released) {
+			_currentMouseEvent.state = MouseButtonState::Pressed;
+		}
+		else {
+			_currentMouseEvent.state = MouseButtonState::Pressed;
+		}
+	}
+	else {
+		if (preEvent.state == MouseButtonState::Pressed) {
+			_currentMouseEvent.state = MouseButtonState::Released;
+		}
+		else {
+			_currentMouseEvent.button = MouseButton::None;
+			_currentMouseEvent.state = MouseButtonState::Moved;
+		}
+	}
+	_currentMouseEvent.just = (preEvent.state != _currentMouseEvent.state);
+
+	DebuggerSetProperty("Mouse Position", "(" + std::to_string(_currentMouseEvent.position.x) + ", " + std::to_string(_currentMouseEvent.position.y) + ")");
+	DebuggerSetProperty("Mouse Button", std::to_string(static_cast<int>(_currentMouseEvent.button)));
+	DebuggerSetProperty("Mouse State", std::to_string(static_cast<int>(_currentMouseEvent.state)));
+}

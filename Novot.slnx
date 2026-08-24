@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="../Pleiades_logue/Pleiades_logue.vcxproj" Id="d4947c7a-88fc-4d38-bdff-d959c56243c0">
+    <BuildDependency Project="Novot.vcxproj" />
+  </Project>
+  <Project Path="Novot.vcxproj" Id="6a2f267e-1288-4db9-b9ff-023707f5d108" />
+</Solution>
