@@ -156,6 +156,7 @@
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\Collision\MouseCollision.cpp" />
     <ClCompile Include="Core\Collision\Terrain.cpp" />
+    <ClCompile Include="Core\Graphic\2D.cpp" />
     <ClCompile Include="Core\Scene\Container\Grid\GridContainer.cpp" />
     <ClCompile Include="Core\Input\KeyMapping.cpp" />
     <ClCompile Include="Core\Asset\Sound\Sound.cpp" />
@@ -186,6 +187,8 @@
     <ClInclude Include="Core\Collision\CollisionManager.h" />
     <ClInclude Include="Core\Collision\MouseCollision.h" />
     <ClInclude Include="Core\Collision\Terrain.h" />
+    <ClInclude Include="Core\Event\StateMachine.h" />
+    <ClInclude Include="Core\Graphic\2D.h" />
     <ClInclude Include="Core\Scene\Container\Grid\GridContainer.h" />
     <ClInclude Include="Core\GameState.h" />
     <ClInclude Include="Core\Input\KeyMapping.h" />

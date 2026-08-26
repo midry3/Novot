@@ -57,7 +57,6 @@ int _Novot::StartGame() {
 		dt = (std::min)(iframe, dt + (currentTime - prevTime) / 1000.0f);
 		prevTime = currentTime;
 		if (iframe <= dt) {
-			// Profile Update and Draw durations
 			auto t0 = std::chrono::high_resolution_clock::now();
 			Update(dt);
 			auto t1 = std::chrono::high_resolution_clock::now();

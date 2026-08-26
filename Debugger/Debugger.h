@@ -7,7 +7,6 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include <functional>
 
 class Debugger : public Singleton<Debugger> {
 private:
