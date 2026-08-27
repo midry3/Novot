@@ -11,34 +11,33 @@ void  _Mouse::UpdateMouseEvent() {
 	_currentMouseEvent.delta = _currentMouseEvent.position - preEvent.position;
 	if (input & MOUSE_INPUT_LEFT) {
 		_currentMouseEvent.button = MouseButton::Left;
-		if (_currentMouseEvent.state == MouseButtonState::Released) {
-			_currentMouseEvent.state = MouseButtonState::Pressed;
-		}
-		else {
-			_currentMouseEvent.state = MouseButtonState::Pressed;
-		}
+		_currentMouseEvent.state = MouseButtonState::Pressed;
+		LeftPressed.Emit(_currentMouseEvent);
 	}
 	else if (input & MOUSE_INPUT_RIGHT) {
 		_currentMouseEvent.button = MouseButton::Right;
-		if (_currentMouseEvent.state == MouseButtonState::Released) {
-			_currentMouseEvent.state = MouseButtonState::Pressed;
-		}
-		else {
-			_currentMouseEvent.state = MouseButtonState::Pressed;
-		}
+		_currentMouseEvent.state = MouseButtonState::Pressed;
+		RightPressed.Emit(_currentMouseEvent);
 	}
 	else if (input & MOUSE_INPUT_MIDDLE) {
 		_currentMouseEvent.button = MouseButton::Middle;
-		if (_currentMouseEvent.state == MouseButtonState::Released) {
-			_currentMouseEvent.state = MouseButtonState::Pressed;
-		}
-		else {
-			_currentMouseEvent.state = MouseButtonState::Pressed;
-		}
+		_currentMouseEvent.state = MouseButtonState::Pressed;
+		MiddlePressed.Emit(_currentMouseEvent);
 	}
 	else {
 		if (preEvent.state == MouseButtonState::Pressed) {
 			_currentMouseEvent.state = MouseButtonState::Released;
+			switch (preEvent.button) {
+			case MouseButton::Left:
+				LeftReleased.Emit(_currentMouseEvent);
+				break;
+			case MouseButton::Middle:
+				MiddleReleased.Emit(_currentMouseEvent);
+				break;
+			case MouseButton::Right:
+				RightReleased.Emit(_currentMouseEvent);
+				break;
+			}
 		}
 		else {
 			_currentMouseEvent.button = MouseButton::None;

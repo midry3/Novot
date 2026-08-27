@@ -6,18 +6,19 @@
 
 class Collision : public Scene {
 protected:
-	std::function<void(const Collision&)> onCollideCallback;
+	const unsigned int DEBUG_LINE_COLOR = GetColor(255, 100, 100);
 	std::vector<Vector2D> vertices;
 	Vector2D scale;
 	std::vector<int> layers;
 	bool isPassable;
 	bool enabled = true;
 	int id = 0;
+#ifdef _DEBUG
 	void _Draw() const override;
-	void _Update(float dt) override {};
-	void _Load() override {};
-	void _Release() override {};
+	void _Load() override;
+#endif
 public:
+	Signal<const Collision&> Collided;
 	Collision() : scale(1, 1), isPassable(false) {}
 	~Collision() = default;
 	void Enable() {
@@ -49,7 +50,7 @@ public:
 		return res;
 	}
 	Vector2D Transform(const Vector2D& v) const {
-		return v * scale + GetGlobalPosition();
+		return v * scale + GetGlobalPosition() - Camera.GetPoint();
 	}
 	std::vector<Vector2D> GetEdges() const;
 	bool CanCollideWith(const Collision& other) const;
@@ -68,12 +69,10 @@ public:
 		return id;
 	}
 	void OnCollide(const std::function<void(const Collision&)>& callback) {
-		onCollideCallback = callback;
+		Collided.Connect(callback);
 	}
-	void CollideCallback(const Collision& other) const {
-		if (onCollideCallback) {
-			onCollideCallback(other);
-		}
+	void CollideCallback(const Collision& other) {
+		Collided.Emit(other);
 	}
 	bool operator==(const Collision& other) const {
 		return id == other.GetID();

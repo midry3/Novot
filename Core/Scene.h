@@ -4,6 +4,9 @@
 #include <memory>
 #include <vector>
 
+class TweenGroup;
+class Timer;
+
 class Scene : public std::enable_shared_from_this<Scene> {
 protected:
 	bool _isLoaded = false;
@@ -21,9 +24,9 @@ protected:
 	}
 public:
 	int alpha = 255;
-	Vector2D position;
+	Vector2D position, transform;
 	Vector3D modulate = Vector3D(255, 255, 255);
-	Scene() : position(0, 0) {}
+	Scene() : position(0, 0), transform(0, 0) {}
 	virtual ~Scene() = default;
 	void Draw() const;
 
@@ -38,6 +41,9 @@ public:
 	Vector2D GetDrawPosition() const;
 	void SetPosition(const Vector2D& pos) {
 		position = pos;
+	}
+	void SetTransform(const Vector2D& trans) {
+		transform = trans;
 	}
 	void Move(const Vector2D& delta) {
 		position += delta;
@@ -59,8 +65,8 @@ public:
 	void DeleteScene(int index) {
 		scenes.erase(scenes.begin() + index);
 	}
-	void DeleteScene(Scene* scene) {
-		std::erase_if(scenes, [&scene](const std::shared_ptr<Scene>& s) { return s.get() == scene; });
+	void DeleteScene(std::shared_ptr<Scene> scene) {
+		std::erase_if(scenes, [&scene](const std::shared_ptr<Scene>& s){ return s == scene; });
 	}
 	void Free() {
 		Release();
@@ -68,7 +74,7 @@ public:
 			scenes.clear();
 		}
 		else {
-			parent.lock()->DeleteScene(this);
+			parent.lock()->DeleteScene(shared_from_this());
 		}
 	}
 	void Show() {
@@ -77,8 +83,6 @@ public:
 	void Hide() {
 		visible = false;
 	}
-
-	// Accessors for debugger
 	const std::vector<std::shared_ptr<Scene>>& GetChildScenes() const {
 		return scenes;
 	}
@@ -88,11 +92,12 @@ public:
 	void SetVisible(bool v) {
 		visible = v;
 	}
-
 	template <std::derived_from<Scene> T>
 	std::shared_ptr<T> CreateScene() {
 		auto scene = std::make_shared<T>();
 		AddScene(scene);
 		return scene;
 	}
+	std::shared_ptr<TweenGroup> CreateTweenGroup();
+	std::shared_ptr<Timer> CreateTimer(double time, const std::function<void()> callback, int loop=1);
 };

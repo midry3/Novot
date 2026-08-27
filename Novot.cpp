@@ -1,8 +1,9 @@
-﻿#include "Novot.h"
+#include "Novot.h"
 #include <DxLib.h>
 #include <chrono>
 
 void _Novot::Update(float dt) {
+	DebuggerProcessCommands();
 	ClearDrawScreen();
 	KeyMapping.Update();
 	TimerManager.Update(dt);
@@ -21,7 +22,6 @@ void _Novot::Update(float dt) {
 	}
 
 	if (shouldUpdate) {
-		TweenManager.Update(dt);
 		Mouse.UpdateMouseEvent();
 		SceneManager.Update(dt);
 	}
@@ -41,7 +41,7 @@ int _Novot::StartGame() {
 #ifdef _DEBUG
 	TimerManager.New(2.0, []() {
 		DebuggerUpdate();
-		}, true);
+		}, -1);
 	DebuggerWriteLine("\r\nDebugger initialized.");
 #endif
 

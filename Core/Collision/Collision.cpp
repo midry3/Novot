@@ -1,4 +1,4 @@
-﻿#include <DxLib.h>
+﻿#include <Graphic/2D.h>
 #include <NovotCore.h>
 #include <algorithm>
 #include "Collision.h"
@@ -93,16 +93,16 @@ Vector2D Collision::GetNearestEdge(const Vector2D& point) const {
 	return nearestEdge;
 }
 
+#ifdef _DEBUG
+void Collision::_Load() {
+	alpha = 120;
+}
+
 void Collision::_Draw() const {
 	if (!PropertyManager.IsDebugMode()) return;
 	auto verts = GetVertices();
 	if (verts.size() < 2) return;
 	auto camera = Camera.GetPoint();
-	auto it = verts.begin();
-	auto prev = it;
-	it++;
-	for (; it != verts.end(); it++, prev++) {
-		DrawLine(static_cast<int>(prev->x) - camera.x, static_cast<int>(prev->y) - camera.y, static_cast<int>(it->x) - camera.x, static_cast<int>(it->y) - camera.y, GetColor(255, 0, 0));
-	}
-	DrawLine(static_cast<int>(verts.back().x) - camera.x, static_cast<int>(verts.back().y) - camera.y, static_cast<int>(verts.front().x) - camera.x, static_cast<int>(verts.front().y) - camera.y, GetColor(255, 0, 0));
+	NovotRenderer::DrawPolygon(verts, DEBUG_LINE_COLOR, false);
 }
+#endif

@@ -1,13 +1,14 @@
-﻿#pragma once
+#pragma once
 #include "Collision.h"
 #include <NovotCore.h>
 #include <Singleton.h>
 #include <list>
+#include <vector>
 #include <memory>
 
 class _CollisionManager : public Singleton<_CollisionManager> {
 private:
-	std::list<std::shared_ptr<Collision>> collisions;
+	std::list<std::weak_ptr<Collision>> collisions;
 public:
 	std::shared_ptr<Collision> New() {
 		auto collision = std::make_shared<Collision>();
@@ -16,11 +17,24 @@ public:
 		return collision;
 	}
 
+	std::vector<std::shared_ptr<Collision>> UpdateCollisions() {
+		std::vector<std::shared_ptr<Collision>> res;
+		std::list<std::weak_ptr<Collision>> aliveCollisions;
+		for (const auto& collision : collisions) {
+			if (auto c = collision.lock()) {
+				res.push_back(c);
+				aliveCollisions.push_back(collision);
+			}
+		}
+		collisions = aliveCollisions;
+		return res;
+	}
+
 	std::shared_ptr<Collision> GetColliding(const Collision& target) {
 		if (!target.IsEnabled()) {
 			return nullptr;
 		}
-		for (const auto& collision : collisions) {
+		for (const auto& collision : UpdateCollisions()) {
 			if (*collision == target) {
 				continue;
 			}
@@ -35,7 +49,7 @@ public:
 		if (!target.IsEnabled()) {
 			return nullptr;
 		}
-		for (const auto& collision : collisions) {
+		for (const auto& collision : UpdateCollisions()) {
 			if (*collision == target) {
 				continue;
 			}
@@ -51,7 +65,7 @@ public:
 		if (!target.IsEnabled()) {
 			return res;
 		}
-		for (const auto& collision : collisions) {
+		for (const auto& collision : UpdateCollisions()) {
 			if (*collision == target) {
 				continue;
 			}
@@ -67,7 +81,7 @@ public:
 		if (!target.IsEnabled()) {
 			return res;
 		}
-		for (const auto& collision : collisions) {
+		for (const auto& collision : UpdateCollisions()) {
 			if (*collision == target) {
 				continue;
 			}
@@ -82,7 +96,7 @@ public:
 		if (!target.IsEnabled()) {
 			return false;
 		}
-		for (const auto& collision : collisions) {
+		for (const auto& collision : UpdateCollisions()) {
 			if (*collision == target) {
 				continue;
 			}
@@ -97,7 +111,7 @@ public:
 		if (!target.IsEnabled()) {
 			return false;
 		}
-		for (const auto& collision : collisions) {
+		for (const auto& collision : UpdateCollisions()) {
 			if (*collision == target) {
 				continue;
 			}
@@ -113,8 +127,10 @@ public:
 		collisions.push_back(collision);
 	}
 
-	void RemoveCollision(std::shared_ptr<Collision> collision) {
-		collisions.remove(collision);
+	void RemoveCollision(const std::shared_ptr<Collision>& collision) {
+		collisions.remove_if([&collision](const std::weak_ptr<Collision>& wp) {
+			return wp.lock() == collision;
+		});
 	}
 
 };

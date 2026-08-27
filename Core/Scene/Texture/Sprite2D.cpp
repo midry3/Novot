@@ -29,10 +29,6 @@ void Sprite2D::_Draw() const {
 	);
 }
 
-void Sprite2D::_Update(float dt) {
-
-}
-
 void Sprite2D::ChangeStretch(StretchType type) {
 	stretch = type;
 	if (size.x != 0 && size.y != 0) {
@@ -46,7 +42,7 @@ void Sprite2D::AdjustScale() {
 	switch (stretch) {
 	case StretchType::FIT:
 		wsize = PropertyManager.GetRealWindowSize();
-		r = min(wsize.x / size.x, wsize.y / size.y)/2;
+		r = (std::min)(wsize.x / size.x, wsize.y / size.y)/2;
 		scale = Vector2D(r, r);
 		DebuggerWriteLine("Changed stretch to FIT. Scale: " + std::to_string(scale.x * size.x) + ", " + std::to_string(scale.y * size.y));
 		break;

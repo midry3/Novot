@@ -6,8 +6,7 @@
 #include "Asset/Sound/SoundManager.h"
 #include "Input/KeyMapping.h"
 #include "GameState.h"
-#include "Timer.h"
-#include "Tween.h"
+#include "Event/Signal.h"
 #ifdef _DEBUG
 #define IS_DEBUG_MODE 1
 #else

@@ -25,6 +25,10 @@ public:
 		DebuggerSetProperty("Current Scene", typeid(*currentScene).name());
 		DebuggerRefreshSceneTree();
 	}
+	template <std::derived_from<Scene> T>
+	void SetCurrentScene() {
+		SetCurrentScene(std::make_shared<T>());
+	}
 	int GetID() {
 		return _nextID++;
 	}

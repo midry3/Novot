@@ -1,8 +1,7 @@
 ﻿#pragma once
-#include "Singleton.h"
+#include <Scene.h>
 #include <functional>
 #include <variant>
-#include <list>
 #include <memory>
 #include <vector>
 #include <type_traits>
@@ -37,15 +36,15 @@ private:
 	double duration, elapsedTime;
 	TweenValue start, end;
 	TweenTarget target;
-	std::function<void()> callback;
 public:
+	Signal<> Completed;
 	bool isFinished = false;
 	Tween() = default;
 	Tween(const TweenTarget& target, TweenValue end, double duration) : duration(duration), elapsedTime(0), start(GetTweenTargetValue(target)), end(end), target(target) {}
 	~Tween() = default;
 	Tween* From(TweenValue start);
-	Tween* OnComplete(std::function<void()> callback) {
-		this->callback = callback;
+	Tween* OnComplete(const std::function<void()>& callback) {
+		Completed.Connect(callback);
 		return this;
 	}
 	void Update(float dt);
@@ -60,13 +59,14 @@ public:
 	}
 };
 
-class TweenGroup {
-private:
+class TweenGroup : public Scene {
+protected:
 	std::vector<std::shared_ptr<Tween>> tweens;
 	int loopCount = 0;
 	int currentTweenIndex = 0;
-	std::function<void()> callback;
+	void _Update(float dt) override;
 public:
+	Signal<> Completed;
 	TweenGroup() = default;
 	~TweenGroup() = default;
 	std::shared_ptr<Tween> CreateTween(const TweenTarget& target, TweenValue end, double duration) {
@@ -76,28 +76,6 @@ public:
 	}
 	void Add(std::shared_ptr<Tween> tween) {
 		tweens.push_back(tween);
-	}
-	void Update(float dt) {
-		if (IsFinished() || tweens.empty()) return;
-		tweens[currentTweenIndex]->Update(dt);
-		if (tweens[currentTweenIndex]->isFinished) {
-			currentTweenIndex++;
-			if (currentTweenIndex >= tweens.size()) {
-				if (--loopCount > 0) {
-					currentTweenIndex = 0;
-					for (const auto& tween : tweens) {
-						tween->Kill();
-						tween->Init();
-					}
-				}
-				else {
-					currentTweenIndex = tweens.size() - 1;
-					if (callback) {
-						callback();
-					}
-				}
-			}
-		}
 	}
 	bool IsFinished() const {
 		for (const auto& tween : tweens) {
@@ -113,37 +91,7 @@ public:
 	void SetLoop() {
 		loopCount = std::numeric_limits<double>::infinity();
 	}
-	void OnComplete(std::function<void()> callback) {
-		this->callback = callback;
+	void OnComplete(const std::function<void()>& callback) {
+		Completed.Connect(callback);
 	}
 };
-
-class _TweenManager : public Singleton<_TweenManager> {
-private:
-	std::list<std::shared_ptr<TweenGroup>> tweens;
-public:
-	_TweenManager() = default;
-	~_TweenManager() = default;
-	void Update(float dt) {
-		for (auto it = tweens.begin(); it != tweens.end();) {
-			(*it)->Update(dt);
-			if ((*it)->IsFinished()) {
-				it = tweens.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-	}
-
-	std::shared_ptr<TweenGroup> CreateGroup() {
-		auto t = std::make_shared<TweenGroup>();
-		tweens.push_back(t);
-		return t;
-	}
-};
-inline _TweenManager& TweenManager() {
-	return _TweenManager::GetInstance();
-}
-
-#define TweenManager _TweenManager::GetInstance()

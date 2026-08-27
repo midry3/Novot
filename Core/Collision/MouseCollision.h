@@ -2,22 +2,22 @@
 #include <MathUtils.h>
 #include <Scene.h>
 #include <Mouse/MouseEvent.h>
-#include <functional>
 #include <vector>
 
 class MouseCollision : public Scene {
 protected:
-	const unsigned int DEBUG_LINE_COLOR = GetColor(0, 255, 0);
-	std::map<MouseButton, std::map<MouseButtonState, std::function<void(const MouseEvent&)>>> onCollideCallbacks;
+#ifdef _DEBUG
+	const unsigned int DEBUG_LINE_COLOR = GetColor(100, 255, 100);
+	void _Draw() const override;
+	void _Load() override;
+#endif
 	std::vector<Vector2D> vertices;
 	Vector2D scale;
 	bool _enabled = true;
 	bool _stop = true;
-	void _Draw() const override;
-	void _Update(float dt) override {};
-	void _Load() override {};
-	void _Release() override {};
 public:
+	Signal<const MouseEvent&> LeftPressed, LeftReleased, MiddlePressed, MiddleReleased, RightPressed, RightReleased;
+
 	MouseCollision() : scale(1, 1) {}
 	~MouseCollision() = default;
 	bool IsWithin(const Vector2D& point) const;
@@ -56,20 +56,36 @@ public:
 		vertices.clear();
 	}
 	Vector2D Transform(const Vector2D& v) const {
-		return v * scale + GetGlobalPosition();
+		return v * scale + GetGlobalPosition() - Camera.GetPoint();
 	}
 	std::vector<Vector2D> GetEdges() const;
 	Vector2D GetNearestEdge(const Vector2D& point) const;
-	void RegisterCallback(MouseButton button, MouseButtonState state, const std::function<void(const MouseEvent&)>& callback) {
-		onCollideCallbacks[button][state] = callback;
-	}
-	void CallCallback(const MouseEvent& event) const {
-		auto it = onCollideCallbacks.find(event.button);
-		if (it != onCollideCallbacks.end()) {
-			auto stateIt = it->second.find(event.state);
-			if (stateIt != it->second.end()) {
-				stateIt->second(event);
+	void CallCallback(const MouseEvent& event) {
+		switch (event.button) {
+		case MouseButton::Left:
+			if (event.state == MouseButtonState::Pressed) {
+				LeftPressed.Emit(event);
 			}
+			else if (event.state == MouseButtonState::Released) {
+				LeftReleased.Emit(event);
+			}
+			break;
+		case MouseButton::Middle:
+			if (event.state == MouseButtonState::Pressed) {
+				MiddlePressed.Emit(event);
+			}
+			else if (event.state == MouseButtonState::Released) {
+				MiddleReleased.Emit(event);
+			}
+			break;
+		case MouseButton::Right:
+			if (event.state == MouseButtonState::Pressed) {
+				RightPressed.Emit(event);
+			}
+			else if (event.state == MouseButtonState::Released) {
+				RightReleased.Emit(event);
+			}
+			break;
 		}
 	}
 };

@@ -1,5 +1,7 @@
 ﻿#include "Scene.h"
 #include <SceneManager.h>
+#include <Timer.h>
+#include <Tween.h>
 
 bool Scene::IsShouldDraw() const {
 	if (!visible) return false;
@@ -15,7 +17,8 @@ void Scene::Load() {
 	if (_isLoaded) return;
 	ID = SceneManager.GetID();
 	_Load();
-	for (const auto& s : scenes) {
+	auto scenesCopy = scenes;
+	for (const auto& s : scenesCopy) {
 		s->Load();
 	}
 	_isLoaded = true;
@@ -24,7 +27,8 @@ void Scene::Load() {
 void Scene::Release() {
 	_Release();
 	AssetLoader.ReleaseAsset(ID);
-	for (const auto& s : scenes) {
+	auto scenesCopy = scenes;
+	for (const auto& s : scenesCopy) {
 		s->Release();
 	}
 }
@@ -37,7 +41,8 @@ void Scene::Update(float dt) {
 	if (SceneManager.IsCancelUpdate()) {
 		return;
 	}
-	for (const auto& s : scenes) {
+	auto scenesCopy = scenes;
+	for (const auto& s : scenesCopy) {
 		s->Update(dt);
 	}
 }
@@ -48,20 +53,40 @@ void Scene::Draw() const {
 	SetDrawBright(modulate.x, modulate.y, modulate.z);
 	_Draw();
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	for (const auto& s : scenes) {
+	auto scenesCopy = scenes;
+	for (const auto& s : scenesCopy) {
 		s->Draw();
 	}
 }
 
 Vector2D Scene::GetGlobalPosition() const {
 	if (parent.expired()) {
-		return position;
+		return position + transform;
 	}
 	else {
-		return parent.lock()->GetGlobalPosition() + position;
+		return parent.lock()->GetGlobalPosition() + position + transform;
 	}
 }
 
 Vector2D Scene::GetDrawPosition() const {
 	return GetGlobalPosition() - Camera.GetPoint();
+}
+
+std::shared_ptr<Timer> Scene::CreateTimer(double time, const std::function<void()> callback, int loop) {
+	auto timer = CreateScene<Timer>();
+	timer->SetTime(time)
+		->SetLoop(loop)
+		->OnTimeout(callback)
+		->OnCompleted([timer]() {
+			timer->Free();
+		});
+	return timer;
+}
+
+std::shared_ptr<TweenGroup> Scene::CreateTweenGroup() {
+	auto tweenGroup = CreateScene<TweenGroup>();
+	tweenGroup->OnComplete([tweenGroup, this]() {
+		tweenGroup->Free();
+		});
+	return tweenGroup;
 }

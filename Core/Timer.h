@@ -1,28 +1,42 @@
 ﻿#pragma once
 #include "Singleton.h"
+#include <Scene.h>
 #include <functional>
 #include <list>
 #include <memory>
 
-class Timer {
-private:
+class Timer : public Scene {
+protected:
+	int loopNum;
 	double time, startTime;
 	bool isPaused = false;
-	bool isLooped = false;
-	std::function<void()> callback;
+	void _Update(float dt) override {
+		Update(dt);
+	}
 public:
+	Signal<> Timeout;
+	Signal<> Completed;
 	bool isFinished = false;
-	Timer(double time, std::function<void()> callback, bool loop=false) : time(time), startTime(time), callback(callback), isLooped(loop) {}
+	Timer() = default;
+	Timer(double time, const std::function<void()>& callback, int loopNum=1) : time(time), startTime(time), loopNum(loopNum) {
+		Timeout.Connect(callback);
+	}
 	void Update(float dt) {
 		if (isPaused || isFinished) return;
 		time -= dt;
 		if (time <= 0) {
-			callback();
-			if (isLooped) {
+			if (loopNum < 0) {
+				Timeout.Emit();
 				time = startTime;
+			}
+			else if (loopNum > 0) {
+				Timeout.Emit();
+				time = startTime;
+				loopNum--;
 			}
 			else {
 				isFinished = true;
+				Completed.Emit();
 			}
 		}
 	}
@@ -30,10 +44,23 @@ public:
 		time = std::numeric_limits<double>::infinity();
 		isFinished = true;
 	}
-	Timer& OnComplete(std::function<void()> callback) {
-		this->callback = callback;
-		return *this;
+	Timer* SetTime(double time) {
+		this->time = time;
+		this->startTime = time;
+		return this;
 	}
+	Timer* SetLoop(int loopNum) {
+		this->loopNum = loopNum;
+		return this;
+	}
+	Timer* OnTimeout(const std::function<void()>& callback) {
+		Timeout.Connect(callback);
+		return this;
+	}
+	Timer* OnCompleted(const std::function<void()>& callback) {
+		Completed.Connect(callback);
+		return this;
+	}	
 	void Pause() {
 		isPaused = true;
 	}

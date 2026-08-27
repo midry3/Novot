@@ -18,7 +18,6 @@ private:
 protected:
 	void _Load() override;
 	void _Release() override;
-	void _Update(float dt) override;
 	void _Draw() const override;
 public:
 	Vector2D scale;

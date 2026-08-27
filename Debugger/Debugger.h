@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifdef _DEBUG
 #include <Singleton.h>
 #include <Windows.h>
@@ -7,16 +7,79 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <thread>
+#include <mutex>
+#include <atomic>
+
+struct SceneNodeSnapshot {
+	std::string name;
+	void* ptr = nullptr;
+	std::vector<SceneNodeSnapshot> children;
+};
+
+struct AssetSnapshot {
+	std::string path;
+	size_t refCount = 0;
+};
+
+enum class DebuggerEventType {
+	WriteLine,
+	SetProperty,
+	RecordFrameTime,
+	UpdateSceneTree,
+	UpdateAssets
+};
+
+struct DebuggerEvent {
+	DebuggerEventType type;
+	std::string text;
+	std::string key;
+	std::string value;
+	double updateMs = 0.0;
+	double drawMs = 0.0;
+	SceneNodeSnapshot treeSnapshot;
+	std::vector<AssetSnapshot> assetSnapshots;
+};
+
+enum class DebuggerCommandType {
+	ToggleDebugMode,
+	Pause,
+	Resume,
+	StepFrame,
+	SetTimeScale,
+	StopBGM,
+	MuteAll,
+	UnmuteAll,
+	SetPropertyFromString,
+	RequestSceneTree
+};
+
+struct DebuggerCommand {
+	DebuggerCommandType type;
+	float floatVal = 1.0f;
+	std::string name;
+	std::string value;
+};
 
 class Debugger : public Singleton<Debugger> {
 private:
-	HWND _Window;
-	HWND _LogEdit;
-	HWND _PropertyView;
-	HWND _DebugModeCheckBox;
-	HWND _ClearLogButton;
-	HWND _FilterStatic;
-	HWND _FilterEdit;
+	std::thread _DebuggerThread;
+	std::atomic<bool> _Running{ true };
+	HANDLE _WindowCreatedEvent = nullptr;
+
+	std::mutex _QueueMutex;
+	std::vector<DebuggerEvent> _EventQueue;
+
+	std::mutex _CommandMutex;
+	std::vector<DebuggerCommand> _CommandQueue;
+
+	HWND _Window = nullptr;
+	HWND _LogEdit = nullptr;
+	HWND _PropertyView = nullptr;
+	HWND _DebugModeCheckBox = nullptr;
+	HWND _ClearLogButton = nullptr;
+	HWND _FilterStatic = nullptr;
+	HWND _FilterEdit = nullptr;
 	HFONT _UIFont = nullptr;
 	std::map<std::string, std::string> _Properties;
 	bool _NeedsUpdate = false;
@@ -37,25 +100,25 @@ private:
 	static constexpr size_t FrameTimeHistoryLimit = 240;
 
 	// Scene tree
-	HWND _SceneTreeView;
-	HWND _RefreshTreeButton;
+	HWND _SceneTreeView = nullptr;
+	HWND _RefreshTreeButton = nullptr;
 
 	// Time control
-	HWND _PauseButton;
-	HWND _StepFrameButton;
-	HWND _TimeScaleCombo;
+	HWND _PauseButton = nullptr;
+	HWND _StepFrameButton = nullptr;
+	HWND _TimeScaleCombo = nullptr;
 
-		// Sound & Assets
-		HWND _StopBGMButton;
-		HWND _MuteAllButton;
-		HWND _AssetList; // listbox
-		HWND _ReloadSpriteButton;
-		HWND _ReleaseSpriteButton;
+	// Sound & Assets
+	HWND _StopBGMButton = nullptr;
+	HWND _MuteAllButton = nullptr;
+	HWND _AssetList = nullptr; // listbox
+	HWND _ReloadSpriteButton = nullptr;
+	HWND _ReleaseSpriteButton = nullptr;
 
-		// Property editing & binding
-	HWND _PropNameCombo;
-	HWND _PropValueEdit;
-	HWND _SetPropButton;
+	// Property editing & binding
+	HWND _PropNameCombo = nullptr;
+	HWND _PropValueEdit = nullptr;
+	HWND _SetPropButton = nullptr;
 	std::vector<std::string> _LastCandidates;
 	std::vector<std::string> _AssetNames;
 
@@ -76,13 +139,20 @@ private:
 	static constexpr int PropValueEditId = 1015;
 	static constexpr int SetPropButtonId = 1016;
 
+	static constexpr UINT WM_USER_PROCESS_QUEUE = WM_USER + 101;
+
+	void ThreadMain();
+	void ProcessEvents();
+	void PushEvent(DebuggerEvent ev);
+	void PushCommand(DebuggerCommand cmd);
+
 	void RefreshLogView();
 	void RefreshPropertyView();
 	void PopulatePropertyCandidates();
 	void DrawMemoryGraph(HDC hdc) const;
 	void DrawFrameTimeGraph(HDC hdc) const;
 	void UpdateMemoryStats();
-	void PopulateTreeItem(HTREEITEM parent, std::shared_ptr<class Scene> scene, HWND tree);
+	void PopulateTreeSnapshotItem(HTREEITEM parent, const SceneNodeSnapshot& snapshot, HWND tree);
 	void RefreshAssetsView();
 	void RefreshSoundState();
 	static LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
@@ -97,6 +167,7 @@ public:
 	void RecordFrameTime(double updateMs, double drawMs);
 	void RefreshSceneTree();
 	void AdjustUI();
+	void ProcessCommands();
 
 	void BindProperty(const std::string& key, int* target);
 	void BindProperty(const std::string& key, float* target);
@@ -116,6 +187,7 @@ protected:
 #define DebuggerRecordFrameTime(updateMs, drawMs) Debugger::GetInstance().RecordFrameTime(updateMs, drawMs)
 #define DebuggerUnbindProperty(key) Debugger::GetInstance().UnbindProperty(key)
 #define DebuggerRefreshSceneTree() Debugger::GetInstance().RefreshSceneTree()
+#define DebuggerProcessCommands() Debugger::GetInstance().ProcessCommands()
 #else
 #define DebuggerWriteLine(msg)
 #define DebuggerSetProperty(key, value)
@@ -124,4 +196,5 @@ protected:
 #define DebuggerRecordFrameTime(updateMs, drawMs)
 #define DebuggerUnbindProperty(key)
 #define DebuggerRefreshSceneTree()
+#define DebuggerProcessCommands()
 #endif

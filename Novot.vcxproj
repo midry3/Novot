@@ -187,6 +187,7 @@
     <ClInclude Include="Core\Collision\CollisionManager.h" />
     <ClInclude Include="Core\Collision\MouseCollision.h" />
     <ClInclude Include="Core\Collision\Terrain.h" />
+    <ClInclude Include="Core\Event\Signal.h" />
     <ClInclude Include="Core\Event\StateMachine.h" />
     <ClInclude Include="Core\Graphic\2D.h" />
     <ClInclude Include="Core\Scene\Container\Grid\GridContainer.h" />

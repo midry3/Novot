@@ -1,6 +1,6 @@
 ﻿#include "MouseCollision.h"
 
-#include <DxLib.h>
+#include <Graphic/2D.h>
 #include <NovotCore.h>
 #include <algorithm>
 
@@ -71,16 +71,15 @@ bool MouseCollision::IsWithin(const Vector2D& point) const {
 	return inside;
 }
 
+#ifdef _DEBUG
+void MouseCollision::_Load() {
+	alpha = 120;
+}
+
 void MouseCollision::_Draw() const {
 	if (!PropertyManager.IsDebugMode()) return;
 	auto verts = GetVertices();
 	if (verts.size() < 2) return;
-	auto camera = Camera.GetPoint();
-	auto it = verts.begin();
-	auto prev = it;
-	it++;
-	for (; it != verts.end(); it++, prev++) {
-		DrawLine(static_cast<int>(prev->x) - camera.x, static_cast<int>(prev->y) - camera.y, static_cast<int>(it->x) - camera.x, static_cast<int>(it->y) - camera.y, DEBUG_LINE_COLOR);
-	}
-	DrawLine(static_cast<int>(verts.back().x) - camera.x, static_cast<int>(verts.back().y) - camera.y, static_cast<int>(verts.front().x) - camera.x, static_cast<int>(verts.front().y) - camera.y, DEBUG_LINE_COLOR);
+	NovotRenderer::DrawPolygon(verts, DEBUG_LINE_COLOR, true);
 }
+#endif

@@ -1,8 +1,9 @@
-﻿#ifdef _DEBUG
+#ifdef _DEBUG
 #include "Debugger.h"
 #include <NovotCore.h>
 #include <SceneManager.h>
 #include <PropertyManager.h>
+#include <Asset/AssetLoader.h>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
@@ -33,6 +34,17 @@ std::string PtrToHex(void* p) {
 	oss << "0x" << std::hex << reinterpret_cast<uintptr_t>(p);
 	return oss.str();
 }
+
+SceneNodeSnapshot BuildSceneSnapshot(std::shared_ptr<Scene> scene) {
+	SceneNodeSnapshot snapshot;
+	if (!scene) return snapshot;
+	snapshot.name = std::string(typeid(*scene).name()) + " " + PtrToHex(scene.get());
+	snapshot.ptr = scene.get();
+	for (const auto& child : scene->GetChildScenes()) {
+		snapshot.children.push_back(BuildSceneSnapshot(child));
+	}
+	return snapshot;
+}
 }
 
 LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -42,10 +54,14 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 	}
 
 	auto debugger = reinterpret_cast<Debugger*>(GetWindowLongPtr(window, GWLP_USERDATA));
+
+	if (message == WM_USER_PROCESS_QUEUE && debugger) {
+		debugger->ProcessEvents();
+		return 0;
+	}
+
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == DebugModeCheckBoxId && HIWORD(wParam) == BN_CLICKED) {
-		const bool enabled = PropertyManager.ToggleDebugMode();
-		SendMessage(debugger->_DebugModeCheckBox, BM_SETCHECK, enabled ? BST_CHECKED : BST_UNCHECKED, 0);
-		debugger->SetProperty("Debug Mode", enabled ? "Enabled" : "Disabled");
+		debugger->PushCommand({ DebuggerCommandType::ToggleDebugMode });
 		return 0;
 	}
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == ClearLogButtonId && HIWORD(wParam) == BN_CLICKED) {
@@ -63,22 +79,12 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 	}
 	// Pause button
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == PauseButtonId && HIWORD(wParam) == BN_CLICKED) {
-		if (GameState.IsPaused()) {
-			GameState.Resume();
-			SetWindowText(debugger->_PauseButton, "Pause");
-			debugger->SetProperty("Paused", "False");
-		}
-		else {
-			GameState.Pause();
-			SetWindowText(debugger->_PauseButton, "Resume");
-			debugger->SetProperty("Paused", "True");
-		}
+		debugger->PushCommand({ DebuggerCommandType::Pause });
 		return 0;
 	}
 	// Step frame button
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == StepFrameButtonId && HIWORD(wParam) == BN_CLICKED) {
-		GameState.RequestStepFrame();
-		debugger->SetProperty("StepRequest", "Requested");
+		debugger->PushCommand({ DebuggerCommandType::StepFrame });
 		return 0;
 	}
 	// TimeScale combobox change
@@ -93,49 +99,22 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 		case 4: scale = 2.0f; break;
 		case 5: scale = 4.0f; break;
 		}
-		GameState.SetTimeScale(scale);
-		debugger->SetProperty("TimeScale", std::to_string(scale));
+		debugger->PushCommand({ DebuggerCommandType::SetTimeScale, scale });
 		return 0;
 	}
 	// Refresh scene tree
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == RefreshTreeButtonId && HIWORD(wParam) == BN_CLICKED) {
-		debugger->RefreshSceneTree();
+		debugger->PushCommand({ DebuggerCommandType::RequestSceneTree });
 		return 0;
 	}
 	// Stop BGM
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == StopBGMButtonId && HIWORD(wParam) == BN_CLICKED) {
-		SoundManager.StopBGM();
-		debugger->SetProperty("BGM", "Stopped");
+		debugger->PushCommand({ DebuggerCommandType::StopBGM });
 		return 0;
 	}
 	// Mute All
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == MuteAllButtonId && HIWORD(wParam) == BN_CLICKED) {
-		if (SoundManager.IsMuted()) {
-			SoundManager.UnmuteAll();
-			debugger->SetProperty("Audio.Muted", "False");
-			SetWindowText(debugger->_MuteAllButton, "Mute All");
-		} else {
-			SoundManager.MuteAll();
-			debugger->SetProperty("Audio.Muted", "True");
-			SetWindowText(debugger->_MuteAllButton, "Unmute");
-		}
-		return 0;
-	}
-	// Sprite reload/release
-	if (debugger && message == WM_COMMAND && LOWORD(wParam) == ReloadSpriteButtonId && HIWORD(wParam) == BN_CLICKED) {
-		int idx = static_cast<int>(SendMessage(debugger->_AssetList, LB_GETCURSEL, 0, 0));
-		if (idx != LB_ERR) {
-			char buf[256] = {};
-			SendMessage(debugger->_AssetList, LB_GETTEXT, idx, reinterpret_cast<LPARAM>(buf));
-		}
-		return 0;
-	}
-	if (debugger && message == WM_COMMAND && LOWORD(wParam) == ReleaseSpriteButtonId && HIWORD(wParam) == BN_CLICKED) {
-		int idx = static_cast<int>(SendMessage(debugger->_AssetList, LB_GETCURSEL, 0, 0));
-		if (idx != LB_ERR) {
-			char buf[256] = {};
-			SendMessage(debugger->_AssetList, LB_GETTEXT, idx, reinterpret_cast<LPARAM>(buf));
-		}
+		debugger->PushCommand({ DebuggerCommandType::MuteAll });
 		return 0;
 	}
 	// Property candidate selection change
@@ -145,10 +124,7 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 			char nameBuf[128] = {};
 			SendMessage(debugger->_PropNameCombo, CB_GETLBTEXT, index, reinterpret_cast<LPARAM>(nameBuf));
 			std::string sName(nameBuf);
-			std::string valStr = PropertyManager.GetPropertyValueString(sName);
-			if (valStr.empty() && debugger->_Properties.count(sName)) {
-				valStr = debugger->_Properties[sName];
-			}
+			std::string valStr = debugger->_Properties[sName];
 			SetWindowText(debugger->_PropValueEdit, valStr.c_str());
 		}
 		return 0;
@@ -162,13 +138,7 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 		std::string sName(name);
 		std::string sVal(val);
 		if (!sName.empty()) {
-			if (PropertyManager.SetPropertyFromString(sName, sVal)) {
-				debugger->WriteLine("[Property] Updated bound property '" + sName + "' = " + sVal);
-			} else {
-				debugger->SetProperty(sName, sVal);
-				debugger->WriteLine("[Property] Set '" + sName + "' = " + sVal);
-			}
-			debugger->_NeedsUpdate = true;
+			debugger->PushCommand({ DebuggerCommandType::SetPropertyFromString, 0.0f, sName, sVal });
 		}
 		return 0;
 	}
@@ -209,6 +179,7 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 }
 
 void Debugger::AdjustUI() {
+	if (!_Window) return;
 	RECT rect;
 	GetClientRect(_Window, &rect);
 
@@ -291,93 +262,181 @@ void Debugger::AdjustUI() {
 	InvalidateRect(_Window, nullptr, TRUE);
 }
 
-void Debugger::PopulateTreeItem(HTREEITEM parent, std::shared_ptr<Scene> scene, HWND tree) {
-	if (!scene) return;
+void Debugger::PopulateTreeSnapshotItem(HTREEITEM parent, const SceneNodeSnapshot& snapshot, HWND tree) {
+	if (snapshot.name.empty()) return;
 	TVINSERTSTRUCT tvis{};
 	tvis.hParent = parent;
 	tvis.hInsertAfter = TVI_LAST;
 	tvis.item.mask = TVIF_TEXT | TVIF_PARAM;
-	std::string text = std::string(typeid(*scene).name()) + " " + PtrToHex(scene.get());
-	tvis.item.pszText = const_cast<char*>(text.c_str());
-	tvis.item.lParam = reinterpret_cast<LPARAM>(scene.get());
+	tvis.item.pszText = const_cast<char*>(snapshot.name.c_str());
+	tvis.item.lParam = reinterpret_cast<LPARAM>(snapshot.ptr);
 	HTREEITEM item = reinterpret_cast<HTREEITEM>(SendMessage(tree, TVM_INSERTITEMA, 0, reinterpret_cast<LPARAM>(&tvis)));
-	for (const auto& child : scene->GetChildScenes()) {
-		PopulateTreeItem(item, child, tree);
+	for (const auto& child : snapshot.children) {
+		PopulateTreeSnapshotItem(item, child, tree);
 	}
-}
-
-void Debugger::RefreshSceneTree() {
-
-	if (!_SceneTreeView) return;
-	SendMessage(_SceneTreeView, TVM_DELETEITEM, 0, reinterpret_cast<LPARAM>(TVI_ROOT));
-	auto root = SceneManager.GetCurrentScene();
-	if (root) {
-		PopulateTreeItem(nullptr, root, _SceneTreeView);
-	}
-	_NeedsUpdate = true;
-
 }
 
 void Debugger::RefreshAssetsView() {
-
-	if (!_AssetList) return;
-	std::string ref;
-	for (const auto& [path, asset] : AssetLoader.GetAssetHandles()) {
-		ref = std::to_string(asset.references.size());
-		auto it = std::find(_AssetNames.begin(), _AssetNames.end(), path);
-		if (it == _AssetNames.end()) {
-			LVITEM item{};
-			item.mask = LVIF_TEXT;
-			item.iItem = _AssetNames.size();
-			item.iSubItem = 0;
-			item.pszText = const_cast<LPSTR>(path.c_str());
-			ListView_InsertItem(_AssetList, &item);
-			ListView_SetItemText(
-				_AssetList,
-				_AssetNames.size(),
-				1,
-				const_cast<LPSTR>(ref.c_str())
-			);
-			_AssetNames.push_back(path);
-			AssetLoader.RegisterAssetReleasedCallback(path, [this, path]() {
-				auto it = std::find(_AssetNames.begin(), _AssetNames.end(), path);
-				if (it != _AssetNames.end()) {
-					int index = std::distance(_AssetNames.begin(), it);
-					ListView_DeleteItem(_AssetList, index);
-					_AssetNames.erase(it);
-					_NeedsUpdate = true;
-				}
-				});
-		}
-		else {
-			ListView_SetItemText(
-				_AssetList,
-				std::distance(_AssetNames.begin(), it),
-				1,
-				const_cast<LPSTR>(ref.c_str())
-			);
-		}
-	}
-	_NeedsUpdate = true;
-
+	// Debugger thread asset view refresh (no-op or handled locally)
 }
 
 void Debugger::RefreshSoundState() {
-
-	auto bgm = SoundManager.GetBGM();
-	if (bgm) {
-		SetProperty("BGM", "Loaded");
-	}
-	else {
-		SetProperty("BGM", "None");
-	}
-	SetProperty("Audio.Muted", SoundManager.IsMuted() ? "True" : "False");
-	_NeedsUpdate = true;
-
+	// Debugger thread sound state refresh (no-op or handled locally)
 }
 
-Debugger::Debugger() {
+void Debugger::PushEvent(DebuggerEvent ev) {
+	{
+		std::lock_guard<std::mutex> lock(_QueueMutex);
+		_EventQueue.push_back(std::move(ev));
+	}
+	if (_Window) {
+		PostMessage(_Window, WM_USER_PROCESS_QUEUE, 0, 0);
+	}
+}
 
+void Debugger::PushCommand(DebuggerCommand cmd) {
+	std::lock_guard<std::mutex> lock(_CommandMutex);
+	_CommandQueue.push_back(std::move(cmd));
+}
+
+void Debugger::ProcessEvents() {
+	std::vector<DebuggerEvent> events;
+	{
+		std::lock_guard<std::mutex> lock(_QueueMutex);
+		events.swap(_EventQueue);
+	}
+	for (const auto& ev : events) {
+		switch (ev.type) {
+		case DebuggerEventType::WriteLine:
+			_LogLines.push_back(ev.text);
+			if (_LogLines.size() > 2000) {
+				_LogLines.erase(_LogLines.begin(), _LogLines.begin() + 500);
+			}
+			_NeedsLogRefresh = true;
+			break;
+		case DebuggerEventType::SetProperty:
+			if (_Properties.find(ev.key) == _Properties.end() || _Properties[ev.key] != ev.value) {
+				_Properties[ev.key] = ev.value;
+				_NeedsUpdate = true;
+			}
+			break;
+		case DebuggerEventType::RecordFrameTime:
+			_UpdateTimeMsHistory.push_back(ev.updateMs);
+			_DrawTimeMsHistory.push_back(ev.drawMs);
+			if (_UpdateTimeMsHistory.size() > FrameTimeHistoryLimit) {
+				_UpdateTimeMsHistory.erase(_UpdateTimeMsHistory.begin());
+				_DrawTimeMsHistory.erase(_DrawTimeMsHistory.begin());
+			}
+			InvalidateRect(_Window, &_FrameTimeGraphRect, TRUE);
+			SetProperty("Frame.UpdateMs", std::to_string(ev.updateMs));
+			SetProperty("Frame.DrawMs", std::to_string(ev.drawMs));
+			SetProperty("Frame.TotalMs", std::to_string(ev.updateMs + ev.drawMs));
+			UpdateMemoryStats();
+			break;
+		case DebuggerEventType::UpdateSceneTree:
+			if (_SceneTreeView) {
+				SendMessage(_SceneTreeView, TVM_DELETEITEM, 0, reinterpret_cast<LPARAM>(TVI_ROOT));
+				PopulateTreeSnapshotItem(nullptr, ev.treeSnapshot, _SceneTreeView);
+			}
+			break;
+		case DebuggerEventType::UpdateAssets:
+			if (_AssetList) {
+				SendMessage(_AssetList, LVM_DELETEALLITEMS, 0, 0);
+				int index = 0;
+				for (const auto& asset : ev.assetSnapshots) {
+					LVITEMA item{};
+					item.mask = LVIF_TEXT;
+					item.iItem = index;
+					item.iSubItem = 0;
+					item.pszText = const_cast<char*>(asset.path.c_str());
+					int row = static_cast<int>(SendMessage(_AssetList, LVM_INSERTITEMA, 0, reinterpret_cast<LPARAM>(&item)));
+					if (row != -1) {
+						std::string refStr = std::to_string(asset.refCount);
+						LVITEMA subItem{};
+						subItem.iSubItem = 1;
+						subItem.pszText = const_cast<char*>(refStr.c_str());
+						SendMessage(_AssetList, LVM_SETITEMTEXTA, row, reinterpret_cast<LPARAM>(&subItem));
+					}
+					index++;
+				}
+			}
+			break;
+		}
+	}
+	if (_NeedsLogRefresh) {
+		RefreshLogView();
+	}
+	if (_NeedsUpdate) {
+		RefreshPropertyView();
+		_NeedsUpdate = false;
+	}
+}
+
+void Debugger::ProcessCommands() {
+	std::vector<DebuggerCommand> cmds;
+	{
+		std::lock_guard<std::mutex> lock(_CommandMutex);
+		cmds.swap(_CommandQueue);
+	}
+	for (const auto& cmd : cmds) {
+		switch (cmd.type) {
+		case DebuggerCommandType::ToggleDebugMode:
+			PropertyManager.ToggleDebugMode();
+			break;
+		case DebuggerCommandType::Pause:
+			GameState.Pause();
+			break;
+		case DebuggerCommandType::Resume:
+			GameState.Resume();
+			break;
+		case DebuggerCommandType::StepFrame:
+			GameState.RequestStepFrame();
+			break;
+		case DebuggerCommandType::SetTimeScale:
+			GameState.SetTimeScale(cmd.floatVal);
+			break;
+		case DebuggerCommandType::StopBGM:
+			SoundManager.StopBGM();
+			break;
+		case DebuggerCommandType::MuteAll:
+			SoundManager.MuteAll();
+			break;
+		case DebuggerCommandType::UnmuteAll:
+			SoundManager.UnmuteAll();
+			break;
+		case DebuggerCommandType::SetPropertyFromString:
+			PropertyManager.SetPropertyFromString(cmd.name, cmd.value);
+			break;
+		case DebuggerCommandType::RequestSceneTree: {
+			auto root = SceneManager.GetCurrentScene();
+			DebuggerEvent ev;
+			ev.type = DebuggerEventType::UpdateSceneTree;
+			if (root) {
+				ev.treeSnapshot = BuildSceneSnapshot(root);
+			}
+			PushEvent(ev);
+			break;
+		}
+		}
+	}
+
+	static DWORD lastAssetUpdate = 0;
+	const DWORD now = GetTickCount();
+	if (now - lastAssetUpdate >= 500) {
+		lastAssetUpdate = now;
+		auto handles = AssetLoader.GetAssetHandles();
+		std::vector<AssetSnapshot> assetList;
+		for (const auto& [path, handle] : handles) {
+			assetList.push_back({ path, handle.references.size() });
+		}
+		DebuggerEvent evAssets;
+		evAssets.type = DebuggerEventType::UpdateAssets;
+		evAssets.assetSnapshots = std::move(assetList);
+		PushEvent(evAssets);
+	}
+}
+
+void Debugger::ThreadMain() {
 	InitCommonControls();
 	const char* windowClassName = "NovotDebuggerWindow";
 	WNDCLASS windowClass{};
@@ -499,12 +558,6 @@ Debugger::Debugger() {
 			SendMessage(_SetPropButton, WM_SETFONT, reinterpret_cast<WPARAM>(_UIFont), TRUE);
 		}
 
-		SendMessage(_DebugModeCheckBox, BM_SETCHECK,
-			PropertyManager.IsDebugMode() ? BST_CHECKED : BST_UNCHECKED, 0);
-		SetProperty("Debug Mode", PropertyManager.IsDebugMode() ? "Enabled" : "Disabled");
-		_LastMemorySampleTick = GetTickCount();
-		UpdateMemoryStats();
-
 		SendMessage(_LogEdit, EM_SETLIMITTEXT, 0, 0);
 		SendMessage(_PropertyView, EM_SETLIMITTEXT, 0, 0);
 		SetWindowText(_LogEdit, "--- Runtime Log ---\r\n");
@@ -512,51 +565,58 @@ Debugger::Debugger() {
 		SendMessage(_Window, WM_SIZE, 0, MAKELPARAM(1000, 800));
 		_NeedsUpdate = true;
 		_NeedsLogRefresh = true;
-		RefreshAssetsView();
-		RefreshSoundState();
 		AdjustUI();
-		Update();
 	}
 
+	if (_WindowCreatedEvent) {
+		SetEvent(_WindowCreatedEvent);
+	}
+
+	MSG msg{};
+	while (_Running && GetMessage(&msg, nullptr, 0, 0)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+Debugger::Debugger() {
+	_WindowCreatedEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	_DebuggerThread = std::thread(&Debugger::ThreadMain, this);
+	if (_WindowCreatedEvent) {
+		WaitForSingleObject(_WindowCreatedEvent, 5000);
+		CloseHandle(_WindowCreatedEvent);
+		_WindowCreatedEvent = nullptr;
+	}
+}
+
+Debugger::~Debugger() {
+	_Running = false;
+	if (_Window) {
+		PostMessage(_Window, WM_CLOSE, 0, 0);
+	}
+	if (_DebuggerThread.joinable()) {
+		_DebuggerThread.join();
+	}
+	if (_UIFont) {
+		DeleteObject(_UIFont);
+		_UIFont = nullptr;
+	}
 }
 
 void Debugger::WriteLine(std::string msg) {
-
-	if (!_LogEdit) return;
-	_LogLines.push_back(msg);
-	if (_LogLines.size() > 2000) {
-		_LogLines.erase(_LogLines.begin(), _LogLines.begin() + 500);
-	}
-	_NeedsLogRefresh = true;
-
+	PushEvent({ DebuggerEventType::WriteLine, msg });
 }
 
 void Debugger::SetProperty(std::string key, std::string value) {
-
-	if (_Properties.find(key) == _Properties.end() || _Properties[key] != value) {
-		_Properties[key] = value;
-		_NeedsUpdate = true;
-	}
-
+	PushEvent({ DebuggerEventType::SetProperty, "", key, value });
 }
 
 void Debugger::Update() {
-
-	if (!_PropertyView) return;
-	UpdateMemoryStats();
-	if (_NeedsLogRefresh) {
-		RefreshLogView();
-	}
-	if (!_NeedsUpdate) return;
-
-	RefreshPropertyView();
-	RefreshAssetsView();
-	_NeedsUpdate = false;
-
+	ProcessCommands();
 }
 
 void Debugger::RefreshLogView() {
-
+	if (!_LogEdit) return;
 	std::stringstream ss;
 	ss << "--- Runtime Log ---\r\n";
 	const std::string filterLower = ToLower(_FilterText);
@@ -570,17 +630,15 @@ void Debugger::RefreshLogView() {
 	SendMessage(_LogEdit, EM_SETSEL, GetWindowTextLength(_LogEdit), GetWindowTextLength(_LogEdit));
 	SendMessage(_LogEdit, EM_SCROLLCARET, 0, 0);
 	_NeedsLogRefresh = false;
-
 }
 
 void Debugger::PopulatePropertyCandidates() {
-
 	if (!_PropNameCombo) return;
 
 	std::vector<std::string> candidates;
-	for (const auto& entry : PropertyManager.GetBoundProperties()) {
-		if (std::find(candidates.begin(), candidates.end(), entry.name) == candidates.end()) {
-			candidates.push_back(entry.name);
+	for (const auto& [key, val] : _Properties) {
+		if (std::find(candidates.begin(), candidates.end(), key) == candidates.end()) {
+			candidates.push_back(key);
 		}
 	}
 	std::sort(candidates.begin(), candidates.end());
@@ -600,16 +658,13 @@ void Debugger::PopulatePropertyCandidates() {
 	if (!currentInput.empty()) {
 		SetWindowText(_PropNameCombo, currentInput.c_str());
 	}
-
 }
 
 void Debugger::RefreshPropertyView() {
-
 	if (!_PropertyView) return;
 
 	PopulatePropertyCandidates();
 
-	// Save scroll position and selection before updating text
 	const int firstVisible = static_cast<int>(SendMessage(_PropertyView, EM_GETFIRSTVISIBLELINE, 0, 0));
 	DWORD selStart = 0, selEnd = 0;
 	SendMessage(_PropertyView, EM_GETSEL, reinterpret_cast<WPARAM>(&selStart), reinterpret_cast<LPARAM>(&selEnd));
@@ -620,38 +675,19 @@ void Debugger::RefreshPropertyView() {
 		ss << key << ": " << value << "\r\n";
 	}
 
-	const auto boundProps = PropertyManager.GetBoundProperties();
-	if (!boundProps.empty()) {
-		ss << "\r\n-- Bound Properties (Editable) --\r\n";
-		for (const auto& entry : boundProps) {
-			std::string valStr = PropertyManager.GetPropertyValueString(entry.name);
-			std::string typeStr;
-			switch (entry.type) {
-			case _PropertyManager::PropertyType::Int: typeStr = "int"; break;
-			case _PropertyManager::PropertyType::Float: typeStr = "float"; break;
-			case _PropertyManager::PropertyType::Bool: typeStr = "bool"; break;
-			case _PropertyManager::PropertyType::String: typeStr = "string"; break;
-			}
-			ss << entry.name << " (" << typeStr << "): " << valStr << "\r\n";
-		}
-	}
-
 	SetWindowText(_PropertyView, ss.str().c_str());
 
-	// Restore selection and vertical scroll position
 	SendMessage(_PropertyView, EM_SETSEL, selStart, selEnd);
 	const int currentFirst = static_cast<int>(SendMessage(_PropertyView, EM_GETFIRSTVISIBLELINE, 0, 0));
 	const int deltaLines = firstVisible - currentFirst;
 	if (deltaLines != 0) {
 		SendMessage(_PropertyView, EM_LINESCROLL, 0, deltaLines);
 	}
-
 }
 
 void Debugger::UpdateMemoryStats() {
-
 	const DWORD now = GetTickCount();
-	if (now - _LastMemorySampleTick < MemorySampleIntervalMs) {
+	if (_LastMemorySampleTick != 0 && (now - _LastMemorySampleTick < MemorySampleIntervalMs)) {
 		return;
 	}
 	_LastMemorySampleTick = now;
@@ -659,7 +695,16 @@ void Debugger::UpdateMemoryStats() {
 	PROCESS_MEMORY_COUNTERS_EX memInfo{};
 	memInfo.cb = sizeof(memInfo);
 	if (!GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memInfo), sizeof(memInfo))) {
-		return;
+		PROCESS_MEMORY_COUNTERS stdMemInfo{};
+		stdMemInfo.cb = sizeof(stdMemInfo);
+		if (GetProcessMemoryInfo(GetCurrentProcess(), &stdMemInfo, sizeof(stdMemInfo))) {
+			memInfo.WorkingSetSize = stdMemInfo.WorkingSetSize;
+			memInfo.PeakWorkingSetSize = stdMemInfo.PeakWorkingSetSize;
+			memInfo.PagefileUsage = stdMemInfo.PagefileUsage;
+			memInfo.PrivateUsage = stdMemInfo.PagefileUsage;
+		} else {
+			return;
+		}
 	}
 	const double workingSetMiB = static_cast<double>(memInfo.WorkingSetSize) / (1024.0 * 1024.0);
 	const double privateUsageMiB = static_cast<double>(memInfo.PrivateUsage) / (1024.0 * 1024.0);
@@ -675,11 +720,9 @@ void Debugger::UpdateMemoryStats() {
 	SetProperty("Memory.PrivateUsage(MiB)", FormatMiB(memInfo.PrivateUsage));
 	SetProperty("Memory.PeakWorkingSet(MiB)", FormatMiB(memInfo.PeakWorkingSetSize));
 	SetProperty("Memory.PagefileUsage(MiB)", FormatMiB(memInfo.PagefileUsage));
-
 }
 
 void Debugger::DrawMemoryGraph(HDC hdc) const {
-
 	if (_MemoryGraphRect.right <= _MemoryGraphRect.left || _MemoryGraphRect.bottom <= _MemoryGraphRect.top) {
 		return;
 	}
@@ -753,27 +796,13 @@ void Debugger::DrawMemoryGraph(HDC hdc) const {
 	const std::string privateText = "Private: " + FormatMiB(static_cast<SIZE_T>(_PrivateUsageHistoryMiB.back() * 1024.0 * 1024.0)) + " MiB";
 	TextOut(hdc, plotRect.left + 4, plotRect.top + 4, workingText.c_str(), static_cast<int>(workingText.size()));
 	TextOut(hdc, plotRect.left + 4, plotRect.top + 22, privateText.c_str(), static_cast<int>(privateText.size()));
-
 }
 
-// Frame time recording
 void Debugger::RecordFrameTime(double updateMs, double drawMs) {
-
-	_UpdateTimeMsHistory.push_back(updateMs);
-	_DrawTimeMsHistory.push_back(drawMs);
-	if (_UpdateTimeMsHistory.size() > FrameTimeHistoryLimit) {
-		_UpdateTimeMsHistory.erase(_UpdateTimeMsHistory.begin());
-		_DrawTimeMsHistory.erase(_DrawTimeMsHistory.begin());
-	}
-	InvalidateRect(_Window, &_FrameTimeGraphRect, TRUE);
-	SetProperty("Frame.UpdateMs", std::to_string(updateMs));
-	SetProperty("Frame.DrawMs", std::to_string(drawMs));
-	SetProperty("Frame.TotalMs", std::to_string(updateMs + drawMs));
-
+	PushEvent({ DebuggerEventType::RecordFrameTime, "", "", "", updateMs, drawMs });
 }
 
 void Debugger::DrawFrameTimeGraph(HDC hdc) const {
-
 	if (_FrameTimeGraphRect.right <= _FrameTimeGraphRect.left || _FrameTimeGraphRect.bottom <= _FrameTimeGraphRect.top) {
 		return;
 	}
@@ -799,7 +828,7 @@ void Debugger::DrawFrameTimeGraph(HDC hdc) const {
 		return;
 	}
 
-	double maxValue = 16.67; // at least show 60FPS line
+	double maxValue = 16.67;
 	for (size_t i = 0; i < count; ++i) {
 		maxValue = (std::max)(maxValue, _UpdateTimeMsHistory[i]);
 		maxValue = (std::max)(maxValue, _DrawTimeMsHistory[i]);
@@ -819,10 +848,9 @@ void Debugger::DrawFrameTimeGraph(HDC hdc) const {
 		DeleteObject(pen);
 	};
 
-	drawSeries(_UpdateTimeMsHistory, RGB(46, 204, 113)); // green
-	drawSeries(_DrawTimeMsHistory, RGB(155, 89, 182)); // purple
+	drawSeries(_UpdateTimeMsHistory, RGB(46, 204, 113));
+	drawSeries(_DrawTimeMsHistory, RGB(155, 89, 182));
 
-	// 60FPS line
 	double y60 = 16.67 / maxValue;
 	int yline = plotRect.bottom - static_cast<int>(y60 * (plotRect.bottom - plotRect.top));
 	HPEN dash = CreatePen(PS_DOT, 1, RGB(200, 0, 0));
@@ -832,7 +860,6 @@ void Debugger::DrawFrameTimeGraph(HDC hdc) const {
 	SelectObject(hdc, old);
 	DeleteObject(dash);
 
-	// spike markers
 	for (size_t i = 0; i < count; ++i) {
 		double total = _UpdateTimeMsHistory[i] + _DrawTimeMsHistory[i];
 		if (total > 16.67) {
@@ -845,53 +872,28 @@ void Debugger::DrawFrameTimeGraph(HDC hdc) const {
 			DeleteObject(b);
 		}
 	}
-
 }
 
-// Property binding helpers (Delegating to PropertyManager)
+void Debugger::RefreshSceneTree() {
+	PushCommand({ DebuggerCommandType::RequestSceneTree });
+}
+
 void Debugger::BindProperty(const std::string& key, int* target) {
-
 	PropertyManager.BindProperty(key, target);
-	_NeedsUpdate = true;
-
 }
 void Debugger::BindProperty(const std::string& key, float* target) {
-
 	PropertyManager.BindProperty(key, target);
-	_NeedsUpdate = true;
-
 }
 void Debugger::BindProperty(const std::string& key, bool* target) {
-
 	PropertyManager.BindProperty(key, target);
-	_NeedsUpdate = true;
-
 }
 void Debugger::BindProperty(const std::string& key, std::string* target) {
-
 	PropertyManager.BindProperty(key, target);
-	_NeedsUpdate = true;
-
 }
 void Debugger::UnbindProperty(const std::string& key) {
-
 	PropertyManager.UnbindProperty(key);
-	_NeedsUpdate = true;
-
 }
 void Debugger::ClearBindings() {
-
 	PropertyManager.ClearBoundProperties();
-	_NeedsUpdate = true;
-
-}
-
-Debugger::~Debugger() {
-
-	if (_UIFont) {
-		DeleteObject(_UIFont);
-		_UIFont = nullptr;
-	}
-
 }
 #endif
