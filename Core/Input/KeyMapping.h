@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <DxLib.h>
 #include <Singleton.h>
 #include <map>
@@ -10,14 +10,18 @@ private:
 	std::map<std::string, std::list<int>> mapping;
 	bool isDetected = false;
 public:
-	char keyState[256];
+	char keyState[256] = {}, prevKeyState[256] = {};
 	_KeyMapping() : mapping(){}
 	void Update();
-	void RegisterMapping(const std::string& action, const std::list<int>& keys) {
-		mapping[action] = keys;
+	template <typename... Args>
+	requires (std::same_as<Args, int> && ...)
+	void RegisterMapping(const std::string& action, Args... keys) {
+		for (int key : {keys...}) {
+			mapping[action].push_back(key);
+		}
 	}
-	void RegisterMapping(const std::string& action, int key);
 	bool IsActionPressing(const std::string& action);
+	bool IsActionJustPressed(const std::string& action);
 	void StartDetect() {
 		isDetected = false;
 	}

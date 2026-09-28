@@ -1,5 +1,5 @@
-﻿#pragma once
-#include <MathUtils.h>
+#pragma once
+#include <Math/Vector2D.h>
 
 enum class MouseButton {
 	Left,
@@ -16,9 +16,8 @@ enum class MouseButtonState {
 
 struct MouseEvent {
 public:
-	Vector2D position;
+	Vector2D position, delta, scrollOffset;
 	MouseButton button;
 	MouseButtonState state;
 	bool just;
-	Vector2D delta;
 };

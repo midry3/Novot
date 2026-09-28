@@ -1,7 +1,8 @@
-﻿#pragma once
-#include <Asset/Asset.h>
+#pragma once
+#include <Event/Signal.h>
+#include <Asset/Texture/Texture.h>
 #include <Scene.h>
-#include <memory>
+#include <Math/Constants.h>
 
 enum StretchType {
 	NONE,
@@ -9,55 +10,78 @@ enum StretchType {
 };
 
 class Sprite2D : public Scene {
-private:
-	std::shared_ptr<Asset> texture;
+protected:
+	std::shared_ptr<Texture> texture;
 	StretchType stretch = StretchType::NONE;
 	Vector2D size;
 	int _handle = -1;
-	void AdjustScale();
-protected:
-	void _Load() override;
 	void _Release() override;
 	void _Draw() const override;
 public:
-	Vector2D scale;
+	Signal<> TextureChanged;
 	double rotation = 0.0;
-	Sprite2D() : scale(1, 1){}
-	Sprite2D(const std::shared_ptr<Asset>& texture) : texture(texture), scale(1, 1) {
+	virtual void GetUVRect(float& uMin, float& vMin, float& uMax, float& vMax) const {
+		uMin = 0.0f;
+		vMin = 0.0f;
+		uMax = 1.0f;
+		vMax = 1.0f;
+	}
+	Sprite2D() = default;
+	Sprite2D(const std::shared_ptr<Texture>& texture) : texture(texture) {
 		AdjustSize();
 	}
-	Sprite2D(int handle) : _handle(handle), scale(1, 1) {}
+	Sprite2D(int handle) : _handle(handle) {}
 	~Sprite2D() = default;
-	void SetTexture(const std::shared_ptr<Asset>& texture) {
+	virtual Sprite2D* SetTexture(const std::shared_ptr<Texture>& texture) {
 		this->texture = texture;
 		AdjustSize();
+		TextureChanged.Emit();
+		return this;
+	}
+	Sprite2D* SetTexture(const fs::path& path) {
+		SetTexture(LoadAsset<Texture>(path));
+		return this;
+	}
+	Sprite2D* SetTexture(int handle) {
+		_handle = handle;
+		AdjustSize();
+		return this;
 	}
 	void ChangeStretch(StretchType type);
-	void SetScale(double x) {
-		scale = Vector2D(x, x);
-	}
 	int GetHandle() {
 		if (_handle == -1) {
 			_handle = texture->Load();
 		}
 		return _handle;
 	}
+	void AdjustScale() {
+		Vector2D wsize;
+		float r;
+		switch (stretch) {
+		case StretchType::FIT:
+			wsize = PropertyManager.GetRealWindowSize();
+			r = (std::min)(wsize.x / size.x, wsize.y / size.y) / 2;
+			SetScale(Vector2D(r, r));
+			break;
+		case StretchType::NONE:
+			break;
+		}
+	}
 	void AdjustSize() {
-		DebuggerWriteLine("Load Sprite2D...");
 		int x = 0, y = 0;
 		GetGraphSize(GetHandle(), &x, &y);
 		size = Vector2D(x, y);
-		DebuggerWriteLine("Loaded texture size: " + std::to_string(size.x) + ", " + std::to_string(size.y));
 		_handle = GetHandle();
 		AdjustScale();
 	}
-	void RotateDegree(double degree) {
-		rotation = degree * 3.14159265358979323846 / 180.0;
+	Sprite2D* RotateDegree(double degree) {
+		rotation = degree * PI / 180.0;
+		return this;
 	}
 	Vector2D GetSize() const {
-		return size * scale;
+		return size * GetScale();
 	}
-	Vector2D GetRealSize() const {
+	Vector2D GetRawSize() const {
 		return size;
 	}
 };

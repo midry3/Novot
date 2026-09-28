@@ -1,9 +1,9 @@
-#ifdef _DEBUG
+#if defined(_DEBUG) and not defined(_NOVOT_NO_DEBUGGER)
 #include "Debugger.h"
 #include <NovotCore.h>
 #include <SceneManager.h>
 #include <PropertyManager.h>
-#include <Asset/AssetLoader.h>
+#include <Asset/AssetManager.h>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
@@ -33,6 +33,13 @@ std::string PtrToHex(void* p) {
 	std::ostringstream oss;
 	oss << "0x" << std::hex << reinterpret_cast<uintptr_t>(p);
 	return oss.str();
+}
+
+ULONGLONG FileTimeToULL(const FILETIME& ft) {
+	ULARGE_INTEGER uli;
+	uli.LowPart = ft.dwLowDateTime;
+	uli.HighPart = ft.dwHighDateTime;
+	return uli.QuadPart;
 }
 
 SceneNodeSnapshot BuildSceneSnapshot(std::shared_ptr<Scene> scene) {
@@ -79,7 +86,12 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 	}
 	// Pause button
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == PauseButtonId && HIWORD(wParam) == BN_CLICKED) {
-		debugger->PushCommand({ DebuggerCommandType::Pause });
+		if (GameState.IsPaused()) {
+			debugger->PushCommand({ DebuggerCommandType::Resume });
+		}
+		else {
+			debugger->PushCommand({ DebuggerCommandType::Pause });
+		}
 		return 0;
 	}
 	// Step frame button
@@ -165,6 +177,7 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 		HDC hdc = BeginPaint(window, &ps);
 		debugger->DrawFrameTimeGraph(hdc);
 		debugger->DrawMemoryGraph(hdc);
+		debugger->DrawCpuGraph(hdc);
 		EndPaint(window, &ps);
 		return 0;
 	}
@@ -230,12 +243,12 @@ void Debugger::AdjustUI() {
 	MoveWindow(_TimeScaleCombo, col2Left + (timeBtnW + 4) * 2, col2Top, timeBtnW, 150, TRUE);
 
 	const int treeHeaderTop = col2Top + controlHeight + 8;
-	const int debugChkW = 100;
-	const int refreshBtnW = 100;
+	const int debugChkW = 135;
+	const int refreshBtnW = 110;
 	MoveWindow(_DebugModeCheckBox, col2Left, treeHeaderTop, debugChkW, controlHeight, TRUE);
 	MoveWindow(_RefreshTreeButton, col2Left + col2Width - refreshBtnW, treeHeaderTop, refreshBtnW, controlHeight, TRUE);
 
-	const int audioPanelH = 150;
+	const int audioPanelH = 350;
 	const int treeTop = treeHeaderTop + controlHeight + 4;
 	const int treeH = (std::max)(100, height - margin * 3 - treeTop - audioPanelH);
 	MoveWindow(_SceneTreeView, col2Left, treeTop, col2Width, treeH, TRUE);
@@ -257,7 +270,11 @@ void Debugger::AdjustUI() {
 	const int graphGap = 10;
 	const int graphH = (height - margin * 3 - graphGap) / 2;
 	_FrameTimeGraphRect = { col3Left, margin, col3Left + col3Width, margin + graphH };
-	_MemoryGraphRect = { col3Left, margin + graphH + graphGap, col3Left + col3Width, height - margin };
+
+	const int bottomGraphW = (col3Width - graphGap) / 2;
+	const int bottomGraphTop = margin + graphH + graphGap;
+	_MemoryGraphRect = { col3Left, bottomGraphTop, col3Left + bottomGraphW, height - margin };
+	_CpuGraphRect = { col3Left + bottomGraphW + graphGap, bottomGraphTop, col3Left + col3Width, height - margin };
 
 	InvalidateRect(_Window, nullptr, TRUE);
 }
@@ -276,13 +293,8 @@ void Debugger::PopulateTreeSnapshotItem(HTREEITEM parent, const SceneNodeSnapsho
 	}
 }
 
-void Debugger::RefreshAssetsView() {
-	// Debugger thread asset view refresh (no-op or handled locally)
-}
-
-void Debugger::RefreshSoundState() {
-	// Debugger thread sound state refresh (no-op or handled locally)
-}
+void Debugger::RefreshAssetsView() {}
+void Debugger::RefreshSoundState() {}
 
 void Debugger::PushEvent(DebuggerEvent ev) {
 	{
@@ -332,6 +344,7 @@ void Debugger::ProcessEvents() {
 			SetProperty("Frame.DrawMs", std::to_string(ev.drawMs));
 			SetProperty("Frame.TotalMs", std::to_string(ev.updateMs + ev.drawMs));
 			UpdateMemoryStats();
+			UpdateCpuStats();
 			break;
 		case DebuggerEventType::UpdateSceneTree:
 			if (_SceneTreeView) {
@@ -341,24 +354,34 @@ void Debugger::ProcessEvents() {
 			break;
 		case DebuggerEventType::UpdateAssets:
 			if (_AssetList) {
+				SCROLLINFO scrollInfo{};
+				scrollInfo.cbSize = sizeof(scrollInfo);
+				scrollInfo.fMask = SIF_POS;
+				GetScrollInfo(_AssetList, SB_VERT, &scrollInfo);
+
+				SendMessage(_AssetList, WM_SETREDRAW, FALSE, 0);
 				SendMessage(_AssetList, LVM_DELETEALLITEMS, 0, 0);
 				int index = 0;
 				for (const auto& asset : ev.assetSnapshots) {
-					LVITEMA item{};
+					const std::wstring assetPath = asset.path.wstring();
+					LVITEMW item{};
 					item.mask = LVIF_TEXT;
 					item.iItem = index;
 					item.iSubItem = 0;
-					item.pszText = const_cast<char*>(asset.path.c_str());
-					int row = static_cast<int>(SendMessage(_AssetList, LVM_INSERTITEMA, 0, reinterpret_cast<LPARAM>(&item)));
-					if (row != -1) {
-						std::string refStr = std::to_string(asset.refCount);
-						LVITEMA subItem{};
+					item.pszText = const_cast<wchar_t*>(assetPath.c_str());
+					int row = static_cast<int>(SendMessage(_AssetList, LVM_INSERTITEMW, 0, reinterpret_cast<LPARAM>(&item)));
+					if (row not_eq -1) {
+						const std::wstring refStr = std::to_wstring(asset.refCount);
+						LVITEMW subItem{};
 						subItem.iSubItem = 1;
-						subItem.pszText = const_cast<char*>(refStr.c_str());
-						SendMessage(_AssetList, LVM_SETITEMTEXTA, row, reinterpret_cast<LPARAM>(&subItem));
+						subItem.pszText = const_cast<wchar_t*>(refStr.c_str());
+						SendMessage(_AssetList, LVM_SETITEMTEXTW, row, reinterpret_cast<LPARAM>(&subItem));
 					}
 					index++;
 				}
+				SetScrollInfo(_AssetList, SB_VERT, &scrollInfo, FALSE);
+				SendMessage(_AssetList, WM_SETREDRAW, TRUE, 0);
+				InvalidateRect(_AssetList, nullptr, TRUE);
 			}
 			break;
 		}
@@ -420,11 +443,15 @@ void Debugger::ProcessCommands() {
 		}
 	}
 
+	for (const auto& prop : PropertyManager.GetBoundProperties()) {
+		SetProperty(prop.name, PropertyManager.GetPropertyValueString(prop.name));
+	}
+
 	static DWORD lastAssetUpdate = 0;
-	const DWORD now = GetTickCount();
+	const DWORD now = GetTickCount64();
 	if (now - lastAssetUpdate >= 500) {
 		lastAssetUpdate = now;
-		auto handles = AssetLoader.GetAssetHandles();
+		auto handles = AssetManager.GetAssetHandles();
 		std::vector<AssetSnapshot> assetList;
 		for (const auto& [path, handle] : handles) {
 			assetList.push_back({ path, handle.references.size() });
@@ -498,9 +525,19 @@ void Debugger::ThreadMain() {
 			668, 44, 120, 26,
 			_Window, reinterpret_cast<HMENU>(DebugModeCheckBoxId), GetModuleHandle(nullptr), nullptr
 		);
+		SendMessage(_DebugModeCheckBox, BM_SETCHECK, PropertyManager.IsDebugMode() ? BST_CHECKED : BST_UNCHECKED, 0);
 
-		// New controls
-		_PauseButton = CreateWindowEx(0, "BUTTON", "Pause", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 420, 12, 120, 26, _Window, reinterpret_cast<HMENU>(PauseButtonId), GetModuleHandle(nullptr), nullptr);
+		_PauseButton = CreateWindowEx(0, "BUTTON", GameState.IsPaused() ? "Resume" : "Pause", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 420, 12, 120, 26, _Window, reinterpret_cast<HMENU>(PauseButtonId), GetModuleHandle(nullptr), nullptr);
+		GameState.Paused.Connect([this]() {
+			if (_PauseButton) {
+				SetWindowText(_PauseButton, "Resume");
+			}
+			});
+		GameState.Resumed.Connect([this]() {
+			if (_PauseButton) {
+				SetWindowText(_PauseButton, "Pause");
+			}
+			});
 		_StepFrameButton = CreateWindowEx(0, "BUTTON", "Step Frame", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 548, 12, 120, 26, _Window, reinterpret_cast<HMENU>(StepFrameButtonId), GetModuleHandle(nullptr), nullptr);
 		_TimeScaleCombo = CreateWindowEx(WS_EX_CLIENTEDGE, "COMBOBOX", "", WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST, 676, 12, 140, 200, _Window, reinterpret_cast<HMENU>(TimeScaleComboId), GetModuleHandle(nullptr), nullptr);
 		SendMessage(_TimeScaleCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>("0.1x"));
@@ -509,7 +546,7 @@ void Debugger::ThreadMain() {
 		SendMessage(_TimeScaleCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>("1.0x"));
 		SendMessage(_TimeScaleCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>("2.0x"));
 		SendMessage(_TimeScaleCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>("4.0x"));
-		SendMessage(_TimeScaleCombo, CB_SETCURSEL, 3, 0); // default 1.0x
+		SendMessage(_TimeScaleCombo, CB_SETCURSEL, 3, 0);
 
 		_RefreshTreeButton = CreateWindowEx(0, "BUTTON", "Refresh Tree", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 760, 12, 120, 26, _Window, reinterpret_cast<HMENU>(RefreshTreeButtonId), GetModuleHandle(nullptr), nullptr);
 		_SceneTreeView = CreateWindowEx(WS_EX_CLIENTEDGE, WC_TREEVIEWA, "", WS_CHILD | WS_VISIBLE | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES, 760, 48, 220, 200, _Window, reinterpret_cast<HMENU>(SceneTreeViewId), GetModuleHandle(nullptr), nullptr);
@@ -519,19 +556,18 @@ void Debugger::ThreadMain() {
 		_MuteAllButton = CreateWindowEx(0, "BUTTON", "Mute All", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 868, 260, 100, 26, _Window, reinterpret_cast<HMENU>(MuteAllButtonId), GetModuleHandle(nullptr), nullptr);
 
 		_AssetList = CreateWindowEx(0, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL, 760, 296, 220, 140, _Window, reinterpret_cast<HMENU>(AssetListId), GetModuleHandle(nullptr), nullptr);
-		LVCOLUMN column{};
+		LVCOLUMNW column{};
 		column.mask = LVCF_TEXT | LVCF_WIDTH;
-		column.pszText = (LPSTR)"file";
-		column.cx = 200;
-		ListView_InsertColumn(_AssetList, 0, &column);
-		column.pszText = (LPSTR)"ref";
+		column.pszText = const_cast<wchar_t*>(L"file");
+		column.cx =380;
+		SendMessage(_AssetList, LVM_INSERTCOLUMNW, 0, reinterpret_cast<LPARAM>(&column));
+		column.pszText = const_cast<wchar_t*>(L"ref");
 		column.cx = 50;
-		ListView_InsertColumn(_AssetList, 1, &column);
+		SendMessage(_AssetList, LVM_INSERTCOLUMNW, 1, reinterpret_cast<LPARAM>(&column));
 
 		_ReloadSpriteButton = CreateWindowEx(0, "BUTTON", "Reload", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 760, 444, 100, 26, _Window, reinterpret_cast<HMENU>(ReloadSpriteButtonId), GetModuleHandle(nullptr), nullptr);
 		_ReleaseSpriteButton = CreateWindowEx(0, "BUTTON", "Release", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 868, 444, 100, 26, _Window, reinterpret_cast<HMENU>(ReleaseSpriteButtonId), GetModuleHandle(nullptr), nullptr);
 
-		// Property editing controls
 		_PropNameCombo = CreateWindowEx(WS_EX_CLIENTEDGE, "COMBOBOX", "", WS_CHILD | WS_VISIBLE | CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL, 12, 540, 140, 200, _Window, reinterpret_cast<HMENU>(PropNameEditId), GetModuleHandle(nullptr), nullptr);
 		_PropValueEdit = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 160, 540, 140, 26, _Window, reinterpret_cast<HMENU>(PropValueEditId), GetModuleHandle(nullptr), nullptr);
 		_SetPropButton = CreateWindowEx(0, "BUTTON", "Apply", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 308, 540, 70, 26, _Window, reinterpret_cast<HMENU>(SetPropButtonId), GetModuleHandle(nullptr), nullptr);
@@ -580,6 +616,10 @@ void Debugger::ThreadMain() {
 }
 
 Debugger::Debugger() {
+	SYSTEM_INFO sysInfo{};
+	GetSystemInfo(&sysInfo);
+	_NumProcessors = (std::max)(1, static_cast<int>(sysInfo.dwNumberOfProcessors));
+
 	_WindowCreatedEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	_DebuggerThread = std::thread(&Debugger::ThreadMain, this);
 	if (_WindowCreatedEvent) {
@@ -636,9 +676,9 @@ void Debugger::PopulatePropertyCandidates() {
 	if (!_PropNameCombo) return;
 
 	std::vector<std::string> candidates;
-	for (const auto& [key, val] : _Properties) {
-		if (std::find(candidates.begin(), candidates.end(), key) == candidates.end()) {
-			candidates.push_back(key);
+	for (const auto& prop : PropertyManager.GetBoundProperties()) {
+		if (std::find(candidates.begin(), candidates.end(), prop.name) == candidates.end()) {
+			candidates.push_back(prop.name);
 		}
 	}
 	std::sort(candidates.begin(), candidates.end());
@@ -722,6 +762,49 @@ void Debugger::UpdateMemoryStats() {
 	SetProperty("Memory.PagefileUsage(MiB)", FormatMiB(memInfo.PagefileUsage));
 }
 
+void Debugger::UpdateCpuStats() {
+	const DWORD now = GetTickCount();
+	if (_LastCpuSampleTick != 0 && (now - _LastCpuSampleTick < CpuSampleIntervalMs)) {
+		return;
+	}
+
+	if (_NumProcessors <= 0) {
+		SYSTEM_INFO sysInfo{};
+		GetSystemInfo(&sysInfo);
+		_NumProcessors = (std::max)(1, static_cast<int>(sysInfo.dwNumberOfProcessors));
+	}
+
+	FILETIME ftCreation{}, ftExit{}, ftKernel{}, ftUser{}, ftSysNow{};
+	if (!GetProcessTimes(GetCurrentProcess(), &ftCreation, &ftExit, &ftKernel, &ftUser)) {
+		return;
+	}
+	GetSystemTimeAsFileTime(&ftSysNow);
+
+	const ULONGLONG kTime = FileTimeToULL(ftKernel);
+	const ULONGLONG uTime = FileTimeToULL(ftUser);
+	const ULONGLONG sysTime = FileTimeToULL(ftSysNow);
+
+	if (_LastSystemTime != 0 && sysTime > _LastSystemTime) {
+		const ULONGLONG procDiff = (kTime - _LastProcessKernelTime) + (uTime - _LastProcessUserTime);
+		const ULONGLONG sysDiff = sysTime - _LastSystemTime;
+
+		double cpuPercent = (static_cast<double>(procDiff) / (static_cast<double>(sysDiff) * static_cast<double>(_NumProcessors))) * 100.0;
+		cpuPercent = (std::clamp)(cpuPercent, 0.0, 100.0);
+
+		_CpuUsageHistoryPercent.push_back(cpuPercent);
+		if (_CpuUsageHistoryPercent.size() > CpuHistoryLimit) {
+			_CpuUsageHistoryPercent.erase(_CpuUsageHistoryPercent.begin());
+		}
+		InvalidateRect(_Window, &_CpuGraphRect, TRUE);
+		SetProperty("CPU.ProcessUsage(%)", std::to_string(static_cast<int>(std::round(cpuPercent))) + "%");
+	}
+
+	_LastProcessKernelTime = kTime;
+	_LastProcessUserTime = uTime;
+	_LastSystemTime = sysTime;
+	_LastCpuSampleTick = now;
+}
+
 void Debugger::DrawMemoryGraph(HDC hdc) const {
 	if (_MemoryGraphRect.right <= _MemoryGraphRect.left || _MemoryGraphRect.bottom <= _MemoryGraphRect.top) {
 		return;
@@ -733,22 +816,22 @@ void Debugger::DrawMemoryGraph(HDC hdc) const {
 	FrameRect(hdc, &_MemoryGraphRect, static_cast<HBRUSH>(GetStockObject(GRAY_BRUSH)));
 
 	SetBkMode(hdc, TRANSPARENT);
-	TextOut(hdc, _MemoryGraphRect.left + 10, _MemoryGraphRect.top + 8, "Memory Graph (MiB)", 18);
+	TextOut(hdc, _MemoryGraphRect.left + 10, _MemoryGraphRect.top + 6, "Memory (MiB)", 12);
 
 	RECT plotRect = _MemoryGraphRect;
-	plotRect.left += 10;
+	plotRect.left += 65;
 	plotRect.right -= 10;
-	plotRect.top += 30;
-	plotRect.bottom -= 30;
-	if (plotRect.right - plotRect.left < 40 || plotRect.bottom - plotRect.top < 40) {
+	plotRect.top += 24;
+	plotRect.bottom -= 20;
+	if (plotRect.right - plotRect.left < 30 || plotRect.bottom - plotRect.top < 30) {
 		return;
 	}
 
 	FrameRect(hdc, &plotRect, static_cast<HBRUSH>(GetStockObject(LTGRAY_BRUSH)));
 	HPEN gridPen = CreatePen(PS_SOLID, 1, RGB(220, 220, 220));
 	HPEN oldPen = static_cast<HPEN>(SelectObject(hdc, gridPen));
-	for (int i = 1; i < 5; ++i) {
-		const int y = plotRect.top + ((plotRect.bottom - plotRect.top) * i / 5);
+	for (int i = 1; i < 4; ++i) {
+		const int y = plotRect.top + ((plotRect.bottom - plotRect.top) * i / 4);
 		MoveToEx(hdc, plotRect.left, y, nullptr);
 		LineTo(hdc, plotRect.right, y);
 	}
@@ -765,6 +848,23 @@ void Debugger::DrawMemoryGraph(HDC hdc) const {
 	for (size_t i = 0; i < count; ++i) {
 		maxValue = (std::max)(maxValue, _WorkingSetHistoryMiB[i]);
 		maxValue = (std::max)(maxValue, _PrivateUsageHistoryMiB[i]);
+	}
+
+	// Y-axis tick marks
+	COLORREF oldColor = SetTextColor(hdc, RGB(80, 80, 80));
+	HFONT font = CreateFont(-14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Consolas");
+	HFONT oldFont = static_cast<HFONT>(SelectObject(hdc, font));
+	for (int i = 0; i <= 4; ++i) {
+		double val = maxValue * (4 - i) / 4.0;
+		int y = plotRect.top + ((plotRect.bottom - plotRect.top) * i / 4);
+		std::ostringstream ss;
+		if (maxValue >= 100.0) {
+			ss << static_cast<int>(std::round(val)) << " MiB";
+		} else {
+			ss << std::fixed << std::setprecision(1) << val << " MiB";
+		}
+		std::string label = ss.str();
+		TextOut(hdc, plotRect.left - 60, y - 7, label.c_str(), static_cast<int>(label.size()));
 	}
 
 	auto drawSeries = [&](const std::vector<double>& series, COLORREF color) {
@@ -789,13 +889,85 @@ void Debugger::DrawMemoryGraph(HDC hdc) const {
 	drawSeries(_WorkingSetHistoryMiB, RGB(0, 120, 215));
 	drawSeries(_PrivateUsageHistoryMiB, RGB(232, 95, 0));
 
-	const std::string maxText = "Max: " + FormatMiB(static_cast<SIZE_T>(maxValue * 1024.0 * 1024.0)) + " MiB";
-	TextOut(hdc, plotRect.left, plotRect.bottom + 8, maxText.c_str(), static_cast<int>(maxText.size()));
+	SetTextColor(hdc, oldColor);
+	SelectObject(hdc, oldFont);
+	DeleteObject(font);
 
-	const std::string workingText = "WorkingSet: " + FormatMiB(static_cast<SIZE_T>(_WorkingSetHistoryMiB.back() * 1024.0 * 1024.0)) + " MiB";
-	const std::string privateText = "Private: " + FormatMiB(static_cast<SIZE_T>(_PrivateUsageHistoryMiB.back() * 1024.0 * 1024.0)) + " MiB";
+	const std::string workingText = "Working: " + FormatMiB(static_cast<SIZE_T>(_WorkingSetHistoryMiB.back() * 1024.0 * 1024.0)) + " MiB";
 	TextOut(hdc, plotRect.left + 4, plotRect.top + 4, workingText.c_str(), static_cast<int>(workingText.size()));
-	TextOut(hdc, plotRect.left + 4, plotRect.top + 22, privateText.c_str(), static_cast<int>(privateText.size()));
+}
+
+void Debugger::DrawCpuGraph(HDC hdc) const {
+	if (_CpuGraphRect.right <= _CpuGraphRect.left || _CpuGraphRect.bottom <= _CpuGraphRect.top) {
+		return;
+	}
+
+	HBRUSH panelBrush = CreateSolidBrush(RGB(247, 247, 247));
+	FillRect(hdc, &_CpuGraphRect, panelBrush);
+	DeleteObject(panelBrush);
+	FrameRect(hdc, &_CpuGraphRect, static_cast<HBRUSH>(GetStockObject(GRAY_BRUSH)));
+
+	SetBkMode(hdc, TRANSPARENT);
+	TextOut(hdc, _CpuGraphRect.left + 10, _CpuGraphRect.top + 6, "CPU Usage (%)", 13);
+
+	RECT plotRect = _CpuGraphRect;
+	plotRect.left += 65;
+	plotRect.right -= 10;
+	plotRect.top += 24;
+	plotRect.bottom -= 20;
+	if (plotRect.right - plotRect.left < 30 || plotRect.bottom - plotRect.top < 30) {
+		return;
+	}
+
+	FrameRect(hdc, &plotRect, static_cast<HBRUSH>(GetStockObject(LTGRAY_BRUSH)));
+	HPEN gridPen = CreatePen(PS_SOLID, 1, RGB(220, 220, 220));
+	HPEN oldPen = static_cast<HPEN>(SelectObject(hdc, gridPen));
+	for (int i = 1; i < 4; ++i) {
+		const int y = plotRect.top + ((plotRect.bottom - plotRect.top) * i / 4);
+		MoveToEx(hdc, plotRect.left, y, nullptr);
+		LineTo(hdc, plotRect.right, y);
+	}
+	SelectObject(hdc, oldPen);
+	DeleteObject(gridPen);
+
+	const size_t count = _CpuUsageHistoryPercent.size();
+	if (count < 2) {
+		TextOut(hdc, plotRect.left + 8, plotRect.top + 8, "Collecting CPU samples...", 25);
+		return;
+	}
+
+	// Y-axis tick marks
+	COLORREF oldColor = SetTextColor(hdc, RGB(80, 80, 80));
+	HFONT font = CreateFont(-14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Consolas");
+	HFONT oldFont = static_cast<HFONT>(SelectObject(hdc, font));
+	for (int i = 0; i <= 4; ++i) {
+		int val = 100 - (i * 25);
+		int y = plotRect.top + ((plotRect.bottom - plotRect.top) * i / 4);
+		std::string label = std::to_string(val) + " %";
+		TextOut(hdc, plotRect.left - 60, y - 7, label.c_str(), static_cast<int>(label.size()));
+	}
+
+	HPEN pen = CreatePen(PS_SOLID, 2, RGB(231, 76, 60));
+	HPEN prev = static_cast<HPEN>(SelectObject(hdc, pen));
+	for (size_t i = 0; i < count; ++i) {
+		const double xRatio = static_cast<double>(i) / static_cast<double>(count - 1);
+		const double yRatio = (std::clamp)(_CpuUsageHistoryPercent[i], 0.0, 100.0) / 100.0;
+		const int x = plotRect.left + static_cast<int>(xRatio * (plotRect.right - plotRect.left));
+		const int y = plotRect.bottom - static_cast<int>(yRatio * (plotRect.bottom - plotRect.top));
+		if (i == 0) {
+			MoveToEx(hdc, x, y, nullptr);
+		} else {
+			LineTo(hdc, x, y);
+		}
+	}
+	SelectObject(hdc, prev);
+	DeleteObject(pen);
+	SetTextColor(hdc, oldColor);
+	SelectObject(hdc, oldFont);
+	DeleteObject(font);
+
+	const std::string curText = "CPU: " + std::to_string(static_cast<int>(std::round(_CpuUsageHistoryPercent.back()))) + " %";
+	TextOut(hdc, plotRect.left + 4, plotRect.top + 4, curText.c_str(), static_cast<int>(curText.size()));
 }
 
 void Debugger::RecordFrameTime(double updateMs, double drawMs) {
@@ -813,10 +985,10 @@ void Debugger::DrawFrameTimeGraph(HDC hdc) const {
 	FrameRect(hdc, &_FrameTimeGraphRect, static_cast<HBRUSH>(GetStockObject(GRAY_BRUSH)));
 
 	SetBkMode(hdc, TRANSPARENT);
-	TextOut(hdc, _FrameTimeGraphRect.left + 10, _FrameTimeGraphRect.top + 8, "Frame Time (ms)", 14);
+	TextOut(hdc, _FrameTimeGraphRect.left + 10, _FrameTimeGraphRect.top + 8, "Frame Time (ms)", 15);
 
 	RECT plotRect = _FrameTimeGraphRect;
-	plotRect.left += 10;
+	plotRect.left += 65;
 	plotRect.right -= 10;
 	plotRect.top += 30;
 	plotRect.bottom -= 10;
@@ -832,6 +1004,19 @@ void Debugger::DrawFrameTimeGraph(HDC hdc) const {
 	for (size_t i = 0; i < count; ++i) {
 		maxValue = (std::max)(maxValue, _UpdateTimeMsHistory[i]);
 		maxValue = (std::max)(maxValue, _DrawTimeMsHistory[i]);
+	}
+
+	// Y-axis tick marks
+	COLORREF oldColor = SetTextColor(hdc, RGB(80, 80, 80));
+	HFONT font = CreateFont(-14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Consolas");
+	HFONT oldFont = static_cast<HFONT>(SelectObject(hdc, font));
+	for (int i = 0; i <= 4; ++i) {
+		double val = maxValue * (4 - i) / 4.0;
+		int y = plotRect.top + ((plotRect.bottom - plotRect.top) * i / 4);
+		std::ostringstream ss;
+		ss << std::fixed << std::setprecision(1) << val << " ms";
+		std::string label = ss.str();
+		TextOut(hdc, plotRect.left - 60, y - 7, label.c_str(), static_cast<int>(label.size()));
 	}
 
 	auto drawSeries = [&](const std::vector<double>& series, COLORREF color) {
@@ -872,6 +1057,10 @@ void Debugger::DrawFrameTimeGraph(HDC hdc) const {
 			DeleteObject(b);
 		}
 	}
+
+	SetTextColor(hdc, oldColor);
+	SelectObject(hdc, oldFont);
+	DeleteObject(font);
 }
 
 void Debugger::RefreshSceneTree() {
@@ -882,6 +1071,9 @@ void Debugger::BindProperty(const std::string& key, int* target) {
 	PropertyManager.BindProperty(key, target);
 }
 void Debugger::BindProperty(const std::string& key, float* target) {
+	PropertyManager.BindProperty(key, target);
+}
+void Debugger::BindProperty(const std::string& key, double* target) {
 	PropertyManager.BindProperty(key, target);
 }
 void Debugger::BindProperty(const std::string& key, bool* target) {

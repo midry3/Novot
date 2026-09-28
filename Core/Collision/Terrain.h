@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Collision.h"
 #include "CollisionManager.h"
 #include <list>

@@ -1,13 +1,26 @@
-﻿#include "Mouse.h"
+#include "Mouse.h"
 #include <NovotCore.h>
 #include <DxLib.h>
+#include <Camera.h>
 
 void  _Mouse::UpdateMouseEvent() {
+	_handled = false;
 	int x, y;
 	auto input = GetMouseInput();
 	auto preEvent = _currentMouseEvent;
 	GetMousePoint(&x, &y);
-	_currentMouseEvent.position = Vector2D(static_cast<double>(x), static_cast<double>(y));
+	auto offset = GetMouseWheelRotVol();
+	DebuggerSetProperty("Mouse Wheel Offset", std::to_string(offset));
+	if (KeyMapping.IsActionPressing("Shift")) {
+		_currentMouseEvent.scrollOffset = Vector2D(static_cast<double>(offset), 0);
+	}
+	else {
+		_currentMouseEvent.scrollOffset = Vector2D(0, static_cast<double>(offset));
+	}
+	if (offset != 0) {
+		Scrolled.Emit(_currentMouseEvent);
+	}
+	_currentMouseEvent.position = Vector2D(static_cast<double>(x), static_cast<double>(y)) + Camera.GetPoint();
 	_currentMouseEvent.delta = _currentMouseEvent.position - preEvent.position;
 	if (input & MOUSE_INPUT_LEFT) {
 		_currentMouseEvent.button = MouseButton::Left;
@@ -45,7 +58,9 @@ void  _Mouse::UpdateMouseEvent() {
 		}
 	}
 	_currentMouseEvent.just = (preEvent.state != _currentMouseEvent.state);
-
+	if (preEvent.position != _currentMouseEvent.position) {
+		Moved.Emit(_currentMouseEvent);
+	}
 	DebuggerSetProperty("Mouse Position", "(" + std::to_string(_currentMouseEvent.position.x) + ", " + std::to_string(_currentMouseEvent.position.y) + ")");
 	DebuggerSetProperty("Mouse Button", std::to_string(static_cast<int>(_currentMouseEvent.button)));
 	DebuggerSetProperty("Mouse State", std::to_string(static_cast<int>(_currentMouseEvent.state)));

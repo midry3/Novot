@@ -1,6 +1,6 @@
-﻿#pragma once
+#pragma once
 #include <DxLib.h>
-#include "MathUtils.h"
+#include <Math/Vector2D.h>
 #include "Singleton.h"
 #include <string>
 #include <vector>
@@ -9,12 +9,12 @@
 
 class _PropertyManager : public Singleton<_PropertyManager> {
 public:
-    enum class PropertyType { Int, Float, Bool, String };
+    enum class PropertyType { Int, Float, Double, Bool, String };
 
     struct PropertyEntry {
         std::string name;
         PropertyType type;
-        std::variant<int*, float*, bool*, std::string*> ptr;
+        std::variant<int*, float*, double*, bool*, std::string*> ptr;
     };
 
 private:
@@ -29,23 +29,10 @@ public:
     Vector2D GetSettingWindowSize() const {
         return windowSize;
     }
-    bool IsDebugMode() const {
-#ifdef _DEBUG
-        return debugMode;
-#else
-		return false;
-#endif
-    }
-    bool ToggleDebugMode() {
-#ifdef _DEBUG
-        debugMode = !debugMode;
-        return debugMode;
-#else
-        return false;
-#endif
-    }
     void SetWindowSize(const Vector2D& size) {
         windowSize = size;
+		SetGraphMode(static_cast<int>(size.x), static_cast<int>(size.y), 32);
+		DxLib::SetWindowSize(static_cast<int>(size.x), static_cast<int>(size.y));
     }
     void SetFPS(int fps) {
         FPS = fps;
@@ -54,6 +41,9 @@ public:
         return FPS;
     }
     float GetFrameInterval() const {
+        return 1000.0f / FPS;
+    }
+    float GetFrameIntervalAsSec() const {
         return 1.0f / FPS;
     }
     Vector2D GetRealWindowSize() const {
@@ -61,7 +51,30 @@ public:
         GetWindowSize(&w, &h);
         return Vector2D(w, h);
     }
+	void ToFullScreen() {
+        ChangeWindowMode(FALSE);
+        SetDrawScreen(DX_SCREEN_BACK);
+	}
+	void ToWindowed() {
+		ChangeWindowMode(TRUE);
+		SetDrawScreen(DX_SCREEN_BACK);
+	}
+    void SwitchWindowMode() {
+		if (GetWindowModeFlag()) {
+			ToFullScreen();
+		}
+		else {
+			ToWindowed();
+		}
+    }
 #ifdef _DEBUG
+    bool IsDebugMode() const {
+        return debugMode;
+    }
+    bool ToggleDebugMode() {
+        debugMode = !debugMode;
+        return debugMode;
+    }
     void BindProperty(const std::string& name, int* target) {
         auto it = std::find_if(_boundProperties.begin(), _boundProperties.end(), [&](const PropertyEntry& e) { return e.name == name; });
         if (it != _boundProperties.end()) {
@@ -78,6 +91,16 @@ public:
             it->ptr = target;
         } else {
             _boundProperties.push_back({ name, PropertyType::Float, target });
+        }
+    }
+    void BindProperty(const std::string& name, double* target) {
+        auto it = std::find_if(_boundProperties.begin(), _boundProperties.end(), [&](const PropertyEntry& e) { return e.name == name; });
+        if (it != _boundProperties.end()) {
+            it->type = PropertyType::Double;
+            it->ptr = target;
+        }
+        else {
+            _boundProperties.push_back({ name, PropertyType::Double, target });
         }
     }
     void BindProperty(const std::string& name, bool* target) {
@@ -115,14 +138,26 @@ public:
         auto it = std::find_if(_boundProperties.begin(), _boundProperties.end(), [&](const PropertyEntry& e) { return e.name == name; });
         if (it == _boundProperties.end()) return "";
         switch (it->type) {
-        case PropertyType::Int:
-            return std::to_string(*std::get<int*>(it->ptr));
-        case PropertyType::Float:
-            return std::to_string(*std::get<float*>(it->ptr));
-        case PropertyType::Bool:
-            return (*std::get<bool*>(it->ptr)) ? "true" : "false";
-        case PropertyType::String:
-            return *std::get<std::string*>(it->ptr);
+        case PropertyType::Int: {
+            auto p = std::get<int*>(it->ptr);
+            return p ? std::to_string(*p) : "";
+        }
+        case PropertyType::Float: {
+            auto p = std::get<float*>(it->ptr);
+            return p ? std::to_string(*p) : "";
+        }
+        case PropertyType::Double: {
+            auto p = std::get<double*>(it->ptr);
+            return p ? std::to_string(*p) : "";
+        }
+        case PropertyType::Bool: {
+            auto p = std::get<bool*>(it->ptr);
+            return p ? (*p ? "true" : "false") : "";
+        }
+        case PropertyType::String: {
+            auto p = std::get<std::string*>(it->ptr);
+            return p ? *p : "";
+        }
         }
         return "";
     }
@@ -132,21 +167,35 @@ public:
         if (it == _boundProperties.end()) return false;
         try {
             switch (it->type) {
-            case PropertyType::Int:
-                *std::get<int*>(it->ptr) = std::stoi(value);
-                return true;
-            case PropertyType::Float:
-                *std::get<float*>(it->ptr) = std::stof(value);
-                return true;
-            case PropertyType::Bool: {
-                std::string v = value;
-                std::transform(v.begin(), v.end(), v.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-                *std::get<bool*>(it->ptr) = (v == "1" || v == "true");
-                return true;
+            case PropertyType::Int: {
+                auto p = std::get<int*>(it->ptr);
+                if (p) *p = std::stoi(value);
+                return p != nullptr;
             }
-            case PropertyType::String:
-                *std::get<std::string*>(it->ptr) = value;
-                return true;
+            case PropertyType::Float: {
+                auto p = std::get<float*>(it->ptr);
+                if (p) *p = std::stof(value);
+                return p != nullptr;
+            }
+            case PropertyType::Double: {
+                auto p = std::get<double*>(it->ptr);
+                if (p) *p = std::stod(value);
+                return p != nullptr;
+            }
+            case PropertyType::Bool: {
+                auto p = std::get<bool*>(it->ptr);
+                if (p) {
+                    std::string v = value;
+                    std::transform(v.begin(), v.end(), v.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                    *p = (v == "1" || v == "true");
+                }
+                return p != nullptr;
+            }
+            case PropertyType::String: {
+                auto p = std::get<std::string*>(it->ptr);
+                if (p) *p = value;
+                return p != nullptr;
+            }
             }
         }
         catch (...) {

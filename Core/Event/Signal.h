@@ -56,4 +56,16 @@ public:
 			Disconnect(id);
 		}
 	}
+
+	void operator+=(const std::function<void(Types...)>& callback) {
+		Connect(callback);
+	}
+
+	void operator-=(int id) {
+		Disconnect(id);
+	}
+
+	void operator()(Types... args) {
+		Emit(args...);
+	}
 };

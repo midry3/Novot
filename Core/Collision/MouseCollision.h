@@ -1,8 +1,10 @@
-﻿#pragma once
-#include <MathUtils.h>
+#pragma once
+#include <Math/Vector2D.h>
 #include <Scene.h>
 #include <Mouse/MouseEvent.h>
 #include <vector>
+#include <Scene/Texture/Sprite2D.h>
+#include <Camera.h>
 
 class MouseCollision : public Scene {
 protected:
@@ -15,8 +17,10 @@ protected:
 	Vector2D scale;
 	bool _enabled = true;
 	bool _stop = true;
+	bool _isMouseWithin = false;
+	void _Update(float dt) override;
 public:
-	Signal<const MouseEvent&> LeftPressed, LeftReleased, MiddlePressed, MiddleReleased, RightPressed, RightReleased;
+	Signal<const MouseEvent&> LeftPressed, LeftReleased, MiddlePressed, MiddleReleased, RightPressed, RightReleased, Moved, Scrolled, Entered, Left;
 
 	MouseCollision() : scale(1, 1) {}
 	~MouseCollision() = default;
@@ -44,48 +48,35 @@ public:
 			vertices[index] = newVertex;
 		}
 	}
-	void AddVertex(const Vector2D& vertex);
+	template <typename... Args>
+	requires (std::same_as<Args, Vector2D> && ...)
+	MouseCollision* AddVertices(Args... vertex) {
+		for (auto& v : { vertex... }) {
+			vertices.emplace_back(v);
+		}
+		return this;
+	}
+	MouseCollision* AddVertices(std::vector<Vector2D> v) {
+		for (const auto& vert : v) {
+			vertices.emplace_back(vert);
+		}
+		return this;
+	}
 	std::vector<Vector2D> GetVertices() const {
 		std::vector<Vector2D> res;
 		for (auto v : vertices) {
-			res.emplace_back(Transform(v));
+			res.emplace_back(Vertex2Global(v));
 		}
 		return res;
 	}
+	std::vector<Vector2D> GetDrawVertices() const;
 	void ClearVertices() {
 		vertices.clear();
 	}
-	Vector2D Transform(const Vector2D& v) const {
-		return v * scale + GetGlobalPosition() - Camera.GetPoint();
+	Vector2D Vertex2Global(const Vector2D& v) const {
+		return GetGlobalPosition() * Camera.GetZoom() + v * GetScale();
 	}
 	std::vector<Vector2D> GetEdges() const;
 	Vector2D GetNearestEdge(const Vector2D& point) const;
-	void CallCallback(const MouseEvent& event) {
-		switch (event.button) {
-		case MouseButton::Left:
-			if (event.state == MouseButtonState::Pressed) {
-				LeftPressed.Emit(event);
-			}
-			else if (event.state == MouseButtonState::Released) {
-				LeftReleased.Emit(event);
-			}
-			break;
-		case MouseButton::Middle:
-			if (event.state == MouseButtonState::Pressed) {
-				MiddlePressed.Emit(event);
-			}
-			else if (event.state == MouseButtonState::Released) {
-				MiddleReleased.Emit(event);
-			}
-			break;
-		case MouseButton::Right:
-			if (event.state == MouseButtonState::Pressed) {
-				RightPressed.Emit(event);
-			}
-			else if (event.state == MouseButtonState::Released) {
-				RightReleased.Emit(event);
-			}
-			break;
-		}
-	}
+	void CallCallback(const MouseEvent& event);
 };

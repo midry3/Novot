@@ -1,5 +1,6 @@
-﻿#pragma once
+#pragma once
 #include "Singleton.h"
+#include <Event/Signal.h>
 
 class _GameState : public Singleton<_GameState> {
 private:
@@ -7,6 +8,8 @@ private:
 	bool stepFrameRequested = false;
 
 public:
+	Signal<> Paused;
+	Signal<> Resumed;
 	float timeScale = 1.0f;
 	_GameState() : isPaused(false), stepFrameRequested(false) {}
 	bool IsPaused() const {
@@ -14,6 +17,12 @@ public:
 	}
 	void SetPaused(bool paused) {
 		isPaused = paused;
+		if (isPaused) {
+			Paused.Emit();
+		}
+		else {
+			Resumed.Emit();
+		}
 	}
 	void Pause() {
 		SetPaused(true);

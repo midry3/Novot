@@ -1,6 +1,8 @@
-﻿#pragma once
+#pragma once
 #include <NovotCore.h>
-#include "MathUtils.h"
+#include <Asset/Shader/PixelShader.h>
+#include <Math/Vector2D.h>
+#include <Math/Vector3D.h>
 #include <memory>
 #include <vector>
 
@@ -10,87 +12,179 @@ class Timer;
 class Scene : public std::enable_shared_from_this<Scene> {
 protected:
 	bool _isLoaded = false;
+	std::string _name;
 	std::weak_ptr<Scene> parent;
-	std::vector<std::shared_ptr<Scene>> scenes;
-	int ID = 0;
+	std::vector<std::shared_ptr<Scene>> _scenes;
+	std::vector<std::weak_ptr<TweenGroup>> _tweenGroups;
+	std::vector<std::weak_ptr<Timer>> _timers;
+	std::shared_ptr<PixelShader> _pixelShader;
+	int ID = 0, ZIdex = 0;
 	bool visible = true;
+	bool _isIgnoreParentAlpha = false;
+	bool _ySortEnabled = false;
+	bool _isEnabled = true;
 	virtual void _Load() {};
 	virtual void _Release() {};
 	virtual void _Update(float dt) {};
 	virtual void _Draw() const {};
-	template <std::derived_from<Asset> T>
-	std::shared_ptr<T> LoadAsset(const std::string& path) {
-		return AssetLoader.LoadAsset<T>(path, ID);
-	}
 public:
+	Signal<bool> VisibilityChanged;
 	int alpha = 255;
-	Vector2D position, transform;
+	Vector2D position, offset, scale;
 	Vector3D modulate = Vector3D(255, 255, 255);
-	Scene() : position(0, 0), transform(0, 0) {}
+	Scene() : position(0, 0), offset(0, 0), scale(1, 1) {}
 	virtual ~Scene() = default;
 	void Draw() const;
-
-	bool IsShouldDraw() const;
+	void Clear();
+	[[nodiscard]] bool IsShouldDraw() const;
 	void Load();
 	void Update(float dt);
 	void Release();
-	Vector2D GetPosition() const {
+	void Enable() {
+		_isEnabled = true;
+		VisibilityChanged.Emit(true);
+	}
+	void Disable() {
+		_isEnabled = false;
+		VisibilityChanged.Emit(false);
+	}
+	[[nodiscard]] bool IsEnabled() const {
+		return _isEnabled;
+	}
+	Scene* SetName(const std::string& newName) {
+		_name = newName;
+		return this;
+	}
+	[[nodiscard]] std::string GetName() const {
+		if (_name.empty()) {
+			return typeid(*this).name();
+		}
+		return _name;
+	}
+	[[nodiscard]] int GetID() const {
+		return ID;
+	}
+	[[nodiscard]] int GetZIndex() const {
+		return ZIdex;
+	}
+	[[nodiscard]] Vector2D GetPosition() const {
 		return position;
 	}
-	Vector2D GetGlobalPosition() const;
-	Vector2D GetDrawPosition() const;
-	void SetPosition(const Vector2D& pos) {
+	[[nodiscard]] Vector2D GetParentGlobalPosition() const;
+
+	[[nodiscard]] Vector2D GetGlobalPosition() const;
+	[[nodiscard]] Vector2D GetDrawPosition() const;
+	Scene* SetPosition(const Vector2D& pos) {
 		position = pos;
+		return this;
 	}
-	void SetTransform(const Vector2D& trans) {
-		transform = trans;
+	Scene* SetGlobalPosition(const Vector2D& pos);
+	Scene* SetOffset(const Vector2D& off) {
+		offset = off;
+		return this;
 	}
-	void Move(const Vector2D& delta) {
+	[[nodiscard]] Vector2D GetOffset() const {
+		return offset;
+	}
+	Scene* SetScale(double s) {
+		scale = Vector2D(s, s);
+		return this;
+	}
+	Scene* SetScale(const Vector2D& s) {
+		scale = s;
+		return this;
+	}
+	[[nodiscard]] Vector2D GetScale() const;
+	[[nodiscard]] Vector2D GetParentScale() const;
+	Scene* Move(const Vector2D& delta) {
 		position += delta;
+		return this;
 	}
-	void SetParent(std::weak_ptr<Scene> parentScene) {
+	Scene* SetAlpha(int a) {
+		alpha = std::clamp(a, 0, 255);
+		return this;
+	}
+	[[nodiscard]] int GetAlpha() const {
+		auto ptr = parent.lock();
+		if (not _isIgnoreParentAlpha && ptr) {
+			return std::clamp(alpha * ptr->GetAlpha() / 255, 0, 255);
+		}
+		return alpha;
+	}
+	Scene* IgnoreParentAlpha() {
+		_isIgnoreParentAlpha = true;
+		return this;
+	}
+	Scene* FollowParentAlpha() {
+		_isIgnoreParentAlpha = false;
+		return this;
+	}
+	Scene* SetParent(std::weak_ptr<Scene> parentScene) {
 		parent = parentScene;
+		return this;
 	}
-	void SetModulate(const Vector3D& mod) {
+	Scene* SetModulate(const Vector3D& mod) {
 		modulate = mod;
+		return this;
 	}
-	Vector3D GetModulate() const {
-		return modulate;
-	}
-	void AddScene(std::shared_ptr<Scene> scene) {
+	[[nodiscard]] Vector3D GetModulate() const;
+	Scene* AddScene(std::shared_ptr<Scene> scene) {
 		scene->Load();
-		scenes.emplace_back(scene);
+		_scenes.push_back(scene);
 		scene->SetParent(weak_from_this());
+		return this;
 	}
+	Scene* SetPixelShader(std::shared_ptr<PixelShader> shader) {
+		_pixelShader = shader;
+		return this;
+	}
+	template <std::derived_from<PixelShader> T>
+	Scene* SetPixelShader() {
+		auto shader = std::make_shared<T>();
+		_pixelShader = shader;
+		return this;
+	}
+
 	void DeleteScene(int index) {
-		scenes.erase(scenes.begin() + index);
+		_scenes.erase(_scenes.begin() + index);
 	}
 	void DeleteScene(std::shared_ptr<Scene> scene) {
-		std::erase_if(scenes, [&scene](const std::shared_ptr<Scene>& s){ return s == scene; });
+		std::erase_if(_scenes, [&scene](const std::shared_ptr<Scene>& s){ return s == scene; });
 	}
 	void Free() {
 		Release();
 		if (parent.expired()) {
-			scenes.clear();
+			_scenes.clear();
 		}
 		else {
 			parent.lock()->DeleteScene(shared_from_this());
 		}
 	}
-	void Show() {
+	Scene* Show() {
 		visible = true;
+		VisibilityChanged.Emit(true);
+		return this;
 	}
-	void Hide() {
+	Scene* Hide() {
 		visible = false;
+		VisibilityChanged.Emit(false);
+		return this;
 	}
-	const std::vector<std::shared_ptr<Scene>>& GetChildScenes() const {
-		return scenes;
+	[[nodiscard]] const std::vector<std::shared_ptr<Scene>>& GetChildScenes() const {
+		return _scenes;
 	}
-	bool IsVisible() const {
+	[[nodiscard]] int GetChildSceneCount() const {
+		return static_cast<int>(_scenes.size());
+	}
+	[[nodiscard]] bool IsVisible() const {
 		return visible;
 	}
-	void SetVisible(bool v) {
+	Scene* SetVisible(bool v) {
 		visible = v;
+		return this;
+	}
+	[[nodiscard]] bool IsYSortEnabled() const {
+		return _ySortEnabled;
 	}
 	template <std::derived_from<Scene> T>
 	std::shared_ptr<T> CreateScene() {
@@ -99,5 +193,20 @@ public:
 		return scene;
 	}
 	std::shared_ptr<TweenGroup> CreateTweenGroup();
+	void KillAllTweenGroups();
+	void SkipAllTweenGroups();
 	std::shared_ptr<Timer> CreateTimer(double time, const std::function<void()> callback, int loop=1);
+	void KillAllTimers();
+	bool operator==(const Scene& other) const {
+		return ID == other.GetID();
+	}
+
+	template <std::derived_from<Asset> T>
+	std::shared_ptr<T> LoadAsset(const fs::path& path) {
+		return AssetManager.LoadAsset<T>(path, ID);
+	}
+
+	void ReleaseAssets() {
+		AssetManager.ReleaseAsset(ID);
+	}
 };

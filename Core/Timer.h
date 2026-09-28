@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Singleton.h"
 #include <Scene.h>
 #include <functional>
@@ -20,6 +20,7 @@ public:
 	Timer() = default;
 	Timer(double time, const std::function<void()>& callback, int loopNum=1) : time(time), startTime(time), loopNum(loopNum) {
 		Timeout.Connect(callback);
+		Hide();
 	}
 	void Update(float dt) {
 		if (isPaused || isFinished) return;
@@ -43,6 +44,7 @@ public:
 	void Kill() {
 		time = std::numeric_limits<double>::infinity();
 		isFinished = true;
+		Free();
 	}
 	Timer* SetTime(double time) {
 		this->time = time;

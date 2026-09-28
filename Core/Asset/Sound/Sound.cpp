@@ -1,4 +1,4 @@
-﻿#include "Sound.h"
+#include "Sound.h"
 #include <NovotCore.h>
 
 void Sound::Play() {
@@ -25,10 +25,9 @@ int Sound::Load() {
 	);
 	if (_handle == -1) {
 		_handle = -2;
-		DebuggerWriteLine("Failed to load sound: " + GetPath());
+		DebuggerWriteLine("Failed to load sound: " + GetPath().string());
 		return -1;
 	}
-	DebuggerWriteLine("Loaded sound: " + GetPath());
 	return _handle;
 }
 

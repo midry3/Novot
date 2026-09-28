@@ -1,4 +1,4 @@
-﻿#include "Timer.h"
+#include "Timer.h"
 #include "NovotCore.h"
 
 std::shared_ptr<Timer> _TimerManager::New(double time, std::function<void()> f, bool loop) {

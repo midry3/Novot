@@ -1,4 +1,4 @@
-﻿#include "Command.h"
+#include "Command.h"
 #include <NovotCore.h>
 
 int Command::Load() {

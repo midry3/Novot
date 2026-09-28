@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <sstream>
 #include <algorithm>
 #include <Asset/Asset.h>

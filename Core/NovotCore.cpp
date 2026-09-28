@@ -1,1 +1,1 @@
-﻿#include "NovotCore.h"
+#include "NovotCore.h"

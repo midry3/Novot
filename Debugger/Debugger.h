@@ -1,5 +1,6 @@
 #pragma once
-#ifdef _DEBUG
+
+#if defined(_DEBUG) and not defined(_NOVOT_NO_DEBUGGER)
 #include <Singleton.h>
 #include <Windows.h>
 #include <CommCtrl.h>
@@ -10,6 +11,9 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 struct SceneNodeSnapshot {
 	std::string name;
@@ -18,7 +22,7 @@ struct SceneNodeSnapshot {
 };
 
 struct AssetSnapshot {
-	std::string path;
+	fs::path path;
 	size_t refCount = 0;
 };
 
@@ -146,12 +150,25 @@ private:
 	void PushEvent(DebuggerEvent ev);
 	void PushCommand(DebuggerCommand cmd);
 
+	// CPU profiler
+	RECT _CpuGraphRect{};
+	std::vector<double> _CpuUsageHistoryPercent;
+	static constexpr size_t CpuHistoryLimit = 240;
+	ULONGLONG _LastProcessKernelTime = 0;
+	ULONGLONG _LastProcessUserTime = 0;
+	ULONGLONG _LastSystemTime = 0;
+	DWORD _LastCpuSampleTick = 0;
+	static constexpr DWORD CpuSampleIntervalMs = 250;
+	int _NumProcessors = 0;
+
 	void RefreshLogView();
 	void RefreshPropertyView();
 	void PopulatePropertyCandidates();
 	void DrawMemoryGraph(HDC hdc) const;
 	void DrawFrameTimeGraph(HDC hdc) const;
+	void DrawCpuGraph(HDC hdc) const;
 	void UpdateMemoryStats();
+	void UpdateCpuStats();
 	void PopulateTreeSnapshotItem(HTREEITEM parent, const SceneNodeSnapshot& snapshot, HWND tree);
 	void RefreshAssetsView();
 	void RefreshSoundState();
@@ -171,6 +188,7 @@ public:
 
 	void BindProperty(const std::string& key, int* target);
 	void BindProperty(const std::string& key, float* target);
+	void BindProperty(const std::string& key, double* target);
 	void BindProperty(const std::string& key, bool* target);
 	void BindProperty(const std::string& key, std::string* target);
 	void UnbindProperty(const std::string& key);

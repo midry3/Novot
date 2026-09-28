@@ -1,28 +1,31 @@
-﻿#pragma once
+#pragma once
 #include <Scene.h>
 
 class GridContainer : public Scene {
 protected:
-	Vector2D _matrixSize, _size;
+	Vector2D _matrixSize, _size, _space;
 	std::vector<std::weak_ptr<Scene>> grid_scenes;
-	void _Load() override {};
-	void _Release() override {};
 	void _Update(float dt) override;
-	void _Draw() const override {};
 public:
 	GridContainer() = default;
 	~GridContainer() = default;
-	void SetMatrixSize(const Vector2D& size) {
+	GridContainer* SetMatrixSize(const Vector2D& size) {
 		_matrixSize = size;
 		grid_scenes.resize(static_cast<size_t>(size.x * size.y));
+		return this;
 	}
-	void SetSize(const Vector2D& size) {
+	GridContainer* SetSize(const Vector2D& size) {
 		_size = size;
+		return this;
+	}
+	GridContainer* SetSpace(const Vector2D& space) {
+		_space = space;
+		return this;
 	}
 	void AddScene(std::shared_ptr<Scene> scene) {
 		scene->Load();
-		auto n = static_cast<size_t>(scenes.size());
-		scenes.emplace_back(scene);
+		auto n = static_cast<size_t>(_scenes.size());
+		_scenes.emplace_back(scene);
 		grid_scenes[n] = scene;
 		scene->SetParent(weak_from_this());
 	}
@@ -33,6 +36,6 @@ public:
 		return scene;
 	}
 	bool IsFull() const {
-		return scenes.size() >= static_cast<size_t>(_matrixSize.x * _matrixSize.y);
+		return _scenes.size() >= static_cast<size_t>(_matrixSize.x * _matrixSize.y);
 	}
 };

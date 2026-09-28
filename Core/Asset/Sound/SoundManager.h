@@ -1,5 +1,5 @@
-﻿#pragma once
-#include "../AssetLoader.h"
+#pragma once
+#include "../AssetManager.h"
 #include <Singleton.h>
 #include "Sound.h"
 #include <memory>

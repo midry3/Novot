@@ -12,7 +12,6 @@ private:
 public:
 	std::shared_ptr<Collision> New() {
 		auto collision = std::make_shared<Collision>();
-		collision->SetID(static_cast<int>(collisions.size()));
 		collisions.push_back(collision);
 		return collision;
 	}
@@ -31,14 +30,14 @@ public:
 	}
 
 	std::shared_ptr<Collision> GetColliding(const Collision& target) {
-		if (!target.IsEnabled()) {
+		if (not target.IsEnabled()) {
 			return nullptr;
 		}
 		for (const auto& collision : UpdateCollisions()) {
 			if (*collision == target) {
 				continue;
 			}
-			if (collision->IsEnabled() && collision->IsColliding(target)) {
+			if (collision->IsEnabled() && collision->CheckColliding(target)) {
 				return collision;
 			}
 		}
@@ -53,7 +52,7 @@ public:
 			if (*collision == target) {
 				continue;
 			}
-			if (collision->IsEnabled() && collision->IsColliding(target) && !collision->CanPass()) {
+			if (collision->IsEnabled() && collision->CheckColliding(target) && !collision->CanPass()) {
 				return collision;
 			}
 		}
@@ -62,14 +61,14 @@ public:
 
 	std::list<std::shared_ptr<Collision>> GetAllColliding(const Collision& target) {
 		std::list<std::shared_ptr<Collision>> res;
-		if (!target.IsEnabled()) {
+		if (not target.IsEnabled()) {
 			return res;
 		}
 		for (const auto& collision : UpdateCollisions()) {
 			if (*collision == target) {
 				continue;
 			}
-			if (collision->IsEnabled() && collision->IsColliding(target)) {
+			if (collision->IsEnabled() && target.CheckColliding(*collision)) {
 				res.push_back(collision);
 			}
 		}
@@ -85,7 +84,7 @@ public:
 			if (*collision == target) {
 				continue;
 			}
-			if (collision->IsEnabled() && collision->IsColliding(target) && !collision->CanPass()) {
+			if (collision->IsEnabled() && collision->CheckColliding(target) && !collision->CanPass()) {
 				res.push_back(collision);
 			}
 		}
@@ -100,7 +99,7 @@ public:
 			if (*collision == target) {
 				continue;
 			}
-			if (collision->IsEnabled() && collision->IsColliding(target)) {
+			if (collision->IsEnabled() && collision->CheckColliding(target)) {
 				return true;
 			}
 		}
@@ -115,15 +114,14 @@ public:
 			if (*collision == target) {
 				continue;
 			}
-			if (collision->IsEnabled() && collision->IsColliding(target) && !collision->CanPass()) {
-				DebuggerWriteLine("Collision detected with wall! Collision ID: " + std::to_string(collision->GetID()));
+			if (collision->IsEnabled() && collision->CheckColliding(target) && !collision->CanPass()) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	void AddCollision(std::shared_ptr<Collision> collision) {
+	void AddCollision(std::weak_ptr<Collision> collision) {
 		collisions.push_back(collision);
 	}
 

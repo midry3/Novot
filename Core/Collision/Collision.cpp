@@ -1,10 +1,48 @@
-﻿#include <Graphic/2D.h>
+#include <Graphic/2D.h>
 #include <NovotCore.h>
 #include <algorithm>
+#include <Camera.h>
 #include "Collision.h"
+#include "CollisionManager.h"
 
-void Collision::AddVertex(const Vector2D& vertex) {
-	vertices.emplace_back(vertex);
+void Collision::_Update(float dt) {
+	if (not enabled || not _needsUpdate) return;
+	std::list<std::weak_ptr<Collision>> currentCollisions;
+	auto collisions = CollisionManager.GetAllColliding(*this);
+#ifdef _DEBUG
+	_collidingCount = collisions.size();
+#endif
+	if (collisions.size() == 0) {
+		_isColliding = false;
+	}
+	else {
+		for (auto col : collisions) {
+			if (std::find_if(collidingWith.begin(), collidingWith.end(), [&col](const std::weak_ptr<Collision>& c) { return !c.expired() && c.lock() == col; }) == collidingWith.end()) {
+				CollideStarted.Emit(*col);
+			}
+			currentCollisions.push_back(col);
+			collidingWith.remove_if([&col](const std::weak_ptr<Collision>& c) { return !c.expired() && c.lock() == col; });
+			Colliding.Emit(*col);
+		}
+	}
+	for (auto remainingCol : collidingWith) {
+		if (auto col = remainingCol.lock()) {
+			CollideExited.Emit(*col);
+		}
+	}
+	collidingWith = currentCollisions;
+}
+
+std::vector<Vector2D> Collision::GetDrawVertices() const {
+	std::vector<Vector2D> res;
+	for (auto v : vertices) {
+		res.emplace_back(Transform(v) - Camera.GetPoint());
+	}
+	Vector2D s = GetScale();
+	if ((s.x < 0) != (s.y < 0)) {
+		std::reverse(res.begin(), res.end());
+	}
+	return res;
 }
 
 std::vector<Vector2D> Collision::GetEdges() const {
@@ -22,9 +60,9 @@ std::vector<Vector2D> Collision::GetEdges() const {
 }
 
 bool Collision::CanCollideWith(const Collision& other) const {
-	for (int layer : layers) {
+	for (int mask : masks) {
 		for (int otherLayer : other.layers) {
-			if (layer == otherLayer) {
+			if (mask == otherLayer) {
 				return true;
 			}
 		}
@@ -32,8 +70,8 @@ bool Collision::CanCollideWith(const Collision& other) const {
 	return false;
 }
 
-bool Collision::IsColliding(const Collision& other) const {
-	if (vertices.size() == 0 || other.vertices.size() == 0 || !CanCollideWith(other)) return false;
+bool Collision::CheckColliding(const Collision& other) const {
+	if (vertices.size() == 0 || other.vertices.size() == 0 || not CanCollideWith(other)) return false;
 
 	auto edges = GetEdges();
 	auto e2 = other.GetEdges();
@@ -99,10 +137,10 @@ void Collision::_Load() {
 }
 
 void Collision::_Draw() const {
-	if (!PropertyManager.IsDebugMode()) return;
-	auto verts = GetVertices();
+	if (not PropertyManager.IsDebugMode()) return;
+	auto verts = GetDrawVertices();
 	if (verts.size() < 2) return;
-	auto camera = Camera.GetPoint();
-	NovotRenderer::DrawPolygon(verts, DEBUG_LINE_COLOR, false);
+	
+	NovotRenderer::DrawPolygon(verts, _collidingCount > 0 ? DEBUG_COLLIDING_COLOR : DEBUG_NOT_COLLIDING_COLOR, true);
 }
 #endif

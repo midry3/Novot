@@ -1,11 +1,40 @@
-﻿#include "MouseCollision.h"
+#include "MouseCollision.h"
 
 #include <Graphic/2D.h>
 #include <NovotCore.h>
 #include <algorithm>
+#include <Camera.h>
+#include <Mouse/Mouse.h>
 
-void MouseCollision::AddVertex(const Vector2D& vertex) {
-	vertices.emplace_back(vertex);
+void MouseCollision::_Update(float dt) {
+	if (not _enabled || Mouse.IsAlreadyHandled() || vertices.empty()) return;
+	auto event = Mouse.GetMouseEvent();
+	if (IsWithin(event.position)) {
+		if (not _isMouseWithin) {
+			Entered.Emit(event);
+		}
+		_isMouseWithin = true;
+		CallCallback(event);
+		if (_stop) {
+			Mouse.Handled();
+		}
+	}
+	else if (_isMouseWithin) {
+		_isMouseWithin = false;
+		Left.Emit(event);
+	}
+}
+
+std::vector<Vector2D> MouseCollision::GetDrawVertices() const {
+	std::vector<Vector2D> res;
+	for (auto v : vertices) {
+		res.emplace_back(Vertex2Global(v) - Camera.GetPoint());
+	}
+	Vector2D s = GetScale();
+	if ((s.x < 0) != (s.y < 0)) {
+		std::reverse(res.begin(), res.end());
+	}
+	return res;
 }
 
 std::vector<Vector2D> MouseCollision::GetEdges() const {
@@ -71,6 +100,43 @@ bool MouseCollision::IsWithin(const Vector2D& point) const {
 	return inside;
 }
 
+void MouseCollision::CallCallback(const MouseEvent& event) {
+	switch (event.button) {
+	case MouseButton::Left:
+		if (event.state == MouseButtonState::Pressed) {
+			LeftPressed.Emit(event);
+		}
+		else if (event.state == MouseButtonState::Released) {
+			LeftReleased.Emit(event);
+		}
+		break;
+	case MouseButton::Middle:
+		if (event.state == MouseButtonState::Pressed) {
+			MiddlePressed.Emit(event);
+		}
+		else if (event.state == MouseButtonState::Released) {
+			MiddleReleased.Emit(event);
+		}
+		break;
+	case MouseButton::Right:
+		if (event.state == MouseButtonState::Pressed) {
+			RightPressed.Emit(event);
+		}
+		else if (event.state == MouseButtonState::Released) {
+			RightReleased.Emit(event);
+		}
+		break;
+	case MouseButton::None:
+		if (event.scrollOffset.Length() != 0) {
+			Scrolled.Emit(event);
+		}
+		else if (event.state == MouseButtonState::Moved) {
+			Moved.Emit(event);
+		}
+		break;
+	}
+}
+
 #ifdef _DEBUG
 void MouseCollision::_Load() {
 	alpha = 120;
@@ -78,7 +144,7 @@ void MouseCollision::_Load() {
 
 void MouseCollision::_Draw() const {
 	if (!PropertyManager.IsDebugMode()) return;
-	auto verts = GetVertices();
+	auto verts = GetDrawVertices();
 	if (verts.size() < 2) return;
 	NovotRenderer::DrawPolygon(verts, DEBUG_LINE_COLOR, true);
 }

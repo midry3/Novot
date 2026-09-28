@@ -1,4 +1,4 @@
-﻿#include "SoundManager.h"
+#include "SoundManager.h"
 
 void _SoundManager::PlayBGM(std::shared_ptr<Sound> bgm) {
 	if (this->bgm && this->bgm->IsLoaded()) {
@@ -28,7 +28,7 @@ void _SoundManager::PlaySE(std::shared_ptr<Sound> sound) {
 }
 
 void _SoundManager::PlaySE(const std::string& path, int id) {
-	std::shared_ptr<Sound> sound = AssetLoader.LoadAsset<Sound>(path, id);
+	std::shared_ptr<Sound> sound = AssetManager.LoadAsset<Sound>(path, id);
 	sound->SetLoop(false);
 	sound->Play();
 }

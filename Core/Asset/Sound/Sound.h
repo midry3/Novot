@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <Asset/Asset.h>
 #include "../Asset.h"
 
@@ -8,7 +8,7 @@ protected:
 	int volume = 255;
 public:
 	Sound() = default;
-	Sound(const std::string& file) : Asset(file), volume(255) {}
+	Sound(const fs::path& file) : Asset(file), volume(255) {}
 	~Sound() {
 		Release();
 	}

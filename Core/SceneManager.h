@@ -1,33 +1,44 @@
-﻿#pragma once
+#pragma once
 #include <memory>
 #include <Singleton.h>
 #include "Scene.h"
+#include <Animation/Tween.h>
+
+class ColorRect;
 
 class _SceneManager : public Singleton<_SceneManager> {
 private:
 	std::shared_ptr<Scene> currentScene;
 	std::shared_ptr<Scene> nextScene;
-	int _nextID;
-	float inTime = 1.0f;
-	float outTime = 0.5f;
+	std::vector<std::shared_ptr<Scene>> _drawTargets, effectScenes;
+	std::shared_ptr<ColorRect> _transEffect;
+	int _nextID = 0;
 	bool _cancelUpdate = false;
 public:
-	_SceneManager() = default;
+	void Init();
 	void Update(float dt);
+	void EffectUpdate(float dt);
 	void Draw() const;
-	void SetCurrentScene(std::shared_ptr<Scene> scene) {
-		if (currentScene != nullptr) {
-			currentScene->Release();
-			_cancelUpdate = true;
-		}
-		currentScene = scene;
-		currentScene->Load();
-		DebuggerSetProperty("Current Scene", typeid(*currentScene).name());
-		DebuggerRefreshSceneTree();
-	}
+	void EffectDraw() const;
+	void SetCurrentScene(std::shared_ptr<Scene> scene);
+
 	template <std::derived_from<Scene> T>
-	void SetCurrentScene() {
-		SetCurrentScene(std::make_shared<T>());
+	std::shared_ptr<T> SetCurrentScene() {
+		auto scene = std::make_shared<T>();
+		SetCurrentScene(scene);
+		return scene;
+	}
+
+	void AddDrawTarget(std::shared_ptr<Scene> scene) {
+		_drawTargets.emplace_back(scene);
+	}
+
+	void AddEffectScene(std::shared_ptr<Scene> scene) {
+		effectScenes.emplace_back(scene);
+		scene->Load();
+	}
+	void DeleteEffectScene(std::shared_ptr<Scene> scene) {
+		std::erase_if(effectScenes, [&scene](const std::shared_ptr<Scene>& s) { return s == scene; });
 	}
 	int GetID() {
 		return _nextID++;
@@ -38,11 +49,15 @@ public:
 	void ClearCancelUpdate() {
 		_cancelUpdate = false;
 	}
-	void TransToScene(std::shared_ptr<Scene> scene, float in, float out) {
-		
-	}
+	void TransSceneTo(std::shared_ptr<Scene> scene, double in = 2.0, double out = 2.0);
 	std::shared_ptr<Scene> GetCurrentScene() {
 		return currentScene;
+	}
+	template <std::derived_from<Scene> T>
+	std::shared_ptr<T> CreateEffect() {
+		auto effect = std::make_shared<T>();
+		AddEffectScene(effect);
+		return effect;
 	}
 };
 

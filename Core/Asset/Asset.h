@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <vector>
 #include <filesystem>
 #include <cstdint>
@@ -12,17 +12,17 @@ protected:
 	int _handle = -1;
 public:
 	Asset() = default;
-	Asset(const std::string& file) : file(file) {}
-	virtual ~Asset() {
-		Release();
-	}
-	virtual int Load();
+	Asset(const fs::path& file) : file(file) {}
+	~Asset() = default;
+	virtual int Load() { return -1; }
+	virtual void Release() {};
+	int GetHandle();
+	int ReLoad();
 	bool IsLoaded() const {
 		return _handle != -1;
 	}
 	std::vector<std::uint8_t> GetData();
-	virtual void Release();
-	std::string GetPath() const {
-		return ("Assets" / file).string();
-	}
+	std::string GetDataAsString();
+	fs::path GetPath() const;
+	fs::path GetPathRelatedToExe() const;
 };

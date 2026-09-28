@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -59,15 +59,19 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -77,7 +81,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -98,7 +103,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -117,7 +123,8 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -138,7 +145,8 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -151,10 +159,23 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Core\Asset\AssetLoader.cpp" />
+    <ClCompile Include="Core\Animation\EasingFunction.cpp" />
     <ClCompile Include="Core\Asset\Command\Command.cpp" />
+    <ClCompile Include="Core\Asset\Texture\Texture.cpp" />
+    <ClCompile Include="Core\Scene\Container\Animation\AnimatedUI.cpp" />
+    <ClCompile Include="Core\Scene\Shape\ColorPolygon.cpp" />
+    <ClCompile Include="Core\Scene\Shape\ColorRect.cpp" />
+    <ClCompile Include="Core\Scene\Texture\ProgressSprite2D.cpp" />
+    <ClCompile Include="Core\Scene\Text\TextLabel.cpp" />
+    <ClCompile Include="Core\String\StringUtils.cpp" />
+    <ClCompile Include="Core\Asset\Texture\AnimationLoader.cpp" />
+    <ClCompile Include="Eiga\Eiga.cpp" />
+    <ClCompile Include="Eiga\EigaManager.cpp" />
+    <ClCompile Include="Eiga\EigaLexer.cpp" />
+    <ClCompile Include="Core\Asset\Shader\PixelShader.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\Collision\MouseCollision.cpp" />
+    <ClCompile Include="Core\Collision\RayCast.cpp" />
     <ClCompile Include="Core\Collision\Terrain.cpp" />
     <ClCompile Include="Core\Graphic\2D.cpp" />
     <ClCompile Include="Core\Scene\Container\Grid\GridContainer.cpp" />
@@ -164,13 +185,17 @@
     <ClCompile Include="Core\Asset\Texture\SpriteSheetManager.cpp" />
     <ClCompile Include="Core\Mouse\Mouse.cpp" />
     <ClCompile Include="Core\Scene\Button\Button.cpp" />
+    <ClCompile Include="Core\Scene\Texture\AnimatedSprite2D.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
-    <ClCompile Include="Core\Tween.cpp" />
+    <ClCompile Include="Core\Animation\Tween.cpp" />
     <ClCompile Include="Core\Asset\Asset.cpp" />
     <ClCompile Include="Core\Collision\Collision.cpp" />
-    <ClCompile Include="Core\MathUtils.cpp" />
+    <ClCompile Include="Core\Math\Graph.cpp" />
+    <ClCompile Include="Core\Math\LineSegment.cpp" />
+    <ClCompile Include="Core\Math\Utils.cpp" />
+    <ClCompile Include="Core\Math\Vector2D.cpp" />
     <ClCompile Include="Core\NovotCore.cpp" />
-    <ClCompile Include="Core\Object.cpp" />
+    <ClCompile Include="Core\Object2D.cpp" />
     <ClCompile Include="Core\PropertyManager.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\SceneManager.cpp" />
@@ -178,19 +203,45 @@
     <ClCompile Include="Core\Singleton.cpp" />
     <ClCompile Include="Core\Asset\Texture\SpriteSheet.cpp" />
     <ClCompile Include="Debugger\Debugger.cpp" />
+    <ClCompile Include="Effekseer\EffekseerAsset.cpp" />
+    <ClCompile Include="Effekseer\EffekseerEmitter.cpp" />
+    <ClCompile Include="Eiga\EigaRuntime.cpp" />
+    <ClCompile Include="Flow\FlowManager.cpp" />
+    <ClCompile Include="Core\Scene\Container\Grid\ProjectionGridContainer.cpp" />
     <ClCompile Include="Novot.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Core\Asset\AssetLoader.h" />
+    <ClInclude Include="Core\Animation\EasingFunction.h" />
+    <ClInclude Include="Core\Asset\AssetManager.h" />
     <ClInclude Include="Core\Asset\Command\Command.h" />
+    <ClInclude Include="Core\Asset\Shader\OutLineShader.h" />
+    <ClInclude Include="Core\Asset\Texture\Texture.h" />
+    <ClInclude Include="Core\Event\DynamicSignal.h" />
+    <ClInclude Include="Core\Math\Constants.h" />
+    <ClInclude Include="Core\Scene\Container\Animation\AnimatedUI.h" />
+    <ClInclude Include="Core\Scene\Shape\ColorPolygon.h" />
+    <ClInclude Include="Core\Scene\Shape\ColorRect.h" />
+    <ClInclude Include="Core\Scene\Texture\ProgressSprite2D.h" />
+    <ClInclude Include="Core\Scene\Text\TextLabel.h" />
+    <ClInclude Include="Core\Scene\Util\PageController.h" />
+    <ClInclude Include="Core\String\FontManager.h" />
+    <ClInclude Include="Core\String\StringUtils.h" />
+    <ClInclude Include="Core\Asset\Texture\AnimationLoader.h" />
+    <ClInclude Include="Eiga\Eiga.h" />
+    <ClInclude Include="Eiga\EigaManager.h" />
+    <ClInclude Include="Eiga\EigaLexer.h" />
+    <ClInclude Include="Core\Asset\Shader\PixelShader.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\Collision\CollisionManager.h" />
     <ClInclude Include="Core\Collision\MouseCollision.h" />
+    <ClInclude Include="Core\Collision\RayCast.h" />
     <ClInclude Include="Core\Collision\Terrain.h" />
     <ClInclude Include="Core\Event\Signal.h" />
     <ClInclude Include="Core\Event\StateMachine.h" />
     <ClInclude Include="Core\Graphic\2D.h" />
+    <ClInclude Include="Core\Math\Polygon.h" />
     <ClInclude Include="Core\Scene\Container\Grid\GridContainer.h" />
+    <ClInclude Include="Core\Scene\Container\Grid\ProjectionGridContainer.h" />
     <ClInclude Include="Core\GameState.h" />
     <ClInclude Include="Core\Input\KeyMapping.h" />
     <ClInclude Include="Core\Asset\Sound\Sound.h" />
@@ -199,12 +250,17 @@
     <ClInclude Include="Core\Mouse\Mouse.h" />
     <ClInclude Include="Core\Mouse\MouseEvent.h" />
     <ClInclude Include="Core\Scene\Button\Button.h" />
+    <ClInclude Include="Core\Scene\Texture\AnimatedSprite2D.h" />
     <ClInclude Include="Core\Timer.h" />
-    <ClInclude Include="Core\Tween.h" />
+    <ClInclude Include="Core\Animation\Tween.h" />
     <ClInclude Include="Core\Asset\Asset.h" />
     <ClInclude Include="Core\Collision\Collision.h" />
-    <ClInclude Include="Core\MathUtils.h" />
-    <ClInclude Include="Core\Object.h" />
+    <ClInclude Include="Core\Math\Graph.h" />
+    <ClInclude Include="Core\Math\LineSegment.h" />
+    <ClInclude Include="Core\Math\Utils.h" />
+    <ClInclude Include="Core\Math\Vector2D.h" />
+    <ClInclude Include="Core\Math\Vector3D.h" />
+    <ClInclude Include="Core\Object2D.h" />
     <ClInclude Include="Core\PropertyManager.h" />
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Core\SceneManager.h" />
@@ -213,10 +269,67 @@
     <ClInclude Include="Core\Asset\Texture\SpriteSheet.h" />
     <ClInclude Include="Debugger\Debugger.h" />
     <ClInclude Include="Core\NovotCore.h" />
+    <ClInclude Include="Effekseer\EffekseerAsset.h" />
+    <ClInclude Include="Effekseer\EffekseerEmitter.h" />
+    <ClInclude Include="Eiga\EigaRuntime.h" />
+    <ClInclude Include="Flow\FlowManager.h" />
+    <ClInclude Include="nlohmann\adl_serializer.hpp" />
+    <ClInclude Include="nlohmann\byte_container_with_subtype.hpp" />
+    <ClInclude Include="nlohmann\detail\abi_macros.hpp" />
+    <ClInclude Include="nlohmann\detail\conversions\from_json.hpp" />
+    <ClInclude Include="nlohmann\detail\conversions\to_chars.hpp" />
+    <ClInclude Include="nlohmann\detail\conversions\to_json.hpp" />
+    <ClInclude Include="nlohmann\detail\exceptions.hpp" />
+    <ClInclude Include="nlohmann\detail\hash.hpp" />
+    <ClInclude Include="nlohmann\detail\input\binary_reader.hpp" />
+    <ClInclude Include="nlohmann\detail\input\input_adapters.hpp" />
+    <ClInclude Include="nlohmann\detail\input\json_sax.hpp" />
+    <ClInclude Include="nlohmann\detail\input\lexer.hpp" />
+    <ClInclude Include="nlohmann\detail\input\parser.hpp" />
+    <ClInclude Include="nlohmann\detail\input\position_t.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\internal_iterator.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\iteration_proxy.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\iterator_traits.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\iter_impl.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\json_reverse_iterator.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\primitive_iterator.hpp" />
+    <ClInclude Include="nlohmann\detail\json_custom_base_class.hpp" />
+    <ClInclude Include="nlohmann\detail\json_pointer.hpp" />
+    <ClInclude Include="nlohmann\detail\json_ref.hpp" />
+    <ClInclude Include="nlohmann\detail\macro_scope.hpp" />
+    <ClInclude Include="nlohmann\detail\macro_unscope.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\call_std\begin.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\call_std\end.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\cpp_future.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\detected.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\identity_tag.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\is_sax.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\std_fs.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\type_traits.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\void_t.hpp" />
+    <ClInclude Include="nlohmann\detail\output\binary_writer.hpp" />
+    <ClInclude Include="nlohmann\detail\output\output_adapters.hpp" />
+    <ClInclude Include="nlohmann\detail\output\serializer.hpp" />
+    <ClInclude Include="nlohmann\detail\string_concat.hpp" />
+    <ClInclude Include="nlohmann\detail\string_escape.hpp" />
+    <ClInclude Include="nlohmann\detail\string_utils.hpp" />
+    <ClInclude Include="nlohmann\detail\value_t.hpp" />
+    <ClInclude Include="nlohmann\json.hpp" />
+    <ClInclude Include="nlohmann\json_fwd.hpp" />
+    <ClInclude Include="nlohmann\ordered_map.hpp" />
+    <ClInclude Include="nlohmann\thirdparty\hedley\hedley.hpp" />
+    <ClInclude Include="nlohmann\thirdparty\hedley\hedley_undef.hpp" />
     <ClInclude Include="Novot.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\command\1.turn" />
+    <None Include="CommonShader\PixelShaderBase.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="CommonShader\OutLineShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

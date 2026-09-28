@@ -1,22 +1,35 @@
-﻿#pragma once
+#pragma once
 #include <Collision/MouseCollision.h>
 #include <Scene.h>
+#include <vector>
 
 class Button : public Scene {
 protected:
 	std::shared_ptr<MouseCollision> collision;
-	void _Draw() const override;
-	void _Update(float dt) override;
+	std::vector<Vector2D> areaVertices;
 	void _Load() override;
 public:
 	Signal<const MouseEvent&> LeftPressed, LeftReleased, MiddlePressed, MiddleReleased, RightPressed, RightReleased;
 	Button() = default;
 	~Button() = default;
 	template<typename... Args>
-	void SetArea(Args&&... args) {
-		collision->ClearVertices();
+	Button* SetArea(Args&&... args) {
+		areaVertices.clear();
 		for (auto p : std::initializer_list<Vector2D>{(args)...}) {
-			collision->AddVertex(p);
+			areaVertices.emplace_back(p);
+		}
+		if (collision) {
+			collision->ClearVertices();
+			for (const auto& vertex : areaVertices) {
+				auto areaVertex = vertex;
+				collision->AddVertices(areaVertex);
+			}
+		}
+		return this;
+	}
+	void SetPassThrough(bool passThrough) {
+		if (collision) {
+			collision->SetStop(not passThrough);
 		}
 	}
 };
