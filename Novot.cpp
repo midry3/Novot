@@ -4,7 +4,6 @@
 #include <SceneManager.h>
 #include "Core/Timer.h"
 #include <Mouse/Mouse.h>
-#include <Camera.h>
 #include <chrono>
 #include <EffekseerForDXLib.h>
 #include <Graphic/2D.h>
@@ -96,12 +95,13 @@ void _Novot::SetConstantBufferToScreenPixelShader(int handle, int slot) {
 int _Novot::StartGame() {
 	Init();
 
-	int prevTime = GetNowCount();
-	int currentTime;
-	float dt = 0.0f;
 	const float iframe = PropertyManager.GetFrameInterval();
 	const Vector2D wsize = PropertyManager.GetSettingWindowSize();
 	const int screen = MakeScreen(wsize.x, wsize.y);
+
+	float dt = iframe;
+	int prevTime = GetNowCount();
+	int currentTime;
 
 	while (ProcessMessage() == 0) {
 		Effekseer_Sync3DSetting();
@@ -129,15 +129,16 @@ int _Novot::StartGame() {
 			break;
 		}
 		SetDrawScreen(DX_SCREEN_BACK);
+		if (ClearDrawScreen() != 0) {
+			break;
+		}
 		if (_screenPixelShader) {
 			SetShaderConstantBuffer(_constantBufferHandle, DX_SHADERTYPE_PIXEL, _constantBufferSlot);
-			NovotRenderer::DrawRotaGraph3Shader(
-				wsize.x / 2,
-				wsize.y / 2,
-				wsize.x / 2,
-				wsize.y / 2,
-				1.0f, 1.0f, 0.0f,
-				screen, TRUE,
+			NovotRenderer::DrawGraphShader(
+				0,
+				0,
+				screen,
+				TRUE,
 				_screenPixelShader->GetHandle()
 			);
 		}

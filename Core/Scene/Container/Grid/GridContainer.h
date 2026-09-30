@@ -3,31 +3,40 @@
 
 class GridContainer : public Scene {
 protected:
-	Vector2D _matrixSize, _size, _space;
-	std::vector<std::weak_ptr<Scene>> grid_scenes;
+	Vector2D _matrixSize, _cellSize, _size, _space;
+	std::vector<std::weak_ptr<Scene>> _gridScenes;
+
 	void _Update(float dt) override;
+
+	virtual void UpdateCellSize() {
+		_cellSize = Vector2D(_size.x / _matrixSize.x, _size.y / _matrixSize.y);
+	}
 public:
 	GridContainer() = default;
 	~GridContainer() = default;
+	Vector2D GetPositionAt(size_t index) const;
 	GridContainer* SetMatrixSize(const Vector2D& size) {
 		_matrixSize = size;
-		grid_scenes.resize(static_cast<size_t>(size.x * size.y));
+		UpdateCellSize();
+		_gridScenes.resize(static_cast<size_t>(size.x * size.y));
 		return this;
 	}
 	GridContainer* SetSize(const Vector2D& size) {
 		_size = size;
+		UpdateCellSize();
 		return this;
 	}
 	GridContainer* SetSpace(const Vector2D& space) {
 		_space = space;
 		return this;
 	}
-	void AddScene(std::shared_ptr<Scene> scene) {
+	GridContainer* AddScene(std::shared_ptr<Scene> scene) override {
 		scene->Load();
 		auto n = static_cast<size_t>(_scenes.size());
 		_scenes.emplace_back(scene);
-		grid_scenes[n] = scene;
+		_gridScenes[n] = scene;
 		scene->SetParent(weak_from_this());
+		return this;
 	}
 	template <std::derived_from<Scene> T>
 	std::shared_ptr<T> CreateScene() {

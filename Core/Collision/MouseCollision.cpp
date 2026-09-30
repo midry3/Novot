@@ -7,7 +7,13 @@
 #include <Mouse/Mouse.h>
 
 void MouseCollision::_Update(float dt) {
-	if (not _enabled || Mouse.IsAlreadyHandled() || vertices.empty()) return;
+	if (not _enabled || Mouse.IsAlreadyHandled() || vertices.empty()) {
+		if (_isMouseWithin) {
+			_isMouseWithin = false;
+			Left.Emit(Mouse.GetMouseEvent());
+		}
+		return;
+	}
 	auto event = Mouse.GetMouseEvent();
 	if (IsWithin(event.position)) {
 		if (not _isMouseWithin) {

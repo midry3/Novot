@@ -3,11 +3,16 @@
 #include <Asset/AssetManager.h>
 #include <Windows.h>
 
+namespace {
+	std::string GetFontFamilyNameFromTTF(const fs::path& ttfFilePath);
+}
+
 class _FontManager : public Singleton<_FontManager> {
+private:
+	std::vector<std::string> _fontNames;
 public:
-	void AddFont(const std::string& font) {
-		AddFontResourceExA(AssetManager.ResolvePath(font).string().c_str(), FR_PRIVATE, NULL);
-	}
+	void AddFont(const fs::path& font);
+	std::string GetFont(const int index) const;
 };
 
 #define FontManager _FontManager::GetInstance()

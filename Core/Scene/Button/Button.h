@@ -27,9 +27,13 @@ public:
 		}
 		return this;
 	}
-	void SetPassThrough(bool passThrough) {
+	[[nodiscard]] MouseCollision& GetMouseCollision() const {
+		return *collision;
+	}
+	Button* SetPassThrough(bool passThrough) {
 		if (collision) {
 			collision->SetStop(not passThrough);
 		}
+		return this;
 	}
 };

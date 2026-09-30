@@ -1,6 +1,8 @@
 #pragma once
 #include <Asset/Asset.h>
 
+constexpr int NOVOT_CONSTANT_BUFFER_SLOT_START = 4;
+
 class PixelShader : public Asset {
 public:
 	PixelShader() = default;

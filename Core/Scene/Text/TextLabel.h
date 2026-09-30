@@ -6,12 +6,13 @@ protected:
 	int _fontHandle = -1;
 	int _fontSize = 24;
 	int _fontThickness = 3;
-	std::string _fontName = "default";
+	std::string _fontName = "";
 	int _width = -1;
 	void _Load() override;
 	void _Draw() const override;
 	void _Release() override;
 public:
+	static std::string DefaultFont;
 	std::string text;
 	unsigned int foregroundColor = GetColor(255, 255, 255);
 
@@ -34,21 +35,24 @@ public:
 		if (_fontHandle != -1) {
 			DeleteFontToHandle(_fontHandle);
 		}
-		_fontHandle = CreateFontToHandle(_fontName.c_str(), _fontSize, _fontThickness, DX_FONTTYPE_ANTIALIASING);
+		_fontHandle = CreateFontToHandle(_fontName.c_str(), _fontSize, _fontThickness);
 	}
 
 	TextLabel* SetFont(const std::string fontName) {
 		_fontName = fontName;
+		ApplyFont();
 		return this;
 	}
 
 	TextLabel* SetFontSize(int size) {
 		_fontSize = size;
+		ApplyFont();
 		return this;
 	}
 
 	TextLabel* SetFontThickness(int thickness) {
 		_fontThickness = thickness;
+		ApplyFont();
 		return this;
 	}
 

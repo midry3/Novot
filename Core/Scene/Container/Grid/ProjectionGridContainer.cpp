@@ -158,8 +158,8 @@ void ProjectionGridContainer::_Update(float dt) {
 	}
 
 	// Update positions of child scenes (placed items on grid)
-	for (size_t i = 0; i < grid_scenes.size(); ++i) {
-		if (auto scene = grid_scenes[i].lock()) {
+	for (size_t i = 0; i < _gridScenes.size(); ++i) {
+		if (auto scene = _gridScenes[i].lock()) {
 			size_t gx = i % static_cast<size_t>(_matrixSize.x);
 			size_t gy = i / static_cast<size_t>(_matrixSize.x);
 
@@ -174,6 +174,4 @@ void ProjectionGridContainer::_Update(float dt) {
 			}
 		}
 	}
-
-	DebuggerSetProperty("ProjectionGridContainer_Size", std::to_string(grid_scenes.size()));
 }

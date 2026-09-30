@@ -12,7 +12,9 @@ void ProgressSprite2D::_Draw() const {
 	GetUVRect(uMin, vMin, uMax, vMax);
 
 	float progressWidth = (uMax - uMin) * _progress;
-	if (_pixelShader) {
+	
+	const auto& pShader = GetPixelShader();
+	if (pShader) {
 		NovotRenderer::DrawRotaGraph3Shader(
 			static_cast<int>(pos.x + cx_in_image * std::abs(s.x)),
 			static_cast<int>(pos.y + cy_in_image * std::abs(s.y)),
@@ -23,7 +25,7 @@ void ProgressSprite2D::_Draw() const {
 			rotation,
 			_handle,
 			TRUE,
-			_pixelShader->GetHandle(),
+			pShader->GetHandle(),
 			uMin, vMin, uMin + progressWidth, vMax
 		);
 	}

@@ -90,8 +90,6 @@ protected:
 		}
 	}
 public:
-	_AssetManager() = default;
-	~_AssetManager() = default;
 	std::map<fs::path, AssetHandle> GetAssetHandles() const {
 		return _assetHandles;
 	}

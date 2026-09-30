@@ -50,12 +50,12 @@ void Scene::Update(float dt) {
 	if (SceneManager.IsCancelUpdate()) {
 		return;
 	}
-	if (IsShouldDraw()) {
-		SceneManager.AddDrawTarget(shared_from_this());
-	}
 	const auto scenesCopy = _scenes;
-	for (auto it=scenesCopy.begin(); it!=scenesCopy.end(); ++it) {
+	for (auto it=scenesCopy.rbegin(); it!=scenesCopy.rend(); ++it) {
 		(*it)->Update(dt);
+	}
+	if (IsShouldDraw()) {
+		SceneManager.AddDrawTargetFront(shared_from_this());
 	}
 }
 
@@ -64,6 +64,7 @@ void Scene::Draw() const {
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, GetAlpha());
 	SetDrawBright(modulate.x, modulate.y, modulate.z);
 	_Draw();
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 Vector2D Scene::GetParentGlobalPosition() const {

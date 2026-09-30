@@ -10,7 +10,8 @@ class _SceneManager : public Singleton<_SceneManager> {
 private:
 	std::shared_ptr<Scene> currentScene;
 	std::shared_ptr<Scene> nextScene;
-	std::vector<std::shared_ptr<Scene>> _drawTargets, effectScenes;
+	std::vector<std::shared_ptr<Scene>> effectScenes;
+	std::list<std::shared_ptr<Scene>> _drawTargets;
 	std::shared_ptr<ColorRect> _transEffect;
 	int _nextID = 0;
 	bool _cancelUpdate = false;
@@ -31,6 +32,10 @@ public:
 
 	void AddDrawTarget(std::shared_ptr<Scene> scene) {
 		_drawTargets.emplace_back(scene);
+	}
+
+	void AddDrawTargetFront(std::shared_ptr<Scene> scene) {
+		_drawTargets.emplace_front(scene);
 	}
 
 	void AddEffectScene(std::shared_ptr<Scene> scene) {

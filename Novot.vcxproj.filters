@@ -81,9 +81,6 @@
     <ClCompile Include="Core\Asset\Sound\SoundManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Asset\Command\Command.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Novot.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -165,6 +162,12 @@
     <ClCompile Include="Core\Scene\Texture\ProgressSprite2D.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Core\String\FontManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Scene\Container\Animation\AnimatedGrid.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debugger\Debugger.h">
@@ -240,9 +243,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Core\Asset\AssetManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Asset\Command\Command.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Novot.h">
@@ -494,6 +494,12 @@
     <ClInclude Include="Core\Scene\Util\PageController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Asset\Shader\ExpandOutLineShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Scene\Container\Animation\AnimatedGrid.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\command\1.turn" />
@@ -501,5 +507,6 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CommonShader\OutLineShader.hlsl" />
+    <FxCompile Include="CommonShader\ExpandOutLineShader.hlsl" />
   </ItemGroup>
 </Project>

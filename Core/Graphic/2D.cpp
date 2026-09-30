@@ -63,6 +63,64 @@ namespace NovotRenderer {
 		DxLib::DrawBox(static_cast<int>(point.x - size / 2), static_cast<int>(point.y - size / 2), static_cast<int>(point.x + size / 2), static_cast<int>(point.y + size / 2), color, TRUE);
 	}
 
+	void DrawGraphShader(
+		int x, int y,
+		int graphHandle,
+		int transFlag,
+		int pixelShaderHandle,
+		float uMin, float vMin,
+		float uMax, float vMax)
+	{
+		int width, height;
+		if (GetGraphSize(graphHandle, &width, &height) == -1)
+		{
+			return;
+		}
+		VERTEX2DSHADER vertices[6]{};
+		// 左上
+		vertices[0].pos = VGet(static_cast<float>(x), static_cast<float>(y), 0.0f);
+		vertices[0].u = uMin;
+		vertices[0].v = vMin;
+		// 右上
+		vertices[1].pos = VGet(static_cast<float>(x + width), static_cast<float>(y), 0.0f);
+		vertices[1].u = uMax;
+		vertices[1].v = vMin;
+		// 右下
+		vertices[2].pos = VGet(static_cast<float>(x + width), static_cast<float>(y + height), 0.0f);
+		vertices[2].u = uMax;
+		vertices[2].v = vMax;
+		// 三角形1枚目のコピー
+		vertices[3] = vertices[0];
+		vertices[4] = vertices[2];
+		// 左下
+		vertices[5].pos = VGet(static_cast<float>(x), static_cast<float>(y + height), 0.0f);
+		vertices[5].u = uMin;
+		vertices[5].v = vMax;
+		const COLOR_U8 whiteColor = GetColorU8(255, 255, 255, 255);
+		const COLOR_U8 specColor = GetColorU8(0, 0, 0, 0);
+		for (auto& v : vertices)
+		{
+			v.rhw = 1.0f;
+			v.dif = whiteColor;
+			v.spc = specColor;
+			v.su = v.u;
+			v.sv = v.v;
+		}
+		if (not transFlag)
+		{
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		}
+		SetUseTextureToShader(0, graphHandle);
+		SetUsePixelShader(pixelShaderHandle);
+		DrawPrimitive2DToShader(
+			vertices,
+			6,
+			DX_PRIMTYPE_TRIANGLELIST
+		);
+		SetUseTextureToShader(0, -1);
+		SetUsePixelShader(-1);
+	}
+
     void DrawRotaGraph3Shader(
         int x, int y,
         int cx, int cy,

@@ -15,7 +15,9 @@ void Sprite2D::_Draw() const {
 	int cx_in_image = static_cast<int>(size.x / 2.0);
 	int cy_in_image = static_cast<int>(size.y / 2.0);
 
-	if (_pixelShader) {
+	const auto& pShader = GetPixelShader();
+
+	if (pShader) {
 		float uMin, vMin, uMax, vMax;
 		GetUVRect(uMin, vMin, uMax, vMax);
 		NovotRenderer::DrawRotaGraph3Shader(
@@ -28,7 +30,7 @@ void Sprite2D::_Draw() const {
 			rotation,
 			_handle,
 			TRUE,
-			_pixelShader->GetHandle(),
+			pShader->GetHandle(),
 			uMin, vMin, uMax, vMax
 		);
 	}

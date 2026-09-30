@@ -31,6 +31,11 @@ namespace {
 		std::vector<std::string> lines;
 		std::string line;
 
+		if (width <= 0) {
+			lines.push_back(value);
+			return lines;
+		}
+
 		for (size_t index = 0; index < value.size();) {
 			if (value[index] == '\r' || value[index] == '\n') {
 				lines.push_back(line);
@@ -65,8 +70,10 @@ namespace {
 	}
 }
 
+std::string TextLabel::DefaultFont = "";
+
 void TextLabel::_Load() {
-	ApplyFont();
+	SetFont(DefaultFont);
 }
 
 void  TextLabel::_Draw() const {

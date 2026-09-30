@@ -128,7 +128,7 @@ public:
 		return this;
 	}
 	[[nodiscard]] Vector3D GetModulate() const;
-	Scene* AddScene(std::shared_ptr<Scene> scene) {
+	virtual Scene* AddScene(std::shared_ptr<Scene> scene) {
 		scene->Load();
 		_scenes.push_back(scene);
 		scene->SetParent(weak_from_this());
@@ -144,7 +144,15 @@ public:
 		_pixelShader = shader;
 		return this;
 	}
-
+	[[nodiscard]] std::shared_ptr<PixelShader> GetParentPixelShader() const {
+		if (auto ptr = parent.lock()) {
+			return ptr->GetPixelShader();
+		}
+		return nullptr;
+	}
+	[[nodiscard]] std::shared_ptr<PixelShader> GetPixelShader() const {
+		return _pixelShader ? _pixelShader : GetParentPixelShader();
+	}
 	void DeleteScene(int index) {
 		_scenes.erase(_scenes.begin() + index);
 	}
