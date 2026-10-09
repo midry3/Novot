@@ -8,6 +8,7 @@ protected:
 	int _fontThickness = 3;
 	std::string _fontName = "";
 	int _width = -1;
+	bool _isNowSetting = false;
 	void _Load() override;
 	void _Draw() const override;
 	void _Release() override;
@@ -16,12 +17,23 @@ public:
 	std::string text;
 	unsigned int foregroundColor = GetColor(255, 255, 255);
 
-	TextLabel* SetText(const std::string& newText) {
+	TextLabel* BeginSetting() {
+		_isNowSetting = true;
+		return this;
+	}
+
+	TextLabel* EndSetting() {
+		_isNowSetting = false;
+		ApplyFont();
+		return this;
+	}
+
+	virtual TextLabel* SetText(const std::string& newText) {
 		text = newText;
 		return this;
 	}
 
-	TextLabel* AddText(const std::string& additionalText) {
+	virtual TextLabel* AddText(const std::string& additionalText) {
 		text += additionalText;
 		return this;
 	}
@@ -32,6 +44,8 @@ public:
 	}
 
 	void ApplyFont() {
+		if (_isNowSetting) return;
+
 		if (_fontHandle != -1) {
 			DeleteFontToHandle(_fontHandle);
 		}

@@ -1,16 +1,15 @@
 #pragma once
 #include "PixelShader.h"
 
-struct alignas(16) OutLineShaderParam
-{
-    float glowColor[4];   // RGBA
-    float outlineWidth;   // 輪郭の太さ
-    float time;           // 時間
-    float textureSize[2]; // 幅, 高さ
+struct alignas(16) OutLineShaderParam {
+	float glowColor[4];   // RGBA
+	float outlineWidth;   // 輪郭の太さ
+	float time;		      // 時間
+	float textureSize[2]; // 幅, 高さ
 };
 
 struct OutLineShaderBuffer {
-    int handle;
+	int handle;
 	OutLineShaderParam* param;
 };
 

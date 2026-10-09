@@ -160,14 +160,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core\Animation\EasingFunction.cpp" />
+    <ClCompile Include="Core\Asset\Model\MV1.cpp" />
     <ClCompile Include="Core\Asset\Texture\Texture.cpp" />
     <ClCompile Include="Core\Scene\Container\Animation\AnimatedGrid.cpp" />
     <ClCompile Include="Core\Scene\Container\Animation\AnimatedUI.cpp" />
     <ClCompile Include="Core\Scene\Shape\ColorPolygon.cpp" />
     <ClCompile Include="Core\Scene\Shape\ColorRect.cpp" />
     <ClCompile Include="Core\Scene\Texture\ProgressSprite2D.cpp" />
+    <ClCompile Include="Core\Scene\Text\FormatTextLabel.cpp" />
     <ClCompile Include="Core\Scene\Text\TextLabel.cpp" />
     <ClCompile Include="Core\String\FontManager.cpp" />
+    <ClCompile Include="Core\String\NumberingText.cpp" />
     <ClCompile Include="Core\String\StringUtils.cpp" />
     <ClCompile Include="Core\Asset\Texture\AnimationLoader.cpp" />
     <ClCompile Include="Eiga\Eiga.cpp" />
@@ -214,6 +217,7 @@
   <ItemGroup>
     <ClInclude Include="Core\Animation\EasingFunction.h" />
     <ClInclude Include="Core\Asset\AssetManager.h" />
+    <ClInclude Include="Core\Asset\Model\MV1.h" />
     <ClInclude Include="Core\Asset\Shader\ExpandOutLineShader.h" />
     <ClInclude Include="Core\Asset\Shader\OutLineShader.h" />
     <ClInclude Include="Core\Asset\Texture\Texture.h" />
@@ -224,9 +228,11 @@
     <ClInclude Include="Core\Scene\Shape\ColorPolygon.h" />
     <ClInclude Include="Core\Scene\Shape\ColorRect.h" />
     <ClInclude Include="Core\Scene\Texture\ProgressSprite2D.h" />
+    <ClInclude Include="Core\Scene\Text\FormatTextLabel.h" />
     <ClInclude Include="Core\Scene\Text\TextLabel.h" />
     <ClInclude Include="Core\Scene\Util\PageController.h" />
     <ClInclude Include="Core\String\FontManager.h" />
+    <ClInclude Include="Core\String\NumberingText.h" />
     <ClInclude Include="Core\String\StringUtils.h" />
     <ClInclude Include="Core\Asset\Texture\AnimationLoader.h" />
     <ClInclude Include="Eiga\Eiga.h" />

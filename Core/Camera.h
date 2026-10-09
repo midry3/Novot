@@ -15,6 +15,7 @@ protected:
 public:
 	Signal<Vector2D, Vector2D> ZoomChanged;
 	Vector2D position = Vector0;
+	void Shake(int num, double intensity);
 	void SetPosition(const Vector2D& position) {
 		this->position = position;
 	}

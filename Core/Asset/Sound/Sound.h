@@ -16,13 +16,16 @@ public:
 	void Release() override;
 	void Play();
 	void Pause();
-	void SetLoop(bool loop) {
+	Sound* SetLoop(bool loop) {
 		isLoop = loop;
+		return this;
 	}
-	void SetVolume(int volume) {
+	Sound* SetVolume(int volume) {
 		this->volume = volume;
+		return this;
 	}
-	void SetVolume(float volume) {
+	Sound* SetVolume(float volume) {
 		this->volume = static_cast<int>(volume * 255);
+		return this;
 	}
 };

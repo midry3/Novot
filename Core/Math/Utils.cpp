@@ -13,6 +13,22 @@ double ToDouble(const std::variant<double, float, int>& v) {
 	return 0.0;
 }
 
+int Max(int a, int b) {
+	return (a > b) ? a : b;
+}
+
+double Max(double a, double b) {
+	return (a > b) ? a : b;
+}
+
+int Min(int a, int b) {
+	return (a < b) ? a : b;
+}
+
+double Min(double a, double b) {
+	return (a < b) ? a : b;
+}
+
 int Clamp(int value, int min, int max) {
 	if (value < min) return min;
 	if (value > max) return max;

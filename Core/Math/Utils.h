@@ -4,6 +4,11 @@
 
 double ToDouble(const std::variant<double, float, int>& v);
 
+int Max(int a, int b);
+double Max(double a, double b);
+int Min(int a, int b);
+double Min(double a, double b);
+
 int Clamp(int value, int min, int max);
 double Clamp(double value, double min, double max);
 

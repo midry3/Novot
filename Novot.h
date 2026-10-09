@@ -5,22 +5,24 @@
 #include <Asset/Shader/PixelShader.h>
 #include <Asset/AssetManager.h>
 #include <Windows.h>
+#include <Asset/Model/MV1.h>
 
 
+namespace Novot {
+	static int _constantBufferHandle = -1, _constantBufferSlot = -1;
+	static std::shared_ptr<PixelShader> _screenPixelShader;
+	static std::function<void()> _setupFunction = nullptr;
+	static std::shared_ptr<MV1> _screenMaterial = nullptr;
 
-class _Novot : public Singleton<_Novot> {
-private:
-	int _constantBufferHandle=-1, _constantBufferSlot=-1;
-	std::shared_ptr<PixelShader> _screenPixelShader;
-public:
 	int Init();
-	void AdditionalInit();
-	void Setup();
+
 	void End();
 	void Update(float dt);
-	bool Draw() const;
+	bool Draw();
 	int StartGame();
+	void RegisterSetupFunction(const std::function<void()>& func);
 
+	void SetScreenMaterial(const std::shared_ptr<MV1>& material);
 	void SetScreenPixelShader(const std::shared_ptr<PixelShader>& shader);
 	template <std::derived_from<PixelShader> T>
 	void SetScreenPixelShader() {
@@ -28,5 +30,3 @@ public:
 	}
 	void SetConstantBufferToScreenPixelShader(int handle, int slot);
 };
-
-#define Novot _Novot::GetInstance()
