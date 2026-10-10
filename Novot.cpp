@@ -32,9 +32,7 @@ namespace Novot {
 
 		SceneManager.Init();
 
-		if (_setupFunction) {
-			_setupFunction();
-		}
+		Setup();
 
 #if defined(_DEBUG) and not defined(_NOVOT_NO_DEBUGGER)
 		TimerManager.New(2.0, []() {
@@ -185,4 +183,8 @@ namespace Novot {
 		End();
 		return 0;
 	}
+}
+
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
+	return Novot::Main();
 }
