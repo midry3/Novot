@@ -10,9 +10,9 @@ void AnimatedUI::In(bool immediate) {
 	for (const auto& scene : _scenes) {
 		const auto& tg = scene->CreateTweenGroup();
 		if (immediate) {
-			scene->offset = Vector0;
+			scene->offset = Vec2D_0;
 		} else {
-			tg->CreateTween(&scene->offset, Vector0, _inTime, _inEasing);
+			tg->CreateTween(&scene->offset, Vec2D_0, _inTime, _inEasing);
 		}
 	}
 	if (immediate) {

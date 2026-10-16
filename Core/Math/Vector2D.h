@@ -103,14 +103,17 @@ public:
 	}
 };
 
+Vector2D operator*(int a, const Vector2D& v);
+Vector2D operator*(double a, const Vector2D& v);
+
 Vector2D Sign(Vector2D v);
 
-constexpr Vector2D Vector0(0.0, 0.0);
-constexpr Vector2D Vector1(1.0, 1.0);
-constexpr Vector2D VectorUp(0.0, -1.0);
-constexpr Vector2D VectorDown(0.0, 1.0);
-constexpr Vector2D VectorLeft(-1.0, 0.0);
-constexpr Vector2D VectorRight(1.0, 0.0);
+constexpr Vector2D Vec2D_0(0.0, 0.0);
+constexpr Vector2D Vec2D_1(1.0, 1.0);
+constexpr Vector2D Vec2D_Up(0.0, -1.0);
+constexpr Vector2D Vec2D_Down(0.0, 1.0);
+constexpr Vector2D Vec2D_Left(-1.0, 0.0);
+constexpr Vector2D Vec2D_Right(1.0, 0.0);
 
 class Vector2DFunction : public Vector2D {
 protected:

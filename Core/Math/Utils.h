@@ -4,6 +4,9 @@
 
 double ToDouble(const std::variant<double, float, int>& v);
 
+int Abs(int a);
+double Abs(double a);
+
 int Max(int a, int b);
 double Max(double a, double b);
 int Min(int a, int b);

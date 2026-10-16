@@ -2,8 +2,8 @@
 
 void RayCast::_Load() {
 	Collision::_Load();
-	AddVertices(Vector0);
-	AddVertices(Vector0);
+	AddVertices(Vec2D_0);
+	AddVertices(Vec2D_0);
 }
 
 void RayCast::_Update(float dt) {

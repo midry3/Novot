@@ -7,6 +7,7 @@ public:
 	double z;
 	constexpr Vector3D() : x(0), y(0), z(0) {}
 	constexpr Vector3D(double x, double y, double z) : x(x), y(y), z(z) {}
+	unsigned int ToColor() const;
 	Vector3D operator+(const Vector3D& other) const {
 		return Vector3D(x + other.x, y + other.y, z + other.z);
 	}

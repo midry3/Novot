@@ -1,6 +1,12 @@
 #include "Object2D.h"
 #include <Collision/CollisionManager.h>
 
+void Object2D::_Load() {
+	if (not collision) {
+		CreateCollision();
+	}
+}
+
 void Object2D::_Update(float dt) {
 	MoveAndSlide(dt);
 }
@@ -28,7 +34,7 @@ SimulationResult Object2D::Simulation(float dt) {
 			}
 		}
 		_position = prePosition;
-		_velocity = Vector0;
+		_velocity = Vec2D_0;
 	}
 RETURN:
 	collision->SetPosition(colPos);

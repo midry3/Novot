@@ -6,6 +6,11 @@ void _SceneManager::Init() {
 	_transEffect = std::make_shared<ColorRect>();
 	_transEffect->SetColor(GetColor(0, 0, 0))
 		->SetSize(Vector2D(1920, 1080));
+	Camera.ZoomChanged += [this](Vector2D oldZoom, Vector2D newZoom) {
+		if (currentScene) {
+			currentScene->SetScale(currentScene->GetScale() * newZoom / oldZoom);
+		}
+		};
 }
 
 void _SceneManager::SetCurrentScene(std::shared_ptr<Scene> scene) {

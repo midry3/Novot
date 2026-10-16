@@ -13,6 +13,14 @@ double ToDouble(const std::variant<double, float, int>& v) {
 	return 0.0;
 }
 
+int Abs(int a) {
+	return (a < 0) ? -a : a;
+}
+
+double Abs(double a) {
+	return (a < 0) ? -a : a;
+}
+
 int Max(int a, int b) {
 	return (a > b) ? a : b;
 }

@@ -4,29 +4,47 @@
 
 class AnimatedSprite2D : public Sprite2D {
 protected:
-	std::string _currentAnimation;
+	int _currentAnimation = 0;
 	SpriteSheetManager _spriteSheetManager;
+	Vector<String> _animationNames;
 	void _Load() override;
+	void _Release() override;
 	void _Update(float dt) override;
 public:
-	Signal<int> FrameChanged;
-	Signal<std::string> AnimationChanged, AnimationFinished;
-	std::string  GetCurrentAnimation() const {
+	Signal<int> FrameChanged, AnimationChanged, AnimationFinished;
+	int GetCurrentAnimation() const {
 		return _currentAnimation;
 	}
-	AnimatedSprite2D* Play(std::string anim, bool loop = false) {
-		_currentAnimation = anim;
+	AnimatedSprite2D* Play(const int index, bool loop = false) {
+		auto spriteSheet = _spriteSheetManager.GetSpriteSheet(index);
+		if (not spriteSheet) {
+			return this;
+		}
+		_currentAnimation = index;
 		_spriteSheetManager.SetCurrentAnimation(_currentAnimation);
 		if (loop) {
-			_spriteSheetManager[_currentAnimation]->SetLoop(true);
+			spriteSheet->SetLoop(true);
 		}
-		SetScale(_spriteSheetManager[_currentAnimation]->GetScale());
+		SetScale(spriteSheet->GetScale());
 		_spriteSheetManager.Play();
 		AnimationChanged(_currentAnimation);
 		return this;
 	}
-	AnimatedSprite2D* AddAnimation(std::string anim, std::shared_ptr<SpriteSheet> spriteSheet) {
-		_spriteSheetManager.RegisterSpriteSheet(anim, spriteSheet);
+	AnimatedSprite2D* Play(const String& anim, bool loop = false) {
+		auto it = std::find(_animationNames.begin(), _animationNames.end(), anim);
+		if (it != _animationNames.end()) {
+			return Play(std::distance(_animationNames.begin(), it), loop);
+		}
+		return this;
+	}
+	AnimatedSprite2D* AddAnimation(const int index, const SharedPtr<SpriteSheet>& spriteSheet) {
+		_spriteSheetManager.RegisterSpriteSheet(index, spriteSheet);
+		_animationNames.push_back(std::to_string(index));
+		return this;
+	}
+	AnimatedSprite2D* AddAnimation(const String& anim, const SharedPtr<SpriteSheet>& spriteSheet) {
+		_spriteSheetManager.RegisterSpriteSheet(_spriteSheetManager.GetAnimationCount(), spriteSheet);
+		_animationNames.push_back(anim);
 		return this;
 	}
 	[[nodiscard]] Vector2D GetCurrentSheetSize() const {

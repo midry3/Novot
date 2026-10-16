@@ -58,6 +58,10 @@ public:
 		isPaused = true;
 	}
 	void Play() {
+		if (frames.empty() || currentFrameNumber < 0 ||
+			currentFrameNumber >= static_cast<int>(frames.size())) {
+			return;
+		}
 		isPaused = false;
 		FrameChanged.Emit(frames[currentFrameNumber]);
 	}

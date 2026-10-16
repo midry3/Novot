@@ -6,8 +6,8 @@
 void ProgressSprite2D::_Draw() const {
 	auto pos = GetDrawPosition();
 	auto s = GetScale();
-	int cx_in_image = static_cast<int>(size.x / 2.0);
-	int cy_in_image = static_cast<int>(size.y / 2.0);
+	int cx_in_image = static_cast<int>(_size.x / 2.0);
+	int cy_in_image = static_cast<int>(_size.y / 2.0);
 	float uMin, vMin, uMax, vMax;
 	GetUVRect(uMin, vMin, uMax, vMax);
 
@@ -34,7 +34,7 @@ void ProgressSprite2D::_Draw() const {
 			static_cast<int>(pos.x + cx_in_image * std::abs(s.x)),
 			static_cast<int>(pos.y + cy_in_image * std::abs(s.y)),
 			0, 0,
-			size.x * _progress, size.y,
+			_size.x * _progress, _size.y,
 			cx_in_image,
 			cy_in_image,
 			s.x,

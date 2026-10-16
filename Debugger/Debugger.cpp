@@ -447,8 +447,9 @@ void Debugger::ProcessCommands() {
 		SetProperty(prop.name, PropertyManager.GetPropertyValueString(prop.name));
 	}
 
-	static DWORD lastAssetUpdate = 0;
-	const DWORD now = GetTickCount64();
+
+	static ULONGLONG lastAssetUpdate = 0;
+	const ULONGLONG now = GetTickCount64();
 	if (now - lastAssetUpdate >= 500) {
 		lastAssetUpdate = now;
 		auto handles = AssetManager.GetAssetHandles();
@@ -465,7 +466,7 @@ void Debugger::ProcessCommands() {
 
 void Debugger::ThreadMain() {
 	InitCommonControls();
-	const char* windowClassName = "NovotDebuggerWindow";
+	static const char* windowClassName = "NovotDebuggerWindow";
 	WNDCLASS windowClass{};
 	windowClass.lpfnWndProc = WindowProc;
 	windowClass.hInstance = GetModuleHandle(nullptr);
@@ -726,7 +727,7 @@ void Debugger::RefreshPropertyView() {
 }
 
 void Debugger::UpdateMemoryStats() {
-	const DWORD now = GetTickCount();
+	const ULONGLONG now = GetTickCount64();
 	if (_LastMemorySampleTick != 0 && (now - _LastMemorySampleTick < MemorySampleIntervalMs)) {
 		return;
 	}
@@ -763,7 +764,7 @@ void Debugger::UpdateMemoryStats() {
 }
 
 void Debugger::UpdateCpuStats() {
-	const DWORD now = GetTickCount();
+	const ULONGLONG now = GetTickCount64();
 	if (_LastCpuSampleTick != 0 && (now - _LastCpuSampleTick < CpuSampleIntervalMs)) {
 		return;
 	}

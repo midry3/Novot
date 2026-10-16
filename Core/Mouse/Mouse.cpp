@@ -10,8 +10,7 @@ void  _Mouse::UpdateMouseEvent() {
 	auto preEvent = _currentMouseEvent;
 	GetMousePoint(&x, &y);
 	auto offset = GetMouseWheelRotVol();
-	DebuggerSetProperty("Mouse Wheel Offset", std::to_string(offset));
-	if (KeyMapping.IsActionPressing("Shift")) {
+	if (KeyMapping.IsActionPressing(DefautKeyMapping::KEY_SHIFT)) {
 		_currentMouseEvent.scrollOffset = Vector2D(static_cast<double>(offset), 0);
 	}
 	else {
@@ -20,7 +19,13 @@ void  _Mouse::UpdateMouseEvent() {
 	if (offset != 0) {
 		Scrolled.Emit(_currentMouseEvent);
 	}
-	_currentMouseEvent.position = Vector2D(static_cast<double>(x), static_cast<double>(y)) + Camera.GetPoint();
+	_currentMouseEvent.position = Vector2D(static_cast<double>(x), static_cast<double>(y));
+	if (const auto scene = SceneManager.GetCurrentScene()) {
+		_currentMouseEvent.globalPosition = _currentMouseEvent.position + scene->GetGlobalPosition();
+	}
+	else {
+		_currentMouseEvent.globalPosition = _currentMouseEvent.position;
+	}
 	_currentMouseEvent.delta = _currentMouseEvent.position - preEvent.position;
 	if (input & MOUSE_INPUT_LEFT) {
 		_currentMouseEvent.button = MouseButton::Left;
@@ -61,7 +66,4 @@ void  _Mouse::UpdateMouseEvent() {
 	if (preEvent.position != _currentMouseEvent.position) {
 		Moved.Emit(_currentMouseEvent);
 	}
-	DebuggerSetProperty("Mouse Position", "(" + std::to_string(_currentMouseEvent.position.x) + ", " + std::to_string(_currentMouseEvent.position.y) + ")");
-	DebuggerSetProperty("Mouse Button", std::to_string(static_cast<int>(_currentMouseEvent.button)));
-	DebuggerSetProperty("Mouse State", std::to_string(static_cast<int>(_currentMouseEvent.state)));
 }

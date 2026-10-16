@@ -17,7 +17,7 @@ namespace AnimationInfoKeys {
 }
 
 struct AnimationInfo {
-	int rows=0, columns=0, fps=10;
+	int rows=1, columns=1, fps=10;
 	double scale = 1.0;
 	bool loop=true;
 };

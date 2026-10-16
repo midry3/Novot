@@ -1,5 +1,6 @@
 #pragma once
 #include "../Asset.h"
+#include <Math/Vector2D.h>
 
 class Texture : public Asset {
 protected:
@@ -11,4 +12,5 @@ public:
 	~Texture() = default;
 	int Load() override;
 	void Release() override;
+	const Vector2D GetSize() const;
 };

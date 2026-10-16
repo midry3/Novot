@@ -11,9 +11,9 @@ enum StretchType {
 
 class Sprite2D : public Scene {
 protected:
-	std::shared_ptr<Texture> texture;
+	std::shared_ptr<Texture> _texture;
 	StretchType stretch = StretchType::NONE;
-	Vector2D size;
+	Vector2D _size;
 	int _handle = -1;
 	void _Release() override;
 	void _Draw() const override;
@@ -27,13 +27,13 @@ public:
 		vMax = 1.0f;
 	}
 	Sprite2D() = default;
-	Sprite2D(const std::shared_ptr<Texture>& texture) : texture(texture) {
+	Sprite2D(const std::shared_ptr<Texture>& texture) : _texture(texture) {
 		AdjustSize();
 	}
 	Sprite2D(int handle) : _handle(handle) {}
 	~Sprite2D() = default;
 	virtual Sprite2D* SetTexture(const std::shared_ptr<Texture>& texture) {
-		this->texture = texture;
+		this->_texture = texture;
 		AdjustSize();
 		TextureChanged.Emit();
 		return this;
@@ -50,7 +50,7 @@ public:
 	void ChangeStretch(StretchType type);
 	int GetHandle() {
 		if (_handle == -1) {
-			_handle = texture->Load();
+			_handle = _texture->Load();
 		}
 		return _handle;
 	}
@@ -60,7 +60,7 @@ public:
 		switch (stretch) {
 		case StretchType::FIT:
 			wsize = PropertyManager.GetRealWindowSize();
-			r = (std::min)(wsize.x / size.x, wsize.y / size.y) / 2;
+			r = (std::min)(wsize.x / _size.x, wsize.y / _size.y) / 2;
 			SetScale(Vector2D(r, r));
 			break;
 		case StretchType::NONE:
@@ -68,9 +68,9 @@ public:
 		}
 	}
 	void AdjustSize() {
-		int x = 0, y = 0;
+		int x, y;
 		GetGraphSize(GetHandle(), &x, &y);
-		size = Vector2D(x, y);
+		_size = Vec2(x, y);
 		_handle = GetHandle();
 		AdjustScale();
 	}
@@ -78,10 +78,10 @@ public:
 		rotation = degree * PI / 180.0;
 		return this;
 	}
-	Vector2D GetSize() const {
-		return size * GetScale();
+	[[nodiscard]] Vector2D GetThisSize() const override {
+		return _size * GetScale();
 	}
 	Vector2D GetRawSize() const {
-		return size;
+		return _size;
 	}
 };

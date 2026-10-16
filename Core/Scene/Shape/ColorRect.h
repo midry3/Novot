@@ -15,6 +15,11 @@ public:
 		return this;
 	}
 
+	ColorRect* SetColor(const Vector3D& c) {
+		color = c.ToColor();
+		return this;
+	}
+
 	ColorRect* SetSize(const Vector2D& s) {
 		size = s;
 		return this;

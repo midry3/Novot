@@ -7,22 +7,22 @@ void _KeyMapping::Update() {
 	GetHitKeyStateAll(keyState);
 }
 
-bool _KeyMapping::IsActionPressing(const std::string& action) {
-	if (mapping.find(action) == mapping.end()) return false;
+bool _KeyMapping::IsActionPressing(const int action) {
+	if (not mapping.contains(action)) return false;
 	for (int key : mapping[action]) {
 		if (keyState[key]) {
-			isDetected = true;
+			_isDetected = true;
 			return true;
 		}
 	}
 	return false;
 }
 
-bool _KeyMapping::IsActionJustPressed(const std::string& action) {
-	if (mapping.find(action) == mapping.end()) return false;
+bool _KeyMapping::IsActionJustPressed(const int action) {
+	if (not mapping.contains(action)) return false;
 	for (int key : mapping[action]) {
 		if (keyState[key] && not prevKeyState[key]) {
-			isDetected = true;
+			_isDetected = true;
 			return true;
 		}
 	}

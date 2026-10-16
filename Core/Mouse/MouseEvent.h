@@ -16,7 +16,7 @@ enum class MouseButtonState {
 
 struct MouseEvent {
 public:
-	Vector2D position, delta, scrollOffset;
+	Vector2D position, globalPosition, delta, scrollOffset;
 	MouseButton button;
 	MouseButtonState state;
 	bool just;

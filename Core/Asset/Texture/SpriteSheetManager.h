@@ -6,30 +6,47 @@
 
 class SpriteSheetManager {
 private:
-	std::map<std::string, std::shared_ptr<SpriteSheet>> spriteSheets;
-	std::string currentAnimation;
+	Vector<std::shared_ptr<SpriteSheet>> _spriteSheets;
+	struct SpriteSheetConnections {
+		int frameChanged = -1;
+		int animationFinished = -1;
+	};
+	Vector<SpriteSheetConnections> _connections;
+	int _currentAnimation = 0;
 	bool isPaused = false;
 public:
-	Signal<int> FrameChanged;
-	Signal<std::string> AnimationFinished;
-	SpriteSheetManager() : spriteSheets(), currentAnimation("default") {}
+	Signal<int> FrameChanged, AnimationFinished;
+	SpriteSheetManager() : _spriteSheets() {}
 	~SpriteSheetManager() = default;
-	void RegisterSpriteSheet(const std::string& animName, std::shared_ptr<SpriteSheet> spriteSheet) {
-		spriteSheets[animName] = spriteSheet;
-		spriteSheet->FrameChanged.Connect([this](int frame) {
+	void RegisterSpriteSheet(const int index, SharedPtr<SpriteSheet> spriteSheet) {
+		if (index < 0 || not spriteSheet) {
+			return;
+		}
+		if (_spriteSheets.size() <= index) {
+			_spriteSheets.resize(index + 1);
+			_connections.resize(index + 1);
+		}
+		else if (_spriteSheets[index]) {
+			_spriteSheets[index]->FrameChanged.Disconnect(_connections[index].frameChanged);
+			_spriteSheets[index]->AnimationFinished.Disconnect(_connections[index].animationFinished);
+		}
+		_spriteSheets[index] = spriteSheet;
+		_connections[index].frameChanged = spriteSheet->FrameChanged.Connect([this](int frame) {
 			FrameChanged.Emit(frame);
 			});
-		spriteSheet->AnimationFinished.Connect([this]() {
-			AnimationFinished.Emit(currentAnimation);
+		_connections[index].animationFinished = spriteSheet->AnimationFinished.Connect([this]() {
+			AnimationFinished.Emit(_currentAnimation);
 			});
 		spriteSheet->Load();
 	}
-	[[nodiscard]] std::shared_ptr<SpriteSheet> GetSpriteSheet(const std::string& animName) const {
-		auto it = spriteSheets.find(animName);
-		return (it != spriteSheets.end()) ? it->second : nullptr;
+	[[nodiscard]] SharedPtr<SpriteSheet> GetSpriteSheet(const int index) const {
+		if (index >= 0 && index < _spriteSheets.size()) {
+			return _spriteSheets[index];
+		}
+		return nullptr;
 	}
-	[[nodiscard]] std::shared_ptr <SpriteSheet> GetCurrentSpriteSheet() const {
-		return GetSpriteSheet(currentAnimation);
+	[[nodiscard]] SharedPtr<SpriteSheet> GetCurrentSpriteSheet() const {
+		return GetSpriteSheet(_currentAnimation);
 	}
 	[[nodiscard]] Vector2D GetCurrentSheetSize() const {
 		if (auto sheet = GetCurrentSpriteSheet()) {
@@ -43,28 +60,39 @@ public:
 		}
 		return Vector2D(0, 0);
 	}
-	void SetCurrentAnimation(const std::string& animName) {
-		if (currentAnimation == animName) return;
+	[[nodiscard]] int GetAnimationCount() const {
+		return static_cast<int>(_spriteSheets.size());
+	}
+	[[nodiscard]] int GetCurrentAnimationIndex() const {
+		return _currentAnimation;
+	}
+	void SetCurrentAnimation(const int index) {
+		if (_currentAnimation == index) return;
 		if (auto sheet = GetCurrentSpriteSheet()) {
 			sheet->Pause();
 			sheet->Init();
 		}
-		if (spriteSheets.find(animName) != spriteSheets.end()) {
-			currentAnimation = animName;
+		if (index >= 0 && index < _spriteSheets.size()) {
+			_currentAnimation = index;
 			if (isPaused) {
-				spriteSheets[currentAnimation]->Pause();
+				_spriteSheets[_currentAnimation]->Pause();
 			}
 			else {
-				spriteSheets[currentAnimation]->Play();
+				_spriteSheets[_currentAnimation]->Play();
 			}
 		}
 	}
 	void Release() {
-		for (auto& pair : spriteSheets) {
-			pair.second->Release();
+		for (size_t i = 0; i < _spriteSheets.size(); ++i) {
+			if (_spriteSheets[i]) {
+				_spriteSheets[i]->FrameChanged.Disconnect(_connections[i].frameChanged);
+				_spriteSheets[i]->AnimationFinished.Disconnect(_connections[i].animationFinished);
+				_spriteSheets[i]->Release();
+			}
 		}
-		spriteSheets.clear();
-		currentAnimation.clear();
+		_spriteSheets.clear();
+		_connections.clear();
+		_currentAnimation = 0;
 	}
 	void Pause() {
 		isPaused = true;
@@ -77,29 +105,28 @@ public:
 	bool IsPaused() const {
 		return isPaused;
 	}
-
-	[[nodiscard]] std::vector<std::string> GetRegisteredNames() const {
-		std::vector<std::string> names;
-		names.reserve(spriteSheets.size());
-		for (const auto& p : spriteSheets) names.push_back(p.first);
-		return names;
-	}
-	void ReleaseSpriteSheet(const std::string& name) {
-		auto it = spriteSheets.find(name);
-		if (it != spriteSheets.end()) {
-			it->second->Release();
-			spriteSheets.erase(it);
+	void ReleaseSpriteSheet(const int index) {
+		if (index >= 0 && index < _spriteSheets.size()) {
+			if (_spriteSheets[index]) {
+				_spriteSheets[index]->FrameChanged.Disconnect(_connections[index].frameChanged);
+				_spriteSheets[index]->AnimationFinished.Disconnect(_connections[index].animationFinished);
+				_spriteSheets[index]->Release();
+			}
+			_spriteSheets.erase(_spriteSheets.begin() + index);
+			_connections.erase(_connections.begin() + index);
+			if (_currentAnimation >= _spriteSheets.size()) {
+				_currentAnimation = 0;
+			}
 		}
 	}
-	void ReloadSpriteSheet(const std::string& name) {
-		auto it = spriteSheets.find(name);
-		if (it != spriteSheets.end()) {
-			it->second->Release();
-			it->second->Load();
+	void ReloadSpriteSheet(const int index) {
+		if (index >= 0 && index < _spriteSheets.size()) {
+			_spriteSheets[index]->Release();
+			_spriteSheets[index]->Load();
 		}
 	}
 
-	std::shared_ptr<SpriteSheet> operator[](const std::string& animName) {
-		return GetSpriteSheet(animName);
+	SharedPtr<SpriteSheet> operator[](const int index) {
+		return GetSpriteSheet(index);
 	}
 };

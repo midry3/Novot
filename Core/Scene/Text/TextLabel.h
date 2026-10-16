@@ -6,16 +6,20 @@ protected:
 	int _fontHandle = -1;
 	int _fontSize = 24;
 	int _fontThickness = 3;
-	std::string _fontName = "";
+	String _fontName = "";
 	int _width = -1;
 	bool _isNowSetting = false;
 	void _Load() override;
 	void _Draw() const override;
 	void _Release() override;
 public:
-	static std::string DefaultFont;
-	std::string text;
+	static String DefaultFont;
+	String text;
 	unsigned int foregroundColor = GetColor(255, 255, 255);
+
+	Vector2D GetThisSize() const override {
+		return Vector2D(_width, text.size() / (_width / _fontSize)) * GetScale();
+	}
 
 	TextLabel* BeginSetting() {
 		_isNowSetting = true;
@@ -40,6 +44,11 @@ public:
 
 	TextLabel* SetForegroundColor(unsigned int color) {
 		foregroundColor = color;
+		return this;
+	}
+
+	TextLabel* SetForegroundColor(const Vector3D& color) {
+		foregroundColor = color.ToColor();
 		return this;
 	}
 

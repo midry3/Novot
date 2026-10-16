@@ -5,28 +5,33 @@
 #include <string>
 #include <list>
 
+enum DefautKeyMapping {
+	KEY_SHIFT
+};	
+
 class _KeyMapping : public Singleton<_KeyMapping> {
 private:
-	std::map<std::string, std::list<int>> mapping;
-	bool isDetected = false;
+	std::map<int, std::list<int>> mapping;
+	bool _isDetected = false;
 public:
 	char keyState[256] = {}, prevKeyState[256] = {};
-	_KeyMapping() : mapping(){}
+	_KeyMapping() = default;
+	~_KeyMapping() = default;
 	void Update();
 	template <typename... Args>
 	requires (std::same_as<Args, int> && ...)
-	void RegisterMapping(const std::string& action, Args... keys) {
+	void RegisterMapping(const int action, Args... keys) {
 		for (int key : {keys...}) {
 			mapping[action].push_back(key);
 		}
 	}
-	bool IsActionPressing(const std::string& action);
-	bool IsActionJustPressed(const std::string& action);
+	bool IsActionPressing(const int action);
+	bool IsActionJustPressed(const int action);
 	void StartDetect() {
-		isDetected = false;
+		_isDetected = false;
 	}
 	bool IsDetected() const {
-		return isDetected;
+		return _isDetected;
 	}
 };
 

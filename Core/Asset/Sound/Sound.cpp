@@ -4,7 +4,6 @@
 void Sound::Play() {
 	Load();
 	if (IsLoaded()) {
-		//SetVolumeSoundMem(volume, _handle);
 		if (isLoop) {
 			PlaySoundMem(_handle, DX_PLAYTYPE_LOOP, TRUE);
 		}
@@ -32,6 +31,10 @@ int Sound::Load() {
 }
 
 void Sound::Pause() {
+	Stop();
+}
+
+void Sound::Stop() {
 	if (IsLoaded()) {
 		StopSoundMem(_handle);
 	}
@@ -41,6 +44,6 @@ void Sound::Release() {
 	if (IsLoaded()) {
 		StopSoundMem(_handle);
 		DeleteSoundMem(_handle);
-		_handle = 0;
+		_handle = -1;
 	}
 }

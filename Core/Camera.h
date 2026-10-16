@@ -4,6 +4,7 @@
 #include <Scene.h>
 #include <Singleton.h>
 #include <Math/Vector2D.h>
+#include <Asset/Texture/Texture.h>
 #include <memory>
 
 class _Camera : public Singleton<_Camera> {
@@ -14,7 +15,7 @@ protected:
 	std::weak_ptr<Scene> target;
 public:
 	Signal<Vector2D, Vector2D> ZoomChanged;
-	Vector2D position = Vector0;
+	Vector2D position = Vec2D_0;
 	void Shake(int num, double intensity);
 	void SetPosition(const Vector2D& position) {
 		this->position = position;
@@ -26,8 +27,8 @@ public:
 		return _zoom;
 	}
 	_Camera& SetZoom(const Vector2D& zoom) {
-		ZoomChanged.Emit(_zoom, zoom);
 		_zoom = zoom;
+		ZoomChanged.Emit(_zoom, zoom);
 		return *this;
 	}
 	_Camera& SetMinimums(const Vector2D& minimums) {
@@ -54,6 +55,7 @@ public:
 		_maximums.y = y;
 		return *this;
 	}
+	_Camera& FitTo(const std::shared_ptr<Scene>& scene);
 	Vector2D GetPoint() const {
 		auto pos = position + GetTargetPoint();
 		pos.x = std::clamp(pos.x, _minimums.x, _maximums.x);
@@ -68,7 +70,7 @@ public:
 		if (auto scene = target.lock()) {
 			return scene->GetGlobalPosition();
 		}
-		return Vector0;
+		return Vec2D_0;
 	}
 };
 

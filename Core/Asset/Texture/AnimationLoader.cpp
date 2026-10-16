@@ -2,6 +2,7 @@
 #include <fstream>
 #include <Asset/AssetManager.h>
 #include <stdexcept>
+#include <Debugger/Debugger.h>
 
 using namespace AnimationInfoKeys;
 
@@ -18,7 +19,7 @@ AnimationInfo AnimationLoader::LoadAnimationInfo(const fs::path& file) {
 		info.scale = data.value(KEY_SCALE, 1.0);
 	}
 	else {
-		throw std::runtime_error("Failed to open animation info file: " + file.string() + ANIM_EXT);
+		DebuggerWriteLine("Failed to open animation info file: " + file.string() + ANIM_EXT);
 	}
 	return info;
 }

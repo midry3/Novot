@@ -6,7 +6,9 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>"C:\Users\midry\projects\Novot-Engine\Novot\Core";C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;"C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用";"C:\Users\midry\projects\Novot-Engine\Novot";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>

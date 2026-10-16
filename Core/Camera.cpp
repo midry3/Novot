@@ -12,5 +12,13 @@ void _Camera::Shake(int num, double intensity) {
 		}
 	}
 
-	tg->CreateTween(&position, Vector0, 0.1);
+	tg->CreateTween(&position, Vec2D_0, 0.1);
+}
+
+_Camera& _Camera::FitTo(const std::shared_ptr<Scene>& scene) {
+	if (scene) {
+		SetMinimums(scene->GetGlobalPosition());
+		SetMaximums(scene->GetGlobalPosition() + scene->GetSize() - PropertyManager.GetSettingWindowSize());
+	}
+	return *this;
 }

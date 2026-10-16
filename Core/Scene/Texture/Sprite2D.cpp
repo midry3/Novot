@@ -4,16 +4,16 @@
 #include <Graphic/2D.h>
 
 void Sprite2D::_Release() {
-	if (texture) {
-		texture->Release();
+	if (_texture) {
+		_texture->Release();
 	}
 }
 
 void Sprite2D::_Draw() const {
 	auto pos = GetDrawPosition();
 	auto s = GetScale();
-	int cx_in_image = static_cast<int>(size.x / 2.0);
-	int cy_in_image = static_cast<int>(size.y / 2.0);
+	int cx_in_image = static_cast<int>(_size.x / 2.0);
+	int cy_in_image = static_cast<int>(_size.y / 2.0);
 
 	const auto& pShader = GetPixelShader();
 
@@ -51,7 +51,7 @@ void Sprite2D::_Draw() const {
 
 void Sprite2D::ChangeStretch(StretchType type) {
 	stretch = type;
-	if (size.x != 0 && size.y != 0) {
+	if (_size.x != 0 && _size.y != 0) {
 		AdjustScale();
 	}
 }

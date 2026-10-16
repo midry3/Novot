@@ -11,6 +11,11 @@ class Timer;
 
 class Scene : public std::enable_shared_from_this<Scene> {
 protected:
+	struct ConstantBufferData {
+		int handle = -1;
+		int slot = -1;
+	};
+
 	bool _isLoaded = false;
 	std::string _name;
 	std::weak_ptr<Scene> parent;
@@ -23,6 +28,9 @@ protected:
 	bool _isIgnoreParentAlpha = false;
 	bool _ySortEnabled = false;
 	bool _isEnabled = true;
+	bool _ignoreCamera = false;
+	Vector<ConstantBufferData>  _constantBuffer;
+
 	virtual void _Load() {};
 	virtual void _Release() {};
 	virtual void _Update(float dt) {};
@@ -104,6 +112,10 @@ public:
 		alpha = std::clamp(a, 0, 255);
 		return this;
 	}
+	Scene* SetAlpha(float a) {
+		alpha = Clamp(static_cast<int>(a * 255), 0, 255);
+		return this;
+	}
 	[[nodiscard]] int GetAlpha() const {
 		auto ptr = parent.lock();
 		if (not _isIgnoreParentAlpha && ptr) {
@@ -127,6 +139,18 @@ public:
 		modulate = mod;
 		return this;
 	}
+	Scene* IgnoreCamera() {
+		_ignoreCamera = true;
+		return this;
+	}
+	[[nodiscard]] bool IsIgnoringCamera() const {
+		if (parent.expired()) {
+			return _ignoreCamera;
+		}
+		else {
+			return _ignoreCamera || parent.lock()->IsIgnoringCamera();
+		}
+	}
 	[[nodiscard]] Vector3D GetModulate() const;
 	virtual Scene* AddScene(std::shared_ptr<Scene> scene) {
 		scene->Load();
@@ -144,6 +168,13 @@ public:
 		_pixelShader = shader;
 		return this;
 	}
+	Scene* SetPixelShaderConstantBuffer(int handle, int slot=4) {
+		ConstantBufferData bufferData;
+		bufferData.handle = handle;
+		bufferData.slot = slot;
+		_constantBuffer.push_back(bufferData);
+		return this;
+	}
 	[[nodiscard]] std::shared_ptr<PixelShader> GetParentPixelShader() const {
 		if (auto ptr = parent.lock()) {
 			return ptr->GetPixelShader();
@@ -153,11 +184,18 @@ public:
 	[[nodiscard]] std::shared_ptr<PixelShader> GetPixelShader() const {
 		return _pixelShader ? _pixelShader : GetParentPixelShader();
 	}
+	[[nodiscard]] SharedPtr<Scene> GetChild(int index) const;
 	void DeleteScene(int index) {
 		_scenes.erase(_scenes.begin() + index);
 	}
 	void DeleteScene(std::shared_ptr<Scene> scene) {
 		std::erase_if(_scenes, [&scene](const std::shared_ptr<Scene>& s){ return s == scene; });
+	}
+	void DeleteFromParent() {
+		if (auto ptr = parent.lock()) {
+			ptr->DeleteScene(shared_from_this());
+			parent = std::weak_ptr<Scene>();
+		}
 	}
 	void Free() {
 		Release();
@@ -165,7 +203,7 @@ public:
 			_scenes.clear();
 		}
 		else {
-			parent.lock()->DeleteScene(shared_from_this());
+			DeleteFromParent();
 		}
 	}
 	Scene* Show() {
@@ -194,6 +232,8 @@ public:
 	[[nodiscard]] bool IsYSortEnabled() const {
 		return _ySortEnabled;
 	}
+	[[nodiscard]] Vector2D GetSize() const;
+	[[nodiscard]] virtual Vector2D GetThisSize() const;
 	template <std::derived_from<Scene> T>
 	std::shared_ptr<T> CreateScene() {
 		auto scene = std::make_shared<T>();

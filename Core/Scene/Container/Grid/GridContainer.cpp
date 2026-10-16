@@ -11,7 +11,7 @@ void GridContainer::_Update(float dt) {
 }
 
 Vector2D GridContainer::GetPositionAt(size_t index) const {
-	if (_scenes.empty()) return Vector0;
+	if (_scenes.empty()) return Vec2D_0;
 	size_t x = index % static_cast<size_t>(_matrixSize.x);
 	size_t y = index / static_cast<size_t>(_matrixSize.x);
 	return Vector2D(x * _cellSize.x, y * _cellSize.y) + Vector2D(_space.x * x, _space.y * y);

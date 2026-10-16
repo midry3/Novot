@@ -13,27 +13,45 @@ namespace Novot {
 	static std::shared_ptr<MV1> _screenMaterial = nullptr;
 
 	/// <summary>
-	///  @brief ゲームの初期化処理を行う関数。オーバーライドして使用する。
+	///  ゲームの初期化処理を行う関数。オーバーライドして使用する。
 	/// </summary>
 	void Setup();
 
 	/// <summary>
-	///  @brief ゲームのメイン関数。オーバーライドして使用する。最後に return StartGame(); を行うこと。
+	///  ゲームのメイン関数。オーバーライドして使用する。最後に return StartGame(); を行うこと。
 	/// </summary>
 	int Main();
 
+	/// <summary>
+	/// ゲームの初期化処理を行う関数。StartGame関数の中で呼ばれる。
+	/// </summary>
+	/// <returns></returns>
 	int Init();
 
 	/// <summary>
-	/// @brief ゲームのメインループを開始する関数。Main関数の返り値にする。
+	/// ゲームのメインループを開始する関数。Main関数の返り値にする。
 	/// </summary>
 	/// <returns></returns>
 	int StartGame();
+
+	/// <summary>
+	/// ゲームの終了処理を行う関数。StartGame関数の中で呼ばれる。
+	/// </summary>
 	void End();
 
+	/// <summary>
+	/// ゲームの更新処理を行う関数。
+	/// </summary>
+	/// <param name="dt"></param>
 	void Update(float dt);
+
+	/// <summary>
+	/// ゲームの描画処理を行う関数。
+	/// </summary>
+	/// <returns></returns>
 	bool Draw();
-	void RegisterSetupFunction(const std::function<void()>& func);
+
+	void SetBackgroundColor(const Vector3D& color);
 
 	void SetScreenMaterial(const std::shared_ptr<MV1>& material);
 	void SetScreenPixelShader(const std::shared_ptr<PixelShader>& shader);
@@ -41,7 +59,7 @@ namespace Novot {
 	void SetScreenPixelShader() {
 		SetScreenPixelShader(std::make_shared<T>());
 	}
-	void SetConstantBufferToScreenPixelShader(int handle, int slot);
+	void SetConstantBufferToScreenPixelShader(int handle, int slot=4);
 };
 
 using namespace Novot;

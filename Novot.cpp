@@ -83,6 +83,10 @@ namespace Novot {
 		return true;
 	}
 
+	void SetBackgroundColor(const Vector3D& color) {
+		DxLib::SetBackgroundColor(static_cast<int>(color.x), static_cast<int>(color.y), static_cast<int>(color.z));
+	}
+
 	void SetScreenMaterial(const std::shared_ptr<MV1>& material) {
 		_screenMaterial = material;
 	}
@@ -94,10 +98,6 @@ namespace Novot {
 	void SetConstantBufferToScreenPixelShader(int handle, int slot) {
 		_constantBufferHandle = handle;
 		_constantBufferSlot = slot;
-	}
-
-	void RegisterSetupFunction(const std::function<void()>& func) {
-		_setupFunction = func;
 	}
 
 	int StartGame() {

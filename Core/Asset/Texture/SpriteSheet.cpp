@@ -36,7 +36,7 @@ void SpriteSheet::Init() {
 }
 
 int SpriteSheet::UpdateFrame(float dt) {
-	if (IsLoaded()) {
+	if (IsLoaded() && not frames.empty() && frameCount > 0) {
 		if (isPaused) {
 			return _handle;
 		}

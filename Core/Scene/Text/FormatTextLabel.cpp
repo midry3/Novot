@@ -6,10 +6,11 @@ namespace {
 		if (index >= value.size()) return 0;
 		const unsigned char character = static_cast<unsigned char>(value[index]);
 
-		// UTF-8 lead byte check
 		if (character < 0x80) {
 			return 1;
 		}
+
+		// UTF-8 lead byte check
 		if (character >= 0xC2 && character <= 0xDF) {
 			return index + 1 < value.size() ? 2 : 1;
 		}

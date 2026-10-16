@@ -3,7 +3,6 @@
 #include <Singleton.h>
 #include "MouseEvent.h"
 
-
 class _Mouse : public Singleton<_Mouse> {
 protected:
 	MouseEvent _currentMouseEvent;

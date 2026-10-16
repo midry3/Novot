@@ -8,3 +8,11 @@ bool IsColliding1D(double a1, double a2, double b1, double b2) {
 Vector2D Sign(Vector2D v) {
 	return Vector2D(Sign(v.x), Sign(v.y));
 }
+
+Vector2D operator*(int a, const Vector2D& v) {
+	return Vector2D(a * v.x, a * v.y);
+}
+
+Vector2D operator*(double a, const Vector2D& v) {
+	return Vector2D(a * v.x, a * v.y);
+}

@@ -38,7 +38,7 @@ Vector2D LineSegment::GetCrossingPoint(const LineSegment& other) const {
 	if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
 		return p + r * t;
 	}
-	return Vector0;
+	return Vec2D_0;
 }
 
 Vector2D LineSegment::NormalVector() const {

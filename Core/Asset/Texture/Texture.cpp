@@ -22,3 +22,12 @@ void Texture::Release() {
 		_handle = -1;
 	}
 }
+
+const Vector2D Texture::GetSize() const {
+	if (IsLoaded()) {
+		int width = 0, height = 0;
+		GetGraphSize(_handle, &width, &height);
+		return Vector2D(width, height);
+	}
+	return Vector2D(0, 0);
+}

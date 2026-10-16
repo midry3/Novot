@@ -33,8 +33,12 @@ void MouseCollision::_Update(float dt) {
 
 std::vector<Vector2D> MouseCollision::GetDrawVertices() const {
 	std::vector<Vector2D> res;
+	Vec2 camPos = Vec2D_0;
+	if (not IsIgnoringCamera()) {
+		camPos = Camera.GetPoint();
+	}
 	for (auto v : vertices) {
-		res.emplace_back(Vertex2Global(v) - Camera.GetPoint());
+		res.emplace_back(Vertex2Global(v) - camPos);
 	}
 	Vector2D s = GetScale();
 	if ((s.x < 0) != (s.y < 0)) {

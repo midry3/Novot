@@ -63,13 +63,25 @@ void Scene::Draw() const {
 	if (not IsShouldDraw()) return;
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, GetAlpha());
 	SetDrawBright(modulate.x, modulate.y, modulate.z);
+	if (_pixelShader && not _constantBuffer.empty()) {
+		for (const auto& cb : _constantBuffer) {
+			SetShaderConstantBuffer(cb.handle, _pixelShader->GetHandle(), cb.slot);
+		}
+	}
 	_Draw();
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
+SharedPtr<Scene> Scene::GetChild(int index) const {
+	if (index < 0 || index >= static_cast<int>(_scenes.size())) {
+		return nullptr;
+	}
+	return _scenes[index];
+}
+
 Vector2D Scene::GetParentGlobalPosition() const {
 	if (parent.expired()) {
-		return Vector0;
+		return Vec2D_0;
 	}
 	else {
 		return parent.lock()->GetGlobalPosition();
@@ -77,7 +89,7 @@ Vector2D Scene::GetParentGlobalPosition() const {
 }
 Vector2D Scene::GetParentScale() const {
 	if (parent.expired()) {
-		return Vector1;
+		return Vec2D_1;
 	}
 	else {
 		return parent.lock()->GetScale();
@@ -89,6 +101,9 @@ Vector2D Scene::GetGlobalPosition() const {
 }
 
 Vector2D Scene::GetDrawPosition() const {
+	if (IsIgnoringCamera()) {
+		return GetGlobalPosition();
+	}
 	return (GetGlobalPosition() * Camera.GetZoom() - Camera.GetPoint());
 }
 
@@ -130,6 +145,24 @@ Vector3D Scene::GetModulate() const {
 			modulate.z * pModulate.z / 255.0
 		);
 	}
+}
+
+Vector2D Scene::GetThisSize() const {
+	return Vec2D_0;
+}
+
+Vector2D Scene::GetSize() const {
+	Vector2D result = GetThisSize();
+	for (const auto scene : _scenes) {	
+		const auto childSize = scene->GetSize();
+		if (result.x <  childSize.x) {
+			result.x = childSize.x;
+		}
+		if (result.y < childSize.y) {
+			result.y = childSize.y;
+		}
+	}
+	return result;
 }
 
 std::shared_ptr<Timer> Scene::CreateTimer(double time, const std::function<void()> callback, int loop) {

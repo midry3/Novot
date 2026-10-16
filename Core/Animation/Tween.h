@@ -14,6 +14,10 @@
 using TweenTarget = std::variant<double*, float*, int*, Vector2D*>;
 using TweenValue = std::variant<double, float, int, Vector2D>;
 
+namespace {
+	int _dummy=0;
+}
+
 inline double ToTweenDouble(const TweenValue& value) {
 	return std::visit([](const auto& v) -> double {
 		using T = std::decay_t<decltype(v)>;
@@ -150,6 +154,7 @@ public:
 	void Add(std::shared_ptr<Tween> tween) {
 		tweens.push_back(tween);
 	}
+	void Delay(double t);
 	bool IsFinished() const;
 	void SetLoop(int loop) {
 		loopCount = loop;

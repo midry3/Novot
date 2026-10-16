@@ -12,6 +12,11 @@ std::shared_ptr<Tween> TweenGroup::CreateTween(const TweenTarget& target, TweenV
 	return t;
 }
 
+void TweenGroup::Delay(double t) {
+	auto twn = std::make_shared<Tween>(&_dummy, 0, t);
+	tweens.push_back(twn);
+}
+
 bool TweenGroup::IsFinished() const {
 	for (const auto& tween : tweens) {
 		if (!tween->isFinished) {

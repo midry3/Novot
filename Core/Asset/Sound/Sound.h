@@ -5,10 +5,9 @@
 class Sound : public Asset {
 protected:
 	bool isLoop = false;
-	int volume = 255;
 public:
 	Sound() = default;
-	Sound(const fs::path& file) : Asset(file), volume(255) {}
+	Sound(const fs::path& file) : Asset(file) {}
 	~Sound() {
 		Release();
 	}
@@ -16,16 +15,9 @@ public:
 	void Release() override;
 	void Play();
 	void Pause();
+	void Stop();
 	Sound* SetLoop(bool loop) {
 		isLoop = loop;
-		return this;
-	}
-	Sound* SetVolume(int volume) {
-		this->volume = volume;
-		return this;
-	}
-	Sound* SetVolume(float volume) {
-		this->volume = static_cast<int>(volume * 255);
 		return this;
 	}
 };

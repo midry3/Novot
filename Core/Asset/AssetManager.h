@@ -79,10 +79,10 @@ struct AssetHandle {
 
 class _AssetManager : public Singleton<_AssetManager> {
 protected:
-	fs::path _rootDir = "Assets";
-	std::map<fs::path, AssetHandle> _assetHandles;
-	std::map<fs::path, std::function<void()>> _assetReleasedCallbacks;
-	void CallAssetReleasedCallbacks(const fs::path& path) {
+	Path _rootDir = "Assets";
+	std::map<Path, AssetHandle> _assetHandles;
+	std::map<Path, std::function<void()>> _assetReleasedCallbacks;
+	void CallAssetReleasedCallbacks(const Path& path) {
 		auto it = _assetReleasedCallbacks.find(path);
 		if (it != _assetReleasedCallbacks.end()) {
 			it->second();
@@ -90,19 +90,19 @@ protected:
 		}
 	}
 public:
-	std::map<fs::path, AssetHandle> GetAssetHandles() const {
+	std::map<Path, AssetHandle> GetAssetHandles() const {
 		return _assetHandles;
 	}
-	void RegisterAssetReleasedCallback(const fs::path& path, std::function<void()> callback) {
+	void RegisterAssetReleasedCallback(const Path& path, std::function<void()> callback) {
 		_assetReleasedCallbacks[path] = callback;
 	}
 
-	void Cd(const fs::path& path) {
+	void Cd(const Path& path) {
 		_rootDir = path;
 	}
 
 	template <std::derived_from<Asset> T>
-	std::shared_ptr<T> LoadAsset(const fs::path& path, int id) {
+	std::shared_ptr<T> LoadAsset(const Path& path, int id=-1) {
 		if (_assetHandles.find(path) != _assetHandles.end()) {
 			_assetHandles[path].references.push_back(id);
 			return std::static_pointer_cast<T>(_assetHandles[path].asset);
@@ -126,7 +126,7 @@ public:
 		}
 	}
 	void ReleaseAsset(int id) {
-		std::vector<fs::path> removeTargets;
+		std::vector<Path> removeTargets;
 		for (auto& [path, handle] : _assetHandles) {
 			handle.references.erase(std::remove(handle.references.begin(), handle.references.end(), id), handle.references.end());
 			if (handle.references.empty()) {
@@ -146,14 +146,14 @@ public:
 		}
 	}
 
-	fs::path GetPath(const fs::path& path) const {
+	Path GetPath(const Path& path) const {
 		return _rootDir / path;
 	}
 
 	std::vector<uint8_t> ReadData(const std::string& file) {
 		std::vector<uint8_t> data;
 		FILE* fp = nullptr;
-		fs::path filePath = GetPath(file);
+		Path filePath = GetPath(file);
 		fopen_s(&fp, filePath.string().c_str(), "rb");
 		if (fp == nullptr) {
 			return data;
@@ -170,7 +170,7 @@ public:
 	std::string ReadAsString(const std::string& file) {
 		std::string data;
 		FILE* fp = nullptr;
-		fs::path filePath = GetPath(file);
+		Path filePath = GetPath(file);
 		fopen_s(&fp, filePath.string().c_str(), "rb");
 		if (fp == nullptr) {
 			return data;
@@ -193,7 +193,7 @@ public:
 		return data;
 	}
 
-	fs::path ResolvePath(const fs::path& path) const {
+	Path ResolvePath(const Path& path) const {
 		return GetPath(path);
 	}
 };

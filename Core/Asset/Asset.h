@@ -5,6 +5,7 @@
 #include <string>
 
 namespace fs = std::filesystem;
+using Path = fs::path;
 
 class Asset {
 protected:

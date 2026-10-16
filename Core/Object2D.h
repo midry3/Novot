@@ -19,6 +19,7 @@ protected:
 	bool isColliding = false;
 	int _maxClimbHeight = 5;
 
+	void _Load() override;
 	void _Update(float dt) override;
 public:
 	std::shared_ptr<Collision> collision;
