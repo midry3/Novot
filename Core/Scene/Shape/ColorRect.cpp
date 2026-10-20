@@ -3,5 +3,6 @@
 
 void ColorRect::_Draw() const {
 	auto pos = GetDrawPosition();
-	NovotRenderer::DrawRect(pos, pos + size, color, true);
+	auto s = GetDrawScale();
+	NovotRenderer::DrawRect(pos, pos + size * s, color, true);
 }

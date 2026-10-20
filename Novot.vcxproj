@@ -180,6 +180,7 @@
     <ClCompile Include="Core\String\NumberingText.cpp" />
     <ClCompile Include="Core\String\StringUtils.cpp" />
     <ClCompile Include="Core\Asset\Texture\AnimationLoader.cpp" />
+    <ClCompile Include="Core\VisualDebugScene.cpp" />
     <ClCompile Include="Eiga\Eiga.cpp" />
     <ClCompile Include="Eiga\EigaManager.cpp" />
     <ClCompile Include="Eiga\EigaLexer.cpp" />
@@ -222,6 +223,7 @@
     <ClCompile Include="Novot.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Algorithm\Search.h" />
     <ClInclude Include="Core\Animation\EasingFunction.h" />
     <ClInclude Include="Core\Asset\AssetManager.h" />
     <ClInclude Include="Core\Asset\Data\Json.h" />
@@ -248,6 +250,8 @@
     <ClInclude Include="Core\String\NumberingText.h" />
     <ClInclude Include="Core\String\StringUtils.h" />
     <ClInclude Include="Core\Asset\Texture\AnimationLoader.h" />
+    <ClInclude Include="Core\LogicScene.h" />
+    <ClInclude Include="Core\VisualDebugScene.h" />
     <ClInclude Include="Eiga\Eiga.h" />
     <ClInclude Include="Eiga\EigaManager.h" />
     <ClInclude Include="Eiga\EigaLexer.h" />

@@ -198,6 +198,9 @@
     <ClCompile Include="Core\Math\Vector3D.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Core\VisualDebugScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debugger\Debugger.h">
@@ -557,9 +560,17 @@
     <ClInclude Include="Core\Data\StopWatch.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Algorithm\Search.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\LogicScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\VisualDebugScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\command\1.turn" />
     <None Include="CommonShader\PixelShaderBase.hlsli" />
   </ItemGroup>
   <ItemGroup>

@@ -92,7 +92,7 @@ void AnimatedTextLabel::_Draw() const {
 	if (_fontHandle == -1) return;
 
 	const auto position = GetDrawPosition();
-	const auto currentScale = GetScale();
+	const auto currentScale = GetDrawScale();
 	const double bounceDuration = _bounceUpTime + _bounceDownTime;
 	const double cycleDuration = _characterDelay * _characters.size() + bounceDuration;
 

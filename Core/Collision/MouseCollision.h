@@ -1,12 +1,12 @@
 #pragma once
 #include <Math/Vector2D.h>
-#include <Scene.h>
+#include <VisualDebugScene.h>
 #include <Mouse/MouseEvent.h>
 #include <vector>
 #include <Scene/Texture/Sprite2D.h>
 #include <Camera.h>
 
-class MouseCollision : public Scene {
+class MouseCollision : public VisualDebugScene {
 protected:
 #ifdef _DEBUG
 	const unsigned int DEBUG_LINE_COLOR = GetColor(100, 255, 100);
@@ -74,7 +74,7 @@ public:
 		vertices.clear();
 	}
 	Vector2D Vertex2Global(const Vector2D& v) const {
-		return GetGlobalPosition() * Camera.GetZoom() + v * GetScale();
+		return GetGlobalPosition() + v * GetScale();
 	}
 	std::vector<Vector2D> GetEdges() const;
 	Vector2D GetNearestEdge(const Vector2D& point) const;

@@ -1,11 +1,11 @@
 #pragma once
 #include <Math/Vector2D.h>
-#include <Scene.h>
+#include <VisualDebugScene.h>
 #include <vector>
 #include <Scene/Texture/Sprite2D.h>
 #include <Camera.h>
 
-class Collision : public Scene {
+class Collision : public VisualDebugScene {
 protected:
 	std::vector<int> layers, masks;
 	std::list<std::weak_ptr<Collision>> collidingWith;

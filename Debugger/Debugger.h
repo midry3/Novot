@@ -47,6 +47,7 @@ struct DebuggerEvent {
 
 enum class DebuggerCommandType {
 	ToggleDebugMode,
+	ToggleCollisionDebugVisible,
 	Pause,
 	Resume,
 	StepFrame,
@@ -81,6 +82,7 @@ private:
 	HWND _LogEdit = nullptr;
 	HWND _PropertyView = nullptr;
 	HWND _DebugModeCheckBox = nullptr;
+	HWND _CollisionDebugCheckBox = nullptr;
 	HWND _ClearLogButton = nullptr;
 	HWND _FilterStatic = nullptr;
 	HWND _FilterEdit = nullptr;
@@ -127,6 +129,7 @@ private:
 	std::vector<std::string> _AssetNames;
 
 	static constexpr int DebugModeCheckBoxId = 1001;
+	static constexpr int CollisionDebugCheckBoxId = 1017;
 	static constexpr int ClearLogButtonId = 1002;
 	static constexpr int FilterEditId = 1003;
 	static constexpr int PauseButtonId = 1004;

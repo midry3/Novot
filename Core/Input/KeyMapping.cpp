@@ -8,6 +8,7 @@ void _KeyMapping::Update() {
 }
 
 bool _KeyMapping::IsActionPressing(const int action) {
+	if (!_gameInputEnabled) return false;
 	if (not mapping.contains(action)) return false;
 	for (int key : mapping[action]) {
 		if (keyState[key]) {
@@ -19,6 +20,7 @@ bool _KeyMapping::IsActionPressing(const int action) {
 }
 
 bool _KeyMapping::IsActionJustPressed(const int action) {
+	if (!_gameInputEnabled) return false;
 	if (not mapping.contains(action)) return false;
 	for (int key : mapping[action]) {
 		if (keyState[key] && not prevKeyState[key]) {

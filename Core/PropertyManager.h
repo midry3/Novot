@@ -20,6 +20,7 @@ public:
 private:
 #ifdef _DEBUG
     bool debugMode = true;
+    bool collisionDebugVisible = false;
 #endif
     Vector2D windowSize = Vector2D(1280, 720);
     int FPS = 60;
@@ -74,6 +75,13 @@ public:
     bool ToggleDebugMode() {
         debugMode = !debugMode;
         return debugMode;
+    }
+    bool IsCollisionDebugVisible() const {
+        return collisionDebugVisible;
+    }
+    bool ToggleCollisionDebugVisible() {
+        collisionDebugVisible = !collisionDebugVisible;
+        return collisionDebugVisible;
     }
     void BindProperty(const std::string& name, int* target) {
         auto it = std::find_if(_boundProperties.begin(), _boundProperties.end(), [&](const PropertyEntry& e) { return e.name == name; });

@@ -1,16 +1,12 @@
 #include "SceneManager.h"
 #include <Camera.h>
 #include <Scene/Shape/ColorRect.h>
+#include <Algorithm/Search.h>
 
 void _SceneManager::Init() {
 	_transEffect = std::make_shared<ColorRect>();
 	_transEffect->SetColor(GetColor(0, 0, 0))
 		->SetSize(Vector2D(1920, 1080));
-	Camera.ZoomChanged += [this](Vector2D oldZoom, Vector2D newZoom) {
-		if (currentScene) {
-			currentScene->SetScale(currentScene->GetScale() * newZoom / oldZoom);
-		}
-		};
 }
 
 void _SceneManager::SetCurrentScene(std::shared_ptr<Scene> scene) {
@@ -19,7 +15,6 @@ void _SceneManager::SetCurrentScene(std::shared_ptr<Scene> scene) {
 		_cancelUpdate = true;
 	}
 	currentScene = scene;
-	currentScene->SetScale(currentScene->GetScale() * Camera.GetZoom());
 	currentScene->Load();
 	DebuggerSetProperty("Current Scene", typeid(*currentScene).name());
 	DebuggerRefreshSceneTree();
@@ -42,6 +37,11 @@ void _SceneManager::TransSceneTo(std::shared_ptr<Scene> scene, double in, double
 
 void _SceneManager::Update(float dt) {
 	_drawTargets.clear();
+	_ySortDrawTargets.clear();
+	_drawUITargets.clear();
+#ifdef _DEBUG
+	_drawDebugTargets.clear();
+#endif
 	if (currentScene != nullptr) {
 		ClearCancelUpdate();
 		currentScene->Update(dt);
@@ -50,20 +50,46 @@ void _SceneManager::Update(float dt) {
 }
 
 void _SceneManager::EffectUpdate(float dt) {
-	for (auto& effectScene : effectScenes) {
+	for (auto& effectScene : _effectScenes) {
 		effectScene->Update(dt);
 	}
 }
 
 void _SceneManager::Draw() const {
-	for (auto& scene : _drawTargets) {
+	for (const auto& scene : _drawTargets) {
 		scene->Draw();
 	}
+	for (const auto& scene : _ySortDrawTargets) {
+		scene->Draw();
+	}
+	for (auto it = _drawUITargets.rbegin(); it != _drawUITargets.rend(); ++it) {
+		(*it)->Draw();
+	}
 	EffectDraw();
+#ifdef _DEBUG
+	DrawDebug();
+#endif
 }
 
 void _SceneManager::EffectDraw() const {
-	for (const auto& effectScene : effectScenes) {
+	for (const auto& effectScene : _effectScenes) {
 		effectScene->Draw();
+	}
+}
+
+void _SceneManager::AddDrawTarget(std::shared_ptr<Scene> scene) {
+	if (scene->IsYSortEnabled()) {
+		const double y = scene->GetYSortPriority();
+
+		for (auto it = _ySortDrawTargets.begin(); it != _ySortDrawTargets.end(); ++it) {
+			if (y <= (*it)->GetYSortPriority()) {
+				_ySortDrawTargets.insert(it, scene);
+				return;
+			}
+		}
+		_ySortDrawTargets.push_back(scene);
+	}
+	else {
+		_drawTargets.push_back(scene);
 	}
 }

@@ -35,14 +35,16 @@ void Collision::_Update(float dt) {
 
 std::vector<Vector2D> Collision::GetDrawVertices() const {
 	std::vector<Vector2D> res;
-	Vec2 camPos = Vec2D_0;
-	if (not IsIgnoringCamera()) {
-		camPos = Camera.GetPoint();
-	}
 	for (auto v : vertices) {
-		res.emplace_back(Transform(v) - camPos);
+		const auto worldV = Transform(v);
+		if (IsIgnoringCamera()) {
+			res.emplace_back(worldV);
+		}
+		else {
+			res.emplace_back(Camera.WorldToScreen(worldV));
+		}
 	}
-	Vector2D s = GetScale();
+	Vector2D s = GetDrawScale();
 	if ((s.x < 0) != (s.y < 0)) {
 		std::reverse(res.begin(), res.end());
 	}
@@ -141,7 +143,7 @@ void Collision::_Load() {
 }
 
 void Collision::_Draw() const {
-	if (not PropertyManager.IsDebugMode()) return;
+	if (not PropertyManager.IsDebugMode() || not PropertyManager.IsCollisionDebugVisible()) return;
 	auto verts = GetDrawVertices();
 	if (verts.size() < 2) return;
 	

@@ -10,11 +10,15 @@ class _SceneManager : public Singleton<_SceneManager> {
 private:
 	std::shared_ptr<Scene> currentScene;
 	std::shared_ptr<Scene> nextScene;
-	std::vector<std::shared_ptr<Scene>> effectScenes;
-	std::list<std::shared_ptr<Scene>> _drawTargets;
+	std::vector<std::shared_ptr<Scene>> _effectScenes,  _drawTargets, _drawUITargets;
+	std::list<std::shared_ptr<Scene>> _ySortDrawTargets;
 	std::shared_ptr<ColorRect> _transEffect;
 	int _nextID = 0;
 	bool _cancelUpdate = false;
+
+#ifdef _DEBUG
+	std::vector<std::shared_ptr<Scene>> _drawDebugTargets;
+#endif
 public:
 	void Init();
 	void Update(float dt);
@@ -30,20 +34,18 @@ public:
 		return scene;
 	}
 
-	void AddDrawTarget(std::shared_ptr<Scene> scene) {
-		_drawTargets.emplace_back(scene);
-	}
+	void AddDrawTarget(std::shared_ptr<Scene> scene);
 
-	void AddDrawTargetFront(std::shared_ptr<Scene> scene) {
-		_drawTargets.emplace_front(scene);
+	void AddDrawUITarget(std::shared_ptr<Scene> scene) {
+		_drawUITargets.push_back(scene);
 	}
 
 	void AddEffectScene(std::shared_ptr<Scene> scene) {
-		effectScenes.emplace_back(scene);
+		_effectScenes.push_back(scene);
 		scene->Load();
 	}
 	void DeleteEffectScene(std::shared_ptr<Scene> scene) {
-		std::erase_if(effectScenes, [&scene](const std::shared_ptr<Scene>& s) { return s == scene; });
+		std::erase_if(_effectScenes, [&scene](const std::shared_ptr<Scene>& s) { return s == scene; });
 	}
 	int GetID() {
 		return _nextID++;
@@ -64,6 +66,18 @@ public:
 		AddEffectScene(effect);
 		return effect;
 	}
+
+#ifdef _DEBUG
+	void AddDrawDebugTarget(std::shared_ptr<Scene> scene) {
+		_drawDebugTargets.emplace_back(scene);
+	}
+
+	void DrawDebug() const {
+		for (const auto& scene : _drawDebugTargets) {
+			scene->Draw();
+		}
+	}
+#endif
 };
 
 #define SceneManager _SceneManager::GetInstance()

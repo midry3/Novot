@@ -11,7 +11,7 @@ void Sprite2D::_Release() {
 
 void Sprite2D::_Draw() const {
 	auto pos = GetDrawPosition();
-	auto s = GetScale();
+	auto s = GetDrawScale();
 	int cx_in_image = static_cast<int>(_size.x / 2.0);
 	int cy_in_image = static_cast<int>(_size.y / 2.0);
 

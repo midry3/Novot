@@ -71,6 +71,10 @@ LRESULT CALLBACK Debugger::WindowProc(HWND window, UINT message, WPARAM wParam, 
 		debugger->PushCommand({ DebuggerCommandType::ToggleDebugMode });
 		return 0;
 	}
+	if (debugger && message == WM_COMMAND && LOWORD(wParam) == CollisionDebugCheckBoxId && HIWORD(wParam) == BN_CLICKED) {
+		debugger->PushCommand({ DebuggerCommandType::ToggleCollisionDebugVisible });
+		return 0;
+	}
 	if (debugger && message == WM_COMMAND && LOWORD(wParam) == ClearLogButtonId && HIWORD(wParam) == BN_CLICKED) {
 		debugger->_LogLines.clear();
 		debugger->_NeedsLogRefresh = true;
@@ -244,8 +248,10 @@ void Debugger::AdjustUI() {
 
 	const int treeHeaderTop = col2Top + controlHeight + 8;
 	const int debugChkW = 135;
+	const int collisionChkW = 145;
 	const int refreshBtnW = 110;
 	MoveWindow(_DebugModeCheckBox, col2Left, treeHeaderTop, debugChkW, controlHeight, TRUE);
+	MoveWindow(_CollisionDebugCheckBox, col2Left + debugChkW + 4, treeHeaderTop, collisionChkW, controlHeight, TRUE);
 	MoveWindow(_RefreshTreeButton, col2Left + col2Width - refreshBtnW, treeHeaderTop, refreshBtnW, controlHeight, TRUE);
 
 	const int audioPanelH = 350;
@@ -406,6 +412,9 @@ void Debugger::ProcessCommands() {
 		case DebuggerCommandType::ToggleDebugMode:
 			PropertyManager.ToggleDebugMode();
 			break;
+		case DebuggerCommandType::ToggleCollisionDebugVisible:
+			PropertyManager.ToggleCollisionDebugVisible();
+			break;
 		case DebuggerCommandType::Pause:
 			GameState.Pause();
 			break;
@@ -527,6 +536,13 @@ void Debugger::ThreadMain() {
 			_Window, reinterpret_cast<HMENU>(DebugModeCheckBoxId), GetModuleHandle(nullptr), nullptr
 		);
 		SendMessage(_DebugModeCheckBox, BM_SETCHECK, PropertyManager.IsDebugMode() ? BST_CHECKED : BST_UNCHECKED, 0);
+		_CollisionDebugCheckBox = CreateWindowEx(
+			0, "BUTTON", "Collision View",
+			WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+			790, 44, 145, 26,
+			_Window, reinterpret_cast<HMENU>(CollisionDebugCheckBoxId), GetModuleHandle(nullptr), nullptr
+		);
+		SendMessage(_CollisionDebugCheckBox, BM_SETCHECK, PropertyManager.IsCollisionDebugVisible() ? BST_CHECKED : BST_UNCHECKED, 0);
 
 		_PauseButton = CreateWindowEx(0, "BUTTON", GameState.IsPaused() ? "Resume" : "Pause", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 420, 12, 120, 26, _Window, reinterpret_cast<HMENU>(PauseButtonId), GetModuleHandle(nullptr), nullptr);
 		GameState.Paused.Connect([this]() {
@@ -585,6 +601,7 @@ void Debugger::ThreadMain() {
 			SendMessage(_FilterEdit, WM_SETFONT, reinterpret_cast<WPARAM>(_UIFont), TRUE);
 			SendMessage(_ClearLogButton, WM_SETFONT, reinterpret_cast<WPARAM>(_UIFont), TRUE);
 			SendMessage(_DebugModeCheckBox, WM_SETFONT, reinterpret_cast<WPARAM>(_UIFont), TRUE);
+			SendMessage(_CollisionDebugCheckBox, WM_SETFONT, reinterpret_cast<WPARAM>(_UIFont), TRUE);
 			SendMessage(_PauseButton, WM_SETFONT, reinterpret_cast<WPARAM>(_UIFont), TRUE);
 			SendMessage(_StepFrameButton, WM_SETFONT, reinterpret_cast<WPARAM>(_UIFont), TRUE);
 			SendMessage(_TimeScaleCombo, WM_SETFONT, reinterpret_cast<WPARAM>(_UIFont), TRUE);

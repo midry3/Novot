@@ -24,11 +24,13 @@ protected:
 	std::vector<std::weak_ptr<Timer>> _timers;
 	std::shared_ptr<PixelShader> _pixelShader;
 	int ID = 0, ZIdex = 0;
+	int _ySortOffset = 0;
 	bool visible = true;
 	bool _isIgnoreParentAlpha = false;
 	bool _ySortEnabled = false;
 	bool _isEnabled = true;
 	bool _ignoreCamera = false;
+	bool _isUI = false;
 	Vector<ConstantBufferData>  _constantBuffer;
 
 	virtual void _Load() {};
@@ -43,11 +45,11 @@ public:
 	Scene() : position(0, 0), offset(0, 0), scale(1, 1) {}
 	virtual ~Scene() = default;
 	void Draw() const;
-	void Clear();
+	virtual void Clear();
 	[[nodiscard]] bool IsShouldDraw() const;
-	void Load();
-	void Update(float dt);
-	void Release();
+	virtual void Load();
+	virtual void Update(float dt);
+	virtual void Release();
 	void Enable() {
 		_isEnabled = true;
 		VisibilityChanged.Emit(true);
@@ -82,6 +84,7 @@ public:
 
 	[[nodiscard]] Vector2D GetGlobalPosition() const;
 	[[nodiscard]] Vector2D GetDrawPosition() const;
+	[[nodiscard]] Vector2D GetDrawScale() const;
 	Scene* SetPosition(const Vector2D& pos) {
 		position = pos;
 		return this;
@@ -104,6 +107,22 @@ public:
 	}
 	[[nodiscard]] Vector2D GetScale() const;
 	[[nodiscard]] Vector2D GetParentScale() const;
+	Scene* SetYSortOffset(int offset) {
+		_ySortOffset = offset;
+		return this;
+	}
+	Scene* SetYSortOffsetRatio(double r) {
+		_ySortOffset = static_cast<int>(GetSize().y * r);
+		return this;
+	}
+	[[nodiscard]] double GetYSortPriority() const {
+		return GetDrawPosition().y + _ySortOffset;
+	}
+#ifdef _DEBUG
+	[[nodiscard]] Vector2D GetDrawYSortPoint() const {
+		return { GetDrawPosition().x, GetYSortPriority() };
+	}
+#endif
 	Scene* Move(const Vector2D& delta) {
 		position += delta;
 		return this;
@@ -185,6 +204,17 @@ public:
 		return _pixelShader ? _pixelShader : GetParentPixelShader();
 	}
 	[[nodiscard]] SharedPtr<Scene> GetChild(int index) const;
+	Scene* SetUIMode(bool isUI) {
+		_isUI = isUI;
+		return this;
+	}
+	[[nodiscard]] bool IsUIMode() const {
+		const auto& ptr = parent.lock();
+		if (ptr) {
+			return _isUI || ptr->IsUIMode();
+		}
+		return _isUI;
+	}
 	void DeleteScene(int index) {
 		_scenes.erase(_scenes.begin() + index);
 	}
@@ -227,6 +257,10 @@ public:
 	}
 	Scene* SetVisible(bool v) {
 		visible = v;
+		return this;
+	}
+	Scene* SetYSortEnabled(bool enabled) {
+		_ySortEnabled = enabled;
 		return this;
 	}
 	[[nodiscard]] bool IsYSortEnabled() const {

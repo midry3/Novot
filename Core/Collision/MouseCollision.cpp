@@ -7,6 +7,10 @@
 #include <Mouse/Mouse.h>
 
 void MouseCollision::_Update(float dt) {
+	if (!Mouse.AreEventsEnabled()) {
+		_isMouseWithin = false;
+		return;
+	}
 	if (not _enabled || Mouse.IsAlreadyHandled() || vertices.empty()) {
 		if (_isMouseWithin) {
 			_isMouseWithin = false;
@@ -33,14 +37,16 @@ void MouseCollision::_Update(float dt) {
 
 std::vector<Vector2D> MouseCollision::GetDrawVertices() const {
 	std::vector<Vector2D> res;
-	Vec2 camPos = Vec2D_0;
-	if (not IsIgnoringCamera()) {
-		camPos = Camera.GetPoint();
-	}
 	for (auto v : vertices) {
-		res.emplace_back(Vertex2Global(v) - camPos);
+		const auto worldV = Vertex2Global(v);
+		if (IsIgnoringCamera()) {
+			res.emplace_back(worldV);
+		}
+		else {
+			res.emplace_back(Camera.WorldToScreen(worldV));
+		}
 	}
-	Vector2D s = GetScale();
+	Vector2D s = GetDrawScale();
 	if ((s.x < 0) != (s.y < 0)) {
 		std::reverse(res.begin(), res.end());
 	}
@@ -98,13 +104,13 @@ Vector2D MouseCollision::GetNearestEdge(const Vector2D& point) const {
 }
 
 bool MouseCollision::IsWithin(const Vector2D& point) const {
-	auto verts = GetVertices();
+	auto verts = GetDrawVertices();
 	if (verts.size() < 3) return false;
 	bool inside = false;
 	for (size_t i = 0, j = verts.size() - 1; i < verts.size(); j = i++) {
-		if (((verts[i].y > point.y) != (verts[j].y > point.y)) &&
+		if (((point.y < verts[i].y) != (point.y < verts[j].y)) &&
 			(point.x < (verts[j].x - verts[i].x) * (point.y - verts[i].y) / (verts[j].y - verts[i].y) + verts[i].x)) {
-			inside = !inside;
+			inside = not inside;
 		}
 	}
 	return inside;
@@ -153,7 +159,7 @@ void MouseCollision::_Load() {
 }
 
 void MouseCollision::_Draw() const {
-	if (!PropertyManager.IsDebugMode()) return;
+	if (!PropertyManager.IsDebugMode() || !PropertyManager.IsCollisionDebugVisible()) return;
 	auto verts = GetDrawVertices();
 	if (verts.size() < 2) return;
 	NovotRenderer::DrawPolygon(verts, DEBUG_LINE_COLOR, true);

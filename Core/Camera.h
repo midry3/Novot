@@ -26,11 +26,15 @@ public:
 	Vector2D GetZoom() const {
 		return _zoom;
 	}
-	_Camera& SetZoom(const Vector2D& zoom) {
-		_zoom = zoom;
-		ZoomChanged.Emit(_zoom, zoom);
-		return *this;
+	_Camera& SetZoom(const Vector2D& zoom);
+	_Camera& SetZoom(double zoom) {
+		return SetZoom(Vector2D(zoom, zoom));
 	}
+	_Camera& SetZoom(double x, double y) {
+		return SetZoom(Vector2D(x, y));
+	}
+	Vector2D WorldToScreen(const Vector2D& worldPos) const;
+	Vector2D ScreenToWorld(const Vector2D& screenPos) const;
 	_Camera& SetMinimums(const Vector2D& minimums) {
 		_minimums = minimums;
 		return *this;

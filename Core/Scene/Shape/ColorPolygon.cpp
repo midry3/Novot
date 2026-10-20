@@ -3,5 +3,10 @@
 
 void ColorPolygon::_Draw() const {
 	auto pos = GetDrawPosition();
-	NovotRenderer::DrawPolygon(_polygon.RelatedTo(pos).GetVertices(), color, true);
+	auto s = GetDrawScale();
+	std::vector<Vector2D> verts;
+	for (const auto& v : _polygon.GetVertices()) {
+		verts.push_back(pos + v * s);
+	}
+	NovotRenderer::DrawPolygon(verts, color, true);
 }

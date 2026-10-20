@@ -9,11 +9,14 @@ double Abs(double a);
 
 int Max(int a, int b);
 double Max(double a, double b);
+Vector2D Max(const Vector2D& a, const Vector2D& b);
 int Min(int a, int b);
 double Min(double a, double b);
+Vector2D Min(const Vector2D& a, const Vector2D& b);
 
 int Clamp(int value, int min, int max);
 double Clamp(double value, double min, double max);
+Vector2D Clamp(const Vector2D& value, const Vector2D& min, const Vector2D& max);
 
 int Sign(double x);
 

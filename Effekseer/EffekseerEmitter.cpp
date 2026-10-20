@@ -4,7 +4,7 @@
 void EffekseerEmitter2D::_Update(float dt) {
 	if (_effect) {
 		SetPosPlayingEffekseer2DEffect(_effectHandle, GetDrawPosition().x, GetDrawPosition().y, 0);
-		SetScalePlayingEffekseer2DEffect(_effectHandle, GetScale().x, GetScale().y, 1.0f);
+		SetScalePlayingEffekseer2DEffect(_effectHandle, GetDrawScale().x, GetDrawScale().y, 1.0f);
 	}
 }
 

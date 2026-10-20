@@ -29,12 +29,20 @@ double Max(double a, double b) {
 	return (a > b) ? a : b;
 }
 
+Vector2D Max(const Vector2D& a, const Vector2D& b) {
+	return Vector2D(Max(a.x, b.x), Max(a.y, b.y));
+}
+
 int Min(int a, int b) {
 	return (a < b) ? a : b;
 }
 
 double Min(double a, double b) {
 	return (a < b) ? a : b;
+}
+
+Vector2D Min(const Vector2D& a, const Vector2D& b) {
+	return Vector2D(Min(a.x, b.x), Min(a.y, b.y));
 }
 
 int Clamp(int value, int min, int max) {
@@ -47,6 +55,10 @@ double Clamp(double value, double min, double max) {
 	if (value < min) return min;
 	if (value > max) return max;
 	return value;
+}
+
+Vector2D Clamp(const Vector2D& value, const Vector2D& min, const Vector2D& max) {
+	return Vector2D(Clamp(value.x, min.x, max.x), Clamp(value.y, min.y, max.y));
 }
 
 int Sign(double x) {

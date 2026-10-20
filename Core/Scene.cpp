@@ -50,25 +50,35 @@ void Scene::Update(float dt) {
 	if (SceneManager.IsCancelUpdate()) {
 		return;
 	}
+	if (IsShouldDraw()) {
+		if (IsUIMode()) {
+			SceneManager.AddDrawUITarget(shared_from_this());
+		}
+		else {
+			SceneManager.AddDrawTarget(shared_from_this());
+		}
+	}
 	const auto scenesCopy = _scenes;
 	for (auto it=scenesCopy.rbegin(); it!=scenesCopy.rend(); ++it) {
 		(*it)->Update(dt);
-	}
-	if (IsShouldDraw()) {
-		SceneManager.AddDrawTargetFront(shared_from_this());
 	}
 }
 
 void Scene::Draw() const {
 	if (not IsShouldDraw()) return;
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, GetAlpha());
-	SetDrawBright(modulate.x, modulate.y, modulate.z);
+	SetDrawBright(static_cast<int>(modulate.x), static_cast<int>(modulate.y), static_cast<int>(modulate.z));
 	if (_pixelShader && not _constantBuffer.empty()) {
 		for (const auto& cb : _constantBuffer) {
 			SetShaderConstantBuffer(cb.handle, _pixelShader->GetHandle(), cb.slot);
 		}
 	}
 	_Draw();
+#if defined(_DEBUG)
+	if (PropertyManager.IsDebugMode()) {
+		NovotRenderer::DrawPoint(GetDrawYSortPoint(), GetColor(255, 0, 0), 10);
+	}
+#endif
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
@@ -104,7 +114,14 @@ Vector2D Scene::GetDrawPosition() const {
 	if (IsIgnoringCamera()) {
 		return GetGlobalPosition();
 	}
-	return (GetGlobalPosition() * Camera.GetZoom() - Camera.GetPoint());
+	return Camera.WorldToScreen(GetGlobalPosition());
+}
+
+Vector2D Scene::GetDrawScale() const {
+	if (IsIgnoringCamera()) {
+		return GetScale();
+	}
+	return GetScale() * Camera.GetZoom();
 }
 
 Scene* Scene::SetGlobalPosition(const Vector2D& pos) {

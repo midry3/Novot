@@ -13,6 +13,7 @@ class _KeyMapping : public Singleton<_KeyMapping> {
 private:
 	std::map<int, std::list<int>> mapping;
 	bool _isDetected = false;
+	bool _gameInputEnabled = true;
 public:
 	char keyState[256] = {}, prevKeyState[256] = {};
 	_KeyMapping() = default;
@@ -27,6 +28,10 @@ public:
 	}
 	bool IsActionPressing(const int action);
 	bool IsActionJustPressed(const int action);
+	void SetGameInputEnabled(bool enabled) { _gameInputEnabled = enabled; }
+	bool IsGameInputEnabled() const { return _gameInputEnabled; }
+	bool IsRawKeyPressing(int key) const { return key >= 0 && key < 256 && keyState[key] != 0; }
+	bool IsRawKeyJustPressed(int key) const { return key >= 0 && key < 256 && keyState[key] && !prevKeyState[key]; }
 	void StartDetect() {
 		_isDetected = false;
 	}

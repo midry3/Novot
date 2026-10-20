@@ -16,44 +16,39 @@ void  _Mouse::UpdateMouseEvent() {
 	else {
 		_currentMouseEvent.scrollOffset = Vector2D(0, static_cast<double>(offset));
 	}
-	if (offset != 0) {
+	if (_eventsEnabled && offset != 0) {
 		Scrolled.Emit(_currentMouseEvent);
 	}
 	_currentMouseEvent.position = Vector2D(static_cast<double>(x), static_cast<double>(y));
-	if (const auto scene = SceneManager.GetCurrentScene()) {
-		_currentMouseEvent.globalPosition = _currentMouseEvent.position + scene->GetGlobalPosition();
-	}
-	else {
-		_currentMouseEvent.globalPosition = _currentMouseEvent.position;
-	}
+	_currentMouseEvent.globalPosition = Camera.ScreenToWorld(_currentMouseEvent.position);
 	_currentMouseEvent.delta = _currentMouseEvent.position - preEvent.position;
 	if (input & MOUSE_INPUT_LEFT) {
 		_currentMouseEvent.button = MouseButton::Left;
 		_currentMouseEvent.state = MouseButtonState::Pressed;
-		LeftPressed.Emit(_currentMouseEvent);
+		if (_eventsEnabled) LeftPressed.Emit(_currentMouseEvent);
 	}
 	else if (input & MOUSE_INPUT_RIGHT) {
 		_currentMouseEvent.button = MouseButton::Right;
 		_currentMouseEvent.state = MouseButtonState::Pressed;
-		RightPressed.Emit(_currentMouseEvent);
+		if (_eventsEnabled) RightPressed.Emit(_currentMouseEvent);
 	}
 	else if (input & MOUSE_INPUT_MIDDLE) {
 		_currentMouseEvent.button = MouseButton::Middle;
 		_currentMouseEvent.state = MouseButtonState::Pressed;
-		MiddlePressed.Emit(_currentMouseEvent);
+		if (_eventsEnabled) MiddlePressed.Emit(_currentMouseEvent);
 	}
 	else {
 		if (preEvent.state == MouseButtonState::Pressed) {
 			_currentMouseEvent.state = MouseButtonState::Released;
 			switch (preEvent.button) {
 			case MouseButton::Left:
-				LeftReleased.Emit(_currentMouseEvent);
+				if (_eventsEnabled) LeftReleased.Emit(_currentMouseEvent);
 				break;
 			case MouseButton::Middle:
-				MiddleReleased.Emit(_currentMouseEvent);
+				if (_eventsEnabled) MiddleReleased.Emit(_currentMouseEvent);
 				break;
 			case MouseButton::Right:
-				RightReleased.Emit(_currentMouseEvent);
+				if (_eventsEnabled) RightReleased.Emit(_currentMouseEvent);
 				break;
 			}
 		}
@@ -64,6 +59,6 @@ void  _Mouse::UpdateMouseEvent() {
 	}
 	_currentMouseEvent.just = (preEvent.state != _currentMouseEvent.state);
 	if (preEvent.position != _currentMouseEvent.position) {
-		Moved.Emit(_currentMouseEvent);
+		if (_eventsEnabled) Moved.Emit(_currentMouseEvent);
 	}
 }

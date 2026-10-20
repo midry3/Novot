@@ -88,12 +88,12 @@ void  TextLabel::_Draw() const {
 		lineSpacing = _fontSize;
 	}
 
-	const auto s = GetScale();
+	const auto s = GetDrawScale();
 	const auto lines = WrapText(text, _width, _fontHandle);
 	for (size_t index = 0; index < lines.size(); ++index) {
 		DrawExtendStringToHandle(
 			static_cast<int>(pos.x),
-			static_cast<int>(pos.y) + static_cast<int>(index) * lineSpacing,
+			static_cast<int>(pos.y + static_cast<double>(index * lineSpacing) * s.y),
 			s.x, s.y,
 			lines[index].c_str(),
 			foregroundColor,

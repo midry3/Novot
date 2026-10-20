@@ -183,12 +183,12 @@ void FormatTextLabel::_Draw() const {
 	if (_fontHandle == -1) return;
 
 	const auto pos = GetDrawPosition();
-	const auto s = GetScale();
+	const auto s = GetDrawScale();
 
 	for (const auto& segment : _segments) {
 		DrawExtendNStringToHandle(
-			static_cast<int>(pos.x + segment.position.x),
-			static_cast<int>(pos.y + segment.position.y),
+			static_cast<int>(pos.x + segment.position.x * s.x),
+			static_cast<int>(pos.y + segment.position.y * s.y),
 			s.x, s.y,
 			segment.text.c_str(),
 			static_cast<int>(segment.text.size()),
@@ -196,10 +196,10 @@ void FormatTextLabel::_Draw() const {
 			_fontHandle
 		);
 		if (segment.underline) {
-			int underlineY = static_cast<int>(pos.y + segment.position.y + GetFontLineSpaceToHandle(_fontHandle) - 2);
-			int underlineStartX = static_cast<int>(pos.x + segment.position.x);
-			int underlineEndX = underlineStartX + GetDrawNStringWidthToHandle(segment.text.c_str(), static_cast<int>(segment.text.size()), _fontHandle, FALSE);
-			NovotRenderer::DrawLine(Vector2D(underlineStartX, underlineY), Vector2D(underlineEndX, underlineY), segment.color, 4);
+			int underlineY = static_cast<int>(pos.y + (segment.position.y + GetFontLineSpaceToHandle(_fontHandle) - 2) * s.y);
+			int underlineStartX = static_cast<int>(pos.x + segment.position.x * s.x);
+			int underlineEndX = underlineStartX + static_cast<int>(GetDrawNStringWidthToHandle(segment.text.c_str(), static_cast<int>(segment.text.size()), _fontHandle, FALSE) * s.x);
+			NovotRenderer::DrawLine(Vector2D(underlineStartX, underlineY), Vector2D(underlineEndX, underlineY), segment.color, static_cast<int>(4 * s.y));
 		}
 	}
 }
