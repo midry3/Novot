@@ -4,20 +4,9 @@
 
 ## Luaシーン機能
 
-設計案は [LUA_INTEGRATION.md](LUA_INTEGRATION.md)。シーン定義とC++シーンへのスクリプト添付の両方を対象とする。
+回答を受けて合意済み仕様へ反映しました。詳細は[確定仕様](../spec/LUA_INTEGRATION.md)を参照。
 
-1. Luaの依存方法はどれにするか。推奨案はLuaソースをNovotリポジトリに含めて静的ライブラリへ組み込む方法。
-
-A. それで
-
-2. 初期バージョンで対応する標準型は `Scene`、`Object2D`、`Sprite2D`、`ColorRect`、`Button` でよいか。
-
-A. `TextLabel`、`AnimatedSprite2D` も
-
-3. Luaシーン定義は、Luaテーブルを返す形式を初期案とする。ビルダーAPIを優先したいか。
-
-A. 初期案で
-
-4. Lua状態はゲーム全体で共有する初期案とする。シーン単位で分ける必要があるか。
-
-A. シーン単位で持ちたい
+- Lua 5.5.1を同梱して静的リンクする。
+- `TextLabel`と`AnimatedSprite2D`を初期対応型へ追加する。
+- Luaテーブルを返すシーン定義を採用する。
+- Lua状態はシーンごとに所有する。

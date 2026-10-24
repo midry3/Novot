@@ -8,6 +8,7 @@
 
 class TweenGroup;
 class Timer;
+class LuaSceneScript;
 
 class Scene : public std::enable_shared_from_this<Scene> {
 protected:
@@ -23,6 +24,7 @@ protected:
 	std::vector<std::weak_ptr<TweenGroup>> _tweenGroups;
 	std::vector<std::weak_ptr<Timer>> _timers;
 	std::shared_ptr<PixelShader> _pixelShader;
+	LuaSceneScript* _luaScript = nullptr;
 	int ID = 0, ZIdex = 0;
 	int _ySortOffset = 0;
 	bool visible = true;
@@ -43,13 +45,17 @@ public:
 	Vector2D position, offset, scale;
 	Vector3D modulate = Vector3D(255, 255, 255);
 	Scene() : position(0, 0), offset(0, 0), scale(1, 1) {}
-	virtual ~Scene() = default;
+	virtual ~Scene();
 	void Draw() const;
 	virtual void Clear();
 	[[nodiscard]] bool IsShouldDraw() const;
 	virtual void Load();
 	virtual void Update(float dt);
 	virtual void Release();
+	bool AttachLuaScript(const fs::path& path);
+	bool IsLuaScriptLoaded() const;
+	void BindLuaButtonEvents(Scene* target, const std::vector<std::pair<std::string, std::string>>& events);
+	void BindLuaAnimatedSpriteEvents(Scene* target, const std::vector<std::pair<std::string, std::string>>& events);
 	void Enable() {
 		_isEnabled = true;
 		VisibilityChanged.Emit(true);

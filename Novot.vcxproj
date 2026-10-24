@@ -81,8 +81,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;ThirdParty\Lua\src;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -104,7 +104,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;ThirdParty\Lua\src;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -123,8 +123,8 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;ThirdParty\Lua\src;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -146,7 +146,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;C:\Users\midry\c++\EffekseerForDXLib_1.80.7_324f\プロジェクトに追加すべきファイル_VC用;Core;ThirdParty\Lua\src;C:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -159,6 +159,168 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ThirdParty\Lua\src\lzio.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lvm.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lutf8lib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lundump.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\ltm.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\ltablib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\ltable.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lstrlib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lstring.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lstate.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lparser.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\loslib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lopcodes.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lobject.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\loadlib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lmem.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lmathlib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\llex.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\liolib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\linit.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lgc.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lfunc.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\ldump.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\ldo.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\ldebug.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\ldblib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lctype.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lcorolib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lcode.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lbaselib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lauxlib.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\Lua\src\lapi.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+    </ClCompile>
+    <ClCompile Include="Core\Lua\LuaSceneLoader.cpp" />
+    <ClCompile Include="Core\Lua\LuaSceneScript.cpp" />
     <ClCompile Include="Core\Animation\EasingFunction.cpp" />
     <ClCompile Include="Core\Asset\Data\Json.cpp" />
     <ClCompile Include="Core\Asset\Model\MV1.cpp" />
@@ -223,6 +385,8 @@
     <ClCompile Include="Novot.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Lua\LuaSceneLoader.h" />
+    <ClInclude Include="Core\Lua\LuaSceneScript.h" />
     <ClInclude Include="Core\Algorithm\Search.h" />
     <ClInclude Include="Core\Animation\EasingFunction.h" />
     <ClInclude Include="Core\Asset\AssetManager.h" />

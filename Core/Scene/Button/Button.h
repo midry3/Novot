@@ -1,6 +1,8 @@
 #pragma once
 #include <Collision/MouseCollision.h>
 #include <Scene.h>
+#include <concepts>
+#include <type_traits>
 #include <vector>
 
 class Button : public Scene {
@@ -13,6 +15,7 @@ public:
 	Button() = default;
 	~Button() = default;
 	template<typename... Args>
+	requires (std::same_as<std::remove_cvref_t<Args>, Vector2D> && ...)
 	Button* SetArea(Args&&... args) {
 		areaVertices.clear();
 		for (auto p : std::initializer_list<Vector2D>{(args)...}) {
@@ -24,6 +27,14 @@ public:
 				auto areaVertex = vertex;
 				collision->AddVertices(areaVertex);
 			}
+		}
+		return this;
+	}
+	Button* SetArea(const std::vector<Vector2D>& vertices) {
+		areaVertices = vertices;
+		if (collision) {
+			collision->ClearVertices();
+			collision->AddVertices(areaVertices);
 		}
 		return this;
 	}

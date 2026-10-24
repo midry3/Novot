@@ -3,6 +3,7 @@
 
 void Button::_Load() {
 	collision = CreateScene<MouseCollision>();
+	collision->AddVertices(areaVertices);
 	collision->LeftPressed.Connect([this](const MouseEvent& event) {
 		LeftPressed.Emit(event);
 		});

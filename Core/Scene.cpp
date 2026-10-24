@@ -4,6 +4,13 @@
 #include <Timer.h>
 #include <Camera.h>
 #include <Graphic/2D.h>
+#include <Lua/LuaSceneScript.h>
+#include <Scene/Button/Button.h>
+#include <Scene/Texture/AnimatedSprite2D.h>
+
+Scene::~Scene() {
+	delete _luaScript;
+}
 
 bool Scene::IsShouldDraw() const {
 	if (not visible || not _isEnabled) return false;
@@ -22,7 +29,12 @@ void Scene::Clear() {
 }
 
 void Scene::Load() {
-	if (_isLoaded) return;
+	if (_isLoaded) {
+		if (_luaScript and not _luaScript->IsLoaded()) {
+			_luaScript->Load();
+		}
+		return;
+	}
 	ID = SceneManager.GetID();
 	_Load();
 	auto scenesCopy = _scenes;
@@ -31,10 +43,16 @@ void Scene::Load() {
 		s->Load();
 	}
 	_isLoaded = true;
+	if (_luaScript) {
+		_luaScript->Load();
+	}
 }
 
 void Scene::Release() {
 	_Release();
+	if (_luaScript) {
+		_luaScript->Release();
+	}
 	
 	const auto scenesCopy = _scenes;
 	for (const auto& s : scenesCopy) {
@@ -47,6 +65,9 @@ void Scene::Update(float dt) {
 		return;
 	}
 	_Update(dt);
+	if (_luaScript) {
+		_luaScript->Update(dt);
+	}
 	if (SceneManager.IsCancelUpdate()) {
 		return;
 	}
@@ -61,6 +82,31 @@ void Scene::Update(float dt) {
 	const auto scenesCopy = _scenes;
 	for (auto it=scenesCopy.rbegin(); it!=scenesCopy.rend(); ++it) {
 		(*it)->Update(dt);
+	}
+}
+
+bool Scene::AttachLuaScript(const fs::path& path) {
+	delete _luaScript;
+	_luaScript = new LuaSceneScript(this, path.string());
+	if (_isLoaded) {
+		return _luaScript->Load();
+	}
+	return true;
+}
+
+bool Scene::IsLuaScriptLoaded() const {
+	return _luaScript and _luaScript->IsLoaded();
+}
+
+void Scene::BindLuaButtonEvents(Scene* target, const std::vector<std::pair<std::string, std::string>>& events) {
+	if (_luaScript) {
+		_luaScript->BindButton(dynamic_cast<Button*>(target), events);
+	}
+}
+
+void Scene::BindLuaAnimatedSpriteEvents(Scene* target, const std::vector<std::pair<std::string, std::string>>& events) {
+	if (_luaScript) {
+		_luaScript->BindAnimatedSprite(dynamic_cast<AnimatedSprite2D*>(target), events);
 	}
 }
 

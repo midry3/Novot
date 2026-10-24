@@ -6,3 +6,5 @@
 ## 仕様案
 
 - [Luaによるシーン構成とイベント処理](LUA_INTEGRATION.md)
+- [Map1のLua移行に必要な拡張案](MAP1_LUA_MIGRATION.md)
+
