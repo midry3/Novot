@@ -17,7 +17,7 @@ protected:
 	std::unique_ptr<SimulationResult> _simulationResult;
 	std::shared_ptr<Collision> CreateCollision();
 	bool isColliding = false;
-	int _maxClimbHeight = 5;
+	int _maxClimbHeight = 5, _maxSlideWidth = 15;
 
 	void _Load() override;
 	void _Update(float dt) override;
