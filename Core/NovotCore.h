@@ -9,6 +9,7 @@
 #include "Asset/Sound/SoundManager.h"
 
 #include "Input/KeyMapping.h"
+#include "Input/Input.h"
 #include "GameState.h"
 #include "Event/Signal.h"
 #include "String/FontManager.h"

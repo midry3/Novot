@@ -42,6 +42,7 @@ protected:
 public:
 	Signal<bool> VisibilityChanged;
 	int alpha = 255;
+	double rotation = 0.0;
 	Vector2D position, offset, scale;
 	Vector3D modulate = Vector3D(255, 255, 255);
 	Scene() : position(0, 0), offset(0, 0), scale(1, 1) {}
@@ -147,6 +148,24 @@ public:
 			return std::clamp(alpha * ptr->GetAlpha() / 255, 0, 255);
 		}
 		return alpha;
+	}
+	Scene* SetRotation(double r) {
+		rotation = r;
+		return this;
+	}
+	[[nodiscard]] double GetRotation() const {
+		if (auto ptr = parent.lock()) {
+			return rotation + ptr->GetRotation();
+		}
+		return rotation;
+	}
+	Scene* RotateDegree(double degree) {
+		rotation = degree * PI / 180.0;
+		return this;
+	}
+	Scene* RotateTurn(double turn) {
+		rotation = turn * 2 * PI;
+		return this;
 	}
 	Scene* IgnoreParentAlpha() {
 		_isIgnoreParentAlpha = true;

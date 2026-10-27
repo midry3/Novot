@@ -10,9 +10,18 @@ double Abs(double a);
 int Max(int a, int b);
 double Max(double a, double b);
 Vector2D Max(const Vector2D& a, const Vector2D& b);
+template <typename T>
+T Max(const T& a, const T& b) {
+	return a > b ? a : b;
+}
+
 int Min(int a, int b);
 double Min(double a, double b);
 Vector2D Min(const Vector2D& a, const Vector2D& b);
+template <typename T>
+T Min(const T& a, const T& b) {
+	return a < b ? a : b;
+}
 
 int Clamp(int value, int min, int max);
 double Clamp(double value, double min, double max);

@@ -159,6 +159,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Input\Input.cpp" />
     <ClCompile Include="ThirdParty\Lua\src\lzio.c">
       <CompileAs>CompileAsC</CompileAs>
       <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
@@ -385,6 +386,7 @@
     <ClCompile Include="Novot.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Input\Input.h" />
     <ClInclude Include="Core\Lua\LuaSceneLoader.h" />
     <ClInclude Include="Core\Lua\LuaSceneScript.h" />
     <ClInclude Include="Core\Algorithm\Search.h" />

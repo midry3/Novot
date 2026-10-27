@@ -27,7 +27,7 @@ void Sprite2D::_Draw() const {
 			cy_in_image,
 			s.x,
 			s.y,
-			rotation,
+			GetRotation(),
 			_handle,
 			TRUE,
 			pShader->GetHandle(),
@@ -42,7 +42,7 @@ void Sprite2D::_Draw() const {
 			cy_in_image,
 			s.x,
 			s.y,
-			rotation,
+			GetRotation(),
 			_handle,
 			TRUE
 		);

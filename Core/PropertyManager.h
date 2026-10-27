@@ -19,7 +19,7 @@ public:
 
 private:
 #ifdef _DEBUG
-    bool debugMode = true;
+    bool debugMode = false;
     bool collisionDebugVisible = false;
 #endif
     Vector2D windowSize = Vector2D(1280, 720);

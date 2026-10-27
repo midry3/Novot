@@ -9,8 +9,18 @@
 #include <Scene/Texture/Sprite2D.h>
 #include <lua.hpp>
 #include <filesystem>
+#include <unordered_map>
 
 namespace {
+	struct RegisteredType {
+		LuaSceneLoader::TypeFactory factory;
+		LuaSceneLoader::TypeConfigurator configurator;
+	};
+	std::unordered_map<std::string, RegisteredType>& RegisteredTypes() {
+		static std::unordered_map<std::string, RegisteredType> types;
+		return types;
+	}
+
 	struct PendingEvents {
 		Scene* scene;
 		std::vector<std::pair<std::string, std::string>> events;
@@ -30,6 +40,8 @@ namespace {
 		if (type == "TextLabel") return std::make_shared<TextLabel>();
 		if (type == "ColorRect") return std::make_shared<ColorRect>();
 		if (type == "Button") return std::make_shared<Button>();
+		const auto registered = RegisteredTypes().find(type);
+		if (registered != RegisteredTypes().end() && registered->second.factory) return registered->second.factory();
 		return nullptr;
 	}
 
@@ -125,6 +137,14 @@ namespace {
 			double color = -1;
 			if (GetOptionalNumber(state, table, "color", color)) rect->SetColor(static_cast<unsigned int>(color));
 		}
+		const auto registered = RegisteredTypes().find(type);
+		if (registered != RegisteredTypes().end() && registered->second.configurator) {
+			const int nodeTable = lua_absindex(state, table);
+			if (not registered->second.configurator(scene, state, nodeTable, context.sourcePath, &context.error)) {
+				if (context.error.empty()) context.error = "Could not configure scene type: " + type;
+				return nullptr;
+			}
+		}
 		if (auto button = std::dynamic_pointer_cast<Button>(scene)) {
 			lua_getfield(state, table, "area");
 			if (lua_istable(state, -1)) {
@@ -181,6 +201,17 @@ namespace {
 		}
 		return scene;
 	}
+}
+
+bool LuaSceneLoader::RegisterType(const std::string& type, TypeFactory factory, TypeConfigurator configurator) {
+	if (type.empty() || not factory) return false;
+	if (type == "Scene" || type == "Object2D" || type == "Sprite2D" || type == "AnimatedSprite2D" ||
+		type == "TextLabel" || type == "ColorRect" || type == "Button") return false;
+	return RegisteredTypes().emplace(type, RegisteredType{ std::move(factory), std::move(configurator) }).second;
+}
+
+bool LuaSceneLoader::UnregisterType(const std::string& type) {
+	return RegisteredTypes().erase(type) != 0;
 }
 
 std::shared_ptr<Scene> LuaSceneLoader::Load(const std::filesystem::path& path, std::string* errorMessage) {

@@ -52,7 +52,7 @@ namespace Novot {
 #if defined(_DEBUG) and not defined(_NOVOT_NO_DEBUGGER)
 		DebuggerProcessCommands();
 #endif
-		KeyMapping.Update();
+		KeyInput.Update();
 		TimerManager.Update(dt);
 
 		bool shouldUpdate = !GameState.IsPaused();

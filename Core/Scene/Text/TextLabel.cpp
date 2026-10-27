@@ -99,6 +99,7 @@ void  TextLabel::_Draw() const {
 			foregroundColor,
 			_fontHandle
 		);
+		
 	}
 }
 

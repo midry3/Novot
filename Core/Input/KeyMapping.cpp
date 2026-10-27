@@ -1,17 +1,11 @@
 #include "KeyMapping.h"
-
-void _KeyMapping::Update() {
-	for (int i = 0; i < 256; i++) {
-		prevKeyState[i] = keyState[i];
-	}
-	GetHitKeyStateAll(keyState);
-}
+#include "Input.h"
 
 bool _KeyMapping::IsActionPressing(const int action) {
 	if (!_gameInputEnabled) return false;
 	if (not mapping.contains(action)) return false;
 	for (int key : mapping[action]) {
-		if (keyState[key]) {
+		if (KeyInput.IsKeyPressing(key)) {
 			_isDetected = true;
 			return true;
 		}
@@ -23,7 +17,7 @@ bool _KeyMapping::IsActionJustPressed(const int action) {
 	if (!_gameInputEnabled) return false;
 	if (not mapping.contains(action)) return false;
 	for (int key : mapping[action]) {
-		if (keyState[key] && not prevKeyState[key]) {
+		if (KeyInput.IsKeyPressing(key) && not KeyInput.IsKeyPressingPrev(key)) {
 			_isDetected = true;
 			return true;
 		}

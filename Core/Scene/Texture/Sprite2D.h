@@ -19,7 +19,6 @@ protected:
 	void _Draw() const override;
 public:
 	Signal<> TextureChanged;
-	double rotation = 0.0;
 	virtual void GetUVRect(float& uMin, float& vMin, float& uMax, float& vMax) const {
 		uMin = 0.0f;
 		vMin = 0.0f;
@@ -73,10 +72,6 @@ public:
 		_size = Vec2(x, y);
 		_handle = GetHandle();
 		AdjustScale();
-	}
-	Sprite2D* RotateDegree(double degree) {
-		rotation = degree * PI / 180.0;
-		return this;
 	}
 	[[nodiscard]] Vector2D GetThisSize() const override {
 		return _size * GetScale();

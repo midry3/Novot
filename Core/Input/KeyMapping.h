@@ -15,10 +15,8 @@ private:
 	bool _isDetected = false;
 	bool _gameInputEnabled = true;
 public:
-	char keyState[256] = {}, prevKeyState[256] = {};
 	_KeyMapping() = default;
 	~_KeyMapping() = default;
-	void Update();
 	template <typename... Args>
 	requires (std::same_as<Args, int> && ...)
 	void RegisterMapping(const int action, Args... keys) {
@@ -30,8 +28,6 @@ public:
 	bool IsActionJustPressed(const int action);
 	void SetGameInputEnabled(bool enabled) { _gameInputEnabled = enabled; }
 	bool IsGameInputEnabled() const { return _gameInputEnabled; }
-	bool IsRawKeyPressing(int key) const { return key >= 0 && key < 256 && keyState[key] != 0; }
-	bool IsRawKeyJustPressed(int key) const { return key >= 0 && key < 256 && keyState[key] && !prevKeyState[key]; }
 	void StartDetect() {
 		_isDetected = false;
 	}
