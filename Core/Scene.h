@@ -43,7 +43,7 @@ public:
 	Signal<bool> VisibilityChanged;
 	int alpha = 255;
 	double rotation = 0.0;
-	Vector2D position, offset, scale;
+	Vector2D position, offset, scale, rotationCenter;
 	Vector3D modulate = Vector3D(255, 255, 255);
 	Scene() : position(0, 0), offset(0, 0), scale(1, 1) {}
 	virtual ~Scene();
@@ -91,6 +91,7 @@ public:
 
 	[[nodiscard]] Vector2D GetGlobalPosition() const;
 	[[nodiscard]] Vector2D GetDrawPosition() const;
+	[[nodiscard]] Vector2D GetDrawPoint(const Vector2D& localPosition) const;
 	[[nodiscard]] Vector2D GetDrawScale() const;
 	Scene* SetPosition(const Vector2D& pos) {
 		position = pos;
@@ -166,6 +167,16 @@ public:
 	Scene* RotateTurn(double turn) {
 		rotation = turn * 2 * PI;
 		return this;
+	}
+	Scene* SetRotationCenter(const Vector2D& center) {
+		rotationCenter = center;
+		return this;
+	}
+	[[nodiscard]] Vector2D GetRotationCenter() const {
+		if (auto ptr = parent.lock()) {
+			return rotationCenter + ptr->GetRotationCenter();
+		}
+		return rotationCenter;
 	}
 	Scene* IgnoreParentAlpha() {
 		_isIgnoreParentAlpha = true;

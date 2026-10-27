@@ -44,7 +44,7 @@ else {
 }
 ```
 
-対応する型は`Scene`、`Object2D`、`Sprite2D`、`AnimatedSprite2D`、`TextLabel`、`ColorRect`、`Button`です。共通プロパティは`name`、`position`、`offset`、`scale`、`alpha`、`visible`です。`Sprite2D`系は`texture`、`TextLabel`は`text`と`width`、`ColorRect`は`size`と`color`を設定できます。テクスチャの相対パスはLuaファイルの場所から解決します。
+対応する型は`Scene`、`Object2D`、`Sprite2D`、`AnimatedSprite2D`、`TextLabel`、`ColorRect`、`Button`です。共通プロパティは`name`、`position`、`offset`、`scale`、`rotation`（ラジアン）、`alpha`、`visible`です。親シーンの回転は子の配置にも反映されます。`Sprite2D`系は`texture`、`TextLabel`は`text`と`width`、`ColorRect`は`size`と`color`を設定できます。テクスチャの相対パスはLuaファイルの場所から解決します。
 
 イベント名はButtonで`left_pressed`、`left_released`、AnimatedSprite2Dで`animation_changed`、`animation_finished`を使えます。Buttonに`area`の頂点配列または`size`を指定するとクリック領域になります。イベント関数には対象シーンとイベント情報が渡ります。マウスイベント情報は`position`、`global_position`、`just`を持つテーブルです。
 

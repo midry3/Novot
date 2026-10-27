@@ -24,6 +24,9 @@ namespace {
 		else if (std::strcmp(key, "alpha") == 0) {
 			lua_pushinteger(state, scene->alpha);
 		}
+		else if (std::strcmp(key, "rotation") == 0) {
+			lua_pushnumber(state, scene->rotation);
+		}
 		else if (std::strcmp(key, "visible") == 0) {
 			lua_pushboolean(state, scene->IsVisible());
 		}
@@ -63,6 +66,7 @@ namespace {
 		const char* key = luaL_checkstring(state, 2);
 		if (std::strcmp(key, "name") == 0) scene->SetName(luaL_checkstring(state, 3));
 		else if (std::strcmp(key, "alpha") == 0) scene->SetAlpha(static_cast<int>(luaL_checkinteger(state, 3)));
+		else if (std::strcmp(key, "rotation") == 0) scene->SetRotation(luaL_checknumber(state, 3));
 		else if (std::strcmp(key, "visible") == 0) scene->SetVisible(not (lua_toboolean(state, 3) == 0));
 		else if (std::strcmp(key, "position") == 0) scene->SetPosition(ReadVector(state, 3));
 		else if (std::strcmp(key, "offset") == 0) scene->SetOffset(ReadVector(state, 3));

@@ -24,7 +24,6 @@ protected:
 public:
 	std::shared_ptr<Collision> collision;
 	Vector2D scaleVelocity, velocity, acceleration;
-	double rotation = 0.0;
 	Object2D() : scaleVelocity(0, 0), velocity(0, 0), acceleration(0, 0) {}
 	SimulationResult Simulation(float dt);
 	void FixSimulation(SimulationResult result) {
@@ -32,13 +31,13 @@ public:
 	}
 	void MoveAndSlide(float dt, const MoveAndSlideOption& option = {});
 	void SetRotationDegree(double degree) {
-		rotation = degree * 3.14159265358979323846 / 180.0;
+		RotateDegree(degree);
 	}
 	void SetRotationRadian(double radian) {
-		rotation = radian;
+		SetRotation(radian);
 	}
 	void SetRotationTurn(double turn) {
-		rotation = turn * 3.14159265358979323846 * 2.0;
+		RotateTurn(turn);
 	}
 	void SetAcceleration(const Vector2D& a) {
 		acceleration = a;

@@ -110,7 +110,14 @@ public:
 			if (s.y < 0) targetV.y = -targetV.y;
 		}
 
-		return pos + Vector2D(targetV.x * std::abs(s.x), targetV.y * std::abs(s.y));
+		const Vector2D scaledVertex(targetV.x * std::abs(s.x), targetV.y * std::abs(s.y));
+		const double angle = GetRotation();
+		const double cosine = std::cos(angle);
+		const double sine = std::sin(angle);
+		return pos + Vector2D(
+			scaledVertex.x * cosine - scaledVertex.y * sine,
+			scaledVertex.x * sine + scaledVertex.y * cosine
+		);
 	}
 	std::vector<Vector2D> GetEdges() const;
 	void ClearVertices() {

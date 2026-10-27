@@ -78,7 +78,6 @@ void TextLabel::_Load() {
 }
 
 void  TextLabel::_Draw() const {
-	auto pos = GetDrawPosition();
 	if (_fontHandle == -1) {
 		return;
 	}
@@ -91,15 +90,19 @@ void  TextLabel::_Draw() const {
 	const auto s = GetDrawScale();
 	const auto lines = WrapText(text, _width, _fontHandle);
 	for (size_t index = 0; index < lines.size(); ++index) {
-		DrawExtendStringToHandle(
-			static_cast<int>(pos.x),
-			static_cast<int>(pos.y + static_cast<double>(index * lineSpacing) * s.y),
+		const auto linePosition = GetDrawPoint(Vector2D(0, static_cast<double>(index * lineSpacing)));
+		DrawRotaStringToHandle(
+			static_cast<int>(linePosition.x),
+			static_cast<int>(linePosition.y),
 			s.x, s.y,
-			lines[index].c_str(),
+			0, 0,
+			GetRotation(),
 			foregroundColor,
-			_fontHandle
+			_fontHandle,
+			foregroundColor,
+			FALSE,
+			lines[index].c_str()
 		);
-		
 	}
 }
 

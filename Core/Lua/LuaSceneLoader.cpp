@@ -112,6 +112,8 @@ namespace {
 		scene->SetPosition(ReadVector(state, table, "position", Vec2D_0));
 		scene->SetOffset(ReadVector(state, table, "offset", Vec2D_0));
 		scene->SetScale(ReadVector(state, table, "scale", Vec2D_1));
+		double rotation = 0;
+		if (GetOptionalNumber(state, table, "rotation", rotation)) scene->SetRotation(rotation);
 		double alpha = 255;
 		if (GetOptionalNumber(state, table, "alpha", alpha)) scene->SetAlpha(static_cast<int>(alpha));
 		lua_getfield(state, table, "visible");

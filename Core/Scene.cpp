@@ -153,7 +153,17 @@ Vector2D Scene::GetParentScale() const {
 }
 
 Vector2D Scene::GetGlobalPosition() const {
-	return GetParentGlobalPosition() + (position + offset) * GetParentScale();
+	const Vector2D scaledPosition = (position + offset) * GetParentScale();
+	if (auto ptr = parent.lock()) {
+		const double parentRotation = ptr->GetRotation();
+		const double cosine = std::cos(parentRotation);
+		const double sine = std::sin(parentRotation);
+		return ptr->GetGlobalPosition() + Vector2D(
+			scaledPosition.x * cosine - scaledPosition.y * sine,
+			scaledPosition.x * sine + scaledPosition.y * cosine
+		);
+	}
+	return scaledPosition;
 }
 
 Vector2D Scene::GetDrawPosition() const {
@@ -161,6 +171,17 @@ Vector2D Scene::GetDrawPosition() const {
 		return GetGlobalPosition();
 	}
 	return Camera.WorldToScreen(GetGlobalPosition());
+}
+
+Vector2D Scene::GetDrawPoint(const Vector2D& localPosition) const {
+	const Vector2D scaledPosition = localPosition * GetDrawScale();
+	const double angle = GetRotation();
+	const double cosine = std::cos(angle);
+	const double sine = std::sin(angle);
+	return GetDrawPosition() + Vector2D(
+		scaledPosition.x * cosine - scaledPosition.y * sine,
+		scaledPosition.x * sine + scaledPosition.y * cosine
+	);
 }
 
 Vector2D Scene::GetDrawScale() const {

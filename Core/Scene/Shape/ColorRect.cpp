@@ -2,7 +2,11 @@
 #include <Graphic/2D.h>
 
 void ColorRect::_Draw() const {
-	auto pos = GetDrawPosition();
-	auto s = GetDrawScale();
-	NovotRenderer::DrawRect(pos, pos + size * s, color, true);
+	const std::vector<Vector2D> vertices = {
+		GetDrawPoint(Vec2D_0),
+		GetDrawPoint(Vector2D(size.x, 0)),
+		GetDrawPoint(size),
+		GetDrawPoint(Vector2D(0, size.y))
+	};
+	NovotRenderer::DrawPolygon(vertices, color, true);
 }

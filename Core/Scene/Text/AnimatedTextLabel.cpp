@@ -113,12 +113,18 @@ void AnimatedTextLabel::_Draw() const {
 			}
 		}
 
-		DrawExtendNStringToHandle(
-			static_cast<int>(position.x + character.position.x * currentScale.x),
-			static_cast<int>(position.y + (character.position.y + offset) * currentScale.y),
+		const auto characterPosition = GetDrawPoint(character.position + Vector2D(0, offset));
+		DrawRotaStringToHandle(
+			static_cast<int>(characterPosition.x),
+			static_cast<int>(characterPosition.y),
 			currentScale.x, currentScale.y,
-			character.text.c_str(), static_cast<int>(character.text.size()),
-			foregroundColor, _fontHandle
+			0, 0,
+			GetRotation(),
+			foregroundColor,
+			_fontHandle,
+			foregroundColor,
+			FALSE,
+			character.text.c_str()
 		);
 	}
 }
