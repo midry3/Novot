@@ -18,6 +18,7 @@ public:
 	unsigned int foregroundColor = GetColor(255, 255, 255);
 
 	Vector2D GetThisSize() const override {
+		if (text.size() == 0 || _fontSize == 0) return Vec2D_0;
 		return Vector2D(_width, text.size() / (_width / _fontSize)) * GetScale();
 	}
 

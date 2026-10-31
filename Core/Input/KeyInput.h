@@ -5,14 +5,13 @@
 class _KeyInput : public Singleton<_KeyInput> {
 protected:
 	static constexpr int KEY_LENGTH = 256;
-	TCHAR _justPressedKey;
+	TCHAR _justPressedKey = '\0';
 	char _currentKeyState[KEY_LENGTH] = {}, _prevKeyState[KEY_LENGTH] = {};
 public:
 	void Update();
-	bool IsKeyPressing(char key);
-	bool IsKeyPressingPrev(char key);
-	bool IsRawKeyPressing(int key) const { return key >= 0 && key < KEY_LENGTH && _currentKeyState[key] != 0; }
-	bool IsRawKeyJustPressed(int key) const { return key >= 0 && key < KEY_LENGTH && _currentKeyState[key] && not _prevKeyState[key]; }
+	bool IsKeyPressing(int key);
+	bool IsKeyPressingPrev(int key);
+	bool IsKeyJustPressed(int key) const;
 	[[nodiscard]] TCHAR GetJustInputKey() const {
 		return _justPressedKey;
 	}

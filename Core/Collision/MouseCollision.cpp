@@ -14,7 +14,7 @@ void MouseCollision::_Update(float dt) {
 	if (not _enabled || Mouse.IsAlreadyHandled() || vertices.empty()) {
 		if (_isMouseWithin) {
 			_isMouseWithin = false;
-			Left.Emit(Mouse.GetMouseEvent());
+			Exited.Emit(Mouse.GetMouseEvent());
 		}
 		return;
 	}
@@ -31,7 +31,7 @@ void MouseCollision::_Update(float dt) {
 	}
 	else if (_isMouseWithin) {
 		_isMouseWithin = false;
-		Left.Emit(event);
+		Exited.Emit(event);
 	}
 }
 

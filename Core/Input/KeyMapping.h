@@ -1,5 +1,4 @@
 #pragma once
-#include <DxLib.h>
 #include <Singleton.h>
 #include <map>
 #include <string>
@@ -26,6 +25,7 @@ public:
 	}
 	bool IsActionPressing(const int action);
 	bool IsActionJustPressed(const int action);
+	bool IsActionJustReleased(const int action);
 	void SetGameInputEnabled(bool enabled) { _gameInputEnabled = enabled; }
 	bool IsGameInputEnabled() const { return _gameInputEnabled; }
 	void StartDetect() {

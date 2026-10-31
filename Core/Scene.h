@@ -172,6 +172,10 @@ public:
 		rotationCenter = center;
 		return this;
 	}
+	Scene* SetRotationCenterRatio(const Vector2D& ratio) {
+		rotationCenter = GetSize() * ratio;
+		return this;
+	}
 	[[nodiscard]] Vector2D GetRotationCenter() const {
 		if (auto ptr = parent.lock()) {
 			return rotationCenter + ptr->GetRotationCenter();
@@ -224,10 +228,10 @@ public:
 		return this;
 	}
 	Scene* SetPixelShaderConstantBuffer(int handle, int slot=4) {
-		ConstantBufferData bufferData;
-		bufferData.handle = handle;
-		bufferData.slot = slot;
-		_constantBuffer.push_back(bufferData);
+		_constantBuffer.push_back(ConstantBufferData {
+			handle,
+			slot
+			});
 		return this;
 	}
 	[[nodiscard]] std::shared_ptr<PixelShader> GetParentPixelShader() const {

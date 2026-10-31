@@ -15,13 +15,19 @@ protected:
 	std::weak_ptr<Scene> target;
 public:
 	Signal<Vector2D, Vector2D> ZoomChanged;
-	Vector2D position = Vec2D_0;
+	Vector2D position = Vec2D_0, offset = Vec2D_0;
 	void Shake(int num, double intensity);
 	void SetPosition(const Vector2D& position) {
 		this->position = position;
 	}
-	Vector2D GetPosition() const {
+	[[nodiscard]] Vector2D GetPosition() const {
 		return position;
+	}
+	void SetOffset(const Vector2D& offset) {
+		this->offset = offset;
+	}
+	[[nodiscard]] Vector2D GetOffset() const {
+		return offset;
 	}
 	Vector2D GetZoom() const {
 		return _zoom;
@@ -61,7 +67,7 @@ public:
 	}
 	_Camera& FitTo(const std::shared_ptr<Scene>& scene);
 	Vector2D GetPoint() const {
-		auto pos = position + GetTargetPoint();
+		auto pos = position + GetTargetPoint() + offset;
 		pos.x = std::clamp(pos.x, _minimums.x, _maximums.x);
 		pos.y = std::clamp(pos.y, _minimums.y, _maximums.y);
 		return pos;

@@ -22,4 +22,10 @@ void Button::_Load() {
 	collision->RightReleased.Connect([this](const MouseEvent& event) {
 		RightReleased.Emit(event);
 		});
+	collision->Entered.Connect([this](const MouseEvent& event) {
+		Entered.Emit(event);
+		});
+	collision->Exited.Connect([this](const MouseEvent& event) {
+		Exited.Emit(event);
+		});
 }

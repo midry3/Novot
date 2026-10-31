@@ -20,7 +20,7 @@ protected:
 	bool _isMouseWithin = false;
 	void _Update(float dt) override;
 public:
-	Signal<const MouseEvent&> LeftPressed, LeftReleased, MiddlePressed, MiddleReleased, RightPressed, RightReleased, Moved, Scrolled, Entered, Left;
+	Signal<const MouseEvent&> LeftPressed, LeftReleased, MiddlePressed, MiddleReleased, RightPressed, RightReleased, Moved, Scrolled, Entered, Exited;
 
 	MouseCollision() : scale(1, 1) {}
 	~MouseCollision() = default;

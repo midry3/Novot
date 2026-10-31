@@ -116,7 +116,7 @@ void Scene::Draw() const {
 	SetDrawBright(static_cast<int>(modulate.x), static_cast<int>(modulate.y), static_cast<int>(modulate.z));
 	if (_pixelShader && not _constantBuffer.empty()) {
 		for (const auto& cb : _constantBuffer) {
-			SetShaderConstantBuffer(cb.handle, _pixelShader->GetHandle(), cb.slot);
+			SetShaderConstantBuffer(cb.handle, DX_SHADERTYPE_PIXEL, cb.slot);
 		}
 	}
 	_Draw();

@@ -56,8 +56,8 @@ void _SceneManager::EffectUpdate(float dt) {
 }
 
 void _SceneManager::Draw() const {
-	for (const auto& scene : _drawTargets) {
-		scene->Draw();
+	for (auto it = _drawTargets.rbegin(); it != _drawTargets.rend(); ++it) {
+		(*it)->Draw();
 	}
 	for (const auto& scene : _ySortDrawTargets) {
 		scene->Draw();

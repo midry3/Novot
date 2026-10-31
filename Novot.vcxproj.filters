@@ -303,7 +303,7 @@
     <ClCompile Include="Core\Lua\LuaSceneScript.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Input\Input.cpp">
+    <ClCompile Include="Core\Input\KeyInput.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -680,7 +680,7 @@
     <ClInclude Include="Core\Lua\LuaSceneScript.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Input\Input.h">
+    <ClInclude Include="Core\Input\KeyInput.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

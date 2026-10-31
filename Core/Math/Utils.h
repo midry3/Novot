@@ -49,3 +49,8 @@ double GetRandomDouble(double min, double max);
 
 Vector2D GetRandomVector2D(Vector2D min, Vector2D max);
 Vector2D GetRandomIntVector2D(Vector2D min, Vector2D max);
+
+template <typename... Args>
+bool MatchAny(const int n, Args... args) {
+	return ((n == args) || ...);
+}

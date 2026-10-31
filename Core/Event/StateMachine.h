@@ -71,3 +71,8 @@ public:
 		return currentState == stateId;
 	}
 };
+
+template <typename... Args>
+bool MatchAny(const StateMachine& sm, Args... args) {
+	return ((sm.GetCurrentState() == args) || ...);
+}
