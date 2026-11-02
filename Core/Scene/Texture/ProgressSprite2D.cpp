@@ -2,6 +2,7 @@
 #include <Graphic/2D.h>
 #include <Math/Utils.h>
 #include <Animation/Tween.h>
+#include <Backend/Backend.h>
 
 void ProgressSprite2D::_Draw() const {
 	auto pos = GetDrawPosition();
@@ -24,13 +25,13 @@ void ProgressSprite2D::_Draw() const {
 			s.y,
 			GetRotation(),
 			_handle,
-			TRUE,
+			1,
 			pShader->GetHandle(),
 			uMin, vMin, uMin + progressWidth, vMax
 		);
 	}
 	else {
-		DrawRectRotaGraph3(
+		CoreBackend::Drawing::DrawSpriteRegion(
 			static_cast<int>(pos.x + cx_in_image * std::abs(s.x)),
 			static_cast<int>(pos.y + cy_in_image * std::abs(s.y)),
 			0, 0,
@@ -41,7 +42,7 @@ void ProgressSprite2D::_Draw() const {
 			s.y,
 			GetRotation(),
 			_handle,
-			TRUE
+			1
 		);
 	}
 }

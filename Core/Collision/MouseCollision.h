@@ -5,11 +5,12 @@
 #include <vector>
 #include <Scene/Texture/Sprite2D.h>
 #include <Camera.h>
+#include <Backend/Backend.h>
 
 class MouseCollision : public VisualDebugScene {
 protected:
 #ifdef _DEBUG
-	const unsigned int DEBUG_LINE_COLOR = GetColor(100, 255, 100);
+	const unsigned int DEBUG_LINE_COLOR = CoreBackend::Drawing::Color(100, 255, 100);
 	void _Draw() const override;
 	void _Load() override;
 #endif

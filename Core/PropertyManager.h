@@ -1,6 +1,6 @@
 #pragma once
-#include <DxLib.h>
 #include <Math/Vector2D.h>
+#include <Backend/Backend.h>
 #include "Singleton.h"
 #include <string>
 #include <vector>
@@ -32,8 +32,7 @@ public:
     }
     void SetWindowSize(const Vector2D& size) {
         windowSize = size;
-		SetGraphMode(static_cast<int>(size.x), static_cast<int>(size.y), 32);
-		DxLib::SetWindowSize(static_cast<int>(size.x), static_cast<int>(size.y));
+		CoreBackend::Window::SetSize(static_cast<int>(size.x), static_cast<int>(size.y));
     }
     void SetFPS(int fps) {
         FPS = fps;
@@ -49,19 +48,17 @@ public:
     }
     Vector2D GetRealWindowSize() const {
         int w, h;
-        GetWindowSize(&w, &h);
+        CoreBackend::Window::Size(&w, &h);
         return Vector2D(w, h);
     }
 	void ToFullScreen() {
-        ChangeWindowMode(FALSE);
-        SetDrawScreen(DX_SCREEN_BACK);
+        CoreBackend::Window::SetMode(false);
 	}
 	void ToWindowed() {
-		ChangeWindowMode(TRUE);
-		SetDrawScreen(DX_SCREEN_BACK);
+		CoreBackend::Window::SetMode(true);
 	}
     void SwitchWindowMode() {
-		if (GetWindowModeFlag()) {
+		if (CoreBackend::Window::IsWindowed()) {
 			ToFullScreen();
 		}
 		else {
@@ -215,9 +212,3 @@ public:
 };
 
 #define PropertyManager _PropertyManager::GetInstance()
-
-#ifdef _DEBUG
-//#define DebuggerBindProperty(name, target) PropertyManager::GetInstance().BindProperty(name, target)
-#else
-#define DebuggerBindProperty(name, target)
-#endif

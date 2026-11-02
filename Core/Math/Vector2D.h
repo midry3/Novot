@@ -138,3 +138,5 @@ public:
 		}
 	}
 };
+
+using Vec2 = Vector2D;

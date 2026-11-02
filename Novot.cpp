@@ -167,7 +167,7 @@ namespace Novot {
 			double updateMs = std::chrono::duration<double, std::milli>(t1 - t0).count();
 			double drawMs = std::chrono::duration<double, std::milli>(t2 - t1).count();
 			DebuggerRecordFrameTime(updateMs, drawMs);
-			if (updateMs + drawMs > 16.67) {
+			if (iframe < updateMs + drawMs) {
 				DebuggerWriteLine("[WARN] Frame spike detected: " + std::to_string(updateMs + drawMs) + " ms");
 			}
 #endif

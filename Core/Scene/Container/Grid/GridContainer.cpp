@@ -2,7 +2,7 @@
 
 void GridContainer::_Update(float dt) {
 	if (_scenes.empty()) return;
-	size_t x, y;
+
 	for (size_t i = 0; i < _gridScenes.size(); i++) {
 		if (auto scene = _gridScenes[i].lock()) {
 			scene->SetPosition(GetPositionAt(i));

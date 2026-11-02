@@ -1,14 +1,14 @@
 #include "StopWatch.h"
-#include <DxLib.h>
+#include <Backend/Backend.h>
 
 void StopWatch::Restart() {
-	_startTime = GetTickCount();
+	_startTime = CoreBackend::Clock::Tick();
 	_isRunning = true;
 }
 
 int StopWatch::Measure() {
 	if (_isRunning) {
-		return GetTickCount() - _startTime;
+		return CoreBackend::Clock::Tick() - _startTime;
 	}
 	return 0;
 }

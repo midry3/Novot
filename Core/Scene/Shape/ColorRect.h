@@ -1,6 +1,7 @@
 #pragma once
 #include <Scene.h>
 #include <Math/Polygon.h>
+#include <Backend/Backend.h>
 
 class ColorRect : public Scene {
 protected:
@@ -8,7 +9,7 @@ protected:
 	void _Draw() const override;
 public:
 	Vector2D size;
-	unsigned int color = GetColor(255, 255, 255);
+	unsigned int color = CoreBackend::Drawing::Color(255, 255, 255);
 
 	ColorRect* SetColor(unsigned int c) {
 		color = c;

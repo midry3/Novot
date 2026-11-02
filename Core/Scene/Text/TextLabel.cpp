@@ -1,4 +1,5 @@
 #include "TextLabel.h"
+#include <Backend/Backend.h>
 
 namespace {
 	size_t GetCharacterLength(const std::string& value, size_t index) {
@@ -51,11 +52,11 @@ namespace {
 			const size_t characterLength = GetCharacterLength(value, index);
 			const std::string character = value.substr(index, characterLength);
 			const std::string candidate = line + character;
-			const int candidateWidth = GetDrawNStringWidthToHandle(
+			const int candidateWidth = CoreBackend::Drawing::MeasureText(
 				candidate.c_str(),
 				static_cast<int>(candidate.size()),
 				fontHandle,
-				FALSE
+				0
 			);
 			if (width > 0 && !line.empty() && candidateWidth > width) {
 				lines.push_back(line);
@@ -82,7 +83,7 @@ void  TextLabel::_Draw() const {
 		return;
 	}
 
-	int lineSpacing = GetFontLineSpaceToHandle(_fontHandle);
+	int lineSpacing = CoreBackend::Drawing::FontLineSpace(_fontHandle);
 	if (lineSpacing <= 0) {
 		lineSpacing = _fontSize;
 	}
@@ -91,7 +92,7 @@ void  TextLabel::_Draw() const {
 	const auto lines = WrapText(text, _width, _fontHandle);
 	for (size_t index = 0; index < lines.size(); ++index) {
 		const auto linePosition = GetDrawPoint(Vector2D(0, static_cast<double>(index * lineSpacing)));
-		DrawRotaStringToHandle(
+		CoreBackend::Drawing::RenderText(
 			static_cast<int>(linePosition.x),
 			static_cast<int>(linePosition.y),
 			s.x, s.y,
@@ -100,7 +101,7 @@ void  TextLabel::_Draw() const {
 			foregroundColor,
 			_fontHandle,
 			foregroundColor,
-			FALSE,
+			0,
 			lines[index].c_str()
 		);
 	}
@@ -108,7 +109,7 @@ void  TextLabel::_Draw() const {
 
 void TextLabel::_Release() {
 	if (_fontHandle != -1) {
-		DeleteFontToHandle(_fontHandle);
+		CoreBackend::Drawing::DeleteFont(_fontHandle);
 		_fontHandle = -1;
 	}
 }

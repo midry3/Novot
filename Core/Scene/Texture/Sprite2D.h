@@ -3,6 +3,7 @@
 #include <Asset/Texture/Texture.h>
 #include <Scene.h>
 #include <Math/Constants.h>
+#include <Backend/Backend.h>
 
 enum StretchType {
 	NONE,
@@ -68,15 +69,12 @@ public:
 	}
 	void AdjustSize() {
 		int x, y;
-		GetGraphSize(GetHandle(), &x, &y);
+		CoreBackend::Texture::Size(GetHandle(), &x, &y);
 		_size = Vec2(x, y);
 		_handle = GetHandle();
 		AdjustScale();
 	}
-	[[nodiscard]] Vector2D GetThisSize() const override {
-		return _size * GetScale();
-	}
-	Vector2D GetRawSize() const {
+	const Vector2D& GetRawSize() const override {
 		return _size;
 	}
 };

@@ -9,7 +9,20 @@ protected:
 	void _Update(float dt) override;
 
 	virtual void UpdateCellSize() {
-		_cellSize = Vector2D(_size.x / _matrixSize.x, _size.y / _matrixSize.y);
+		if (_size.x == 0 && _size.y == 0) {
+			_cellSize = Vec2D_0;
+
+			for (const auto& scene : _scenes) {
+				if (scene) {
+					const auto& size = scene->GetRawSize();
+					_cellSize.x = Max(_cellSize.x, size.x);
+					_cellSize.y = Max(_cellSize.y, size.y);
+				}
+			}
+		}
+		else {
+			_cellSize = Vector2D(_size.x / _matrixSize.x, _size.y / _matrixSize.y);
+		}
 	}
 public:
 	GridContainer() = default;
@@ -20,6 +33,12 @@ public:
 		UpdateCellSize();
 		_gridScenes.resize(static_cast<size_t>(size.x * size.y));
 		return this;
+	}
+	[[nodiscard]] const Vector2D& GetMatrixSize() const {
+		return _matrixSize;
+	}
+	[[nodiscard]] double GetMaxChildCount() const {
+		return _matrixSize.x * _matrixSize.y;
 	}
 	GridContainer* SetSize(const Vector2D& size) {
 		_size = size;
@@ -33,9 +52,10 @@ public:
 	GridContainer* AddScene(std::shared_ptr<Scene> scene) override {
 		scene->Load();
 		auto n = static_cast<size_t>(_scenes.size());
-		_scenes.emplace_back(scene);
+		_scenes.push_back(scene);
 		_gridScenes[n] = scene;
 		scene->SetParent(weak_from_this());
+		UpdateCellSize();
 		return this;
 	}
 	template <std::derived_from<Scene> T>

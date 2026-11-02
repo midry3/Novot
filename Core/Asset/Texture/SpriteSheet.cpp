@@ -1,6 +1,6 @@
 #include "SpriteSheet.h"
-#include <DxLib.h>
 #include "AnimationLoader.h"
+#include <Backend/Backend.h>
 
 SpriteSheet::SpriteSheet(const fs::path file) : Asset(file) {
 	texture = std::make_shared<Texture>(file);
@@ -15,11 +15,11 @@ SpriteSheet::SpriteSheet(const fs::path file) : Asset(file) {
 
 int SpriteSheet::Load() {
 	frames.resize(rows * columns);
-	GetGraphSize(texture->Load(), &width, &height);
+	CoreBackend::Texture::Size(texture->Load(), &width, &height);
 	auto size = GetFrameSize();
 	auto data = texture->GetData();
 	frameCount = rows * columns;
-	if (CreateDivGraphFromMem(data.data(), (int)data.size(), rows * columns, columns, rows, size.x, size.y, frames.data()) == -1) {
+	if (CoreBackend::Texture::LoadDiv(data.data(), (int)data.size(), rows * columns, columns, rows, size.x, size.y, frames.data()) == -1) {
 		_handle = -2;
 		return -1;
 	}
@@ -32,7 +32,7 @@ void SpriteSheet::Init() {
 	currentFrameNumber = 0;
 	elapsedTime = 0;
 	_isEmittedAnimationFinished = false;
-	prevTime = GetNowCount();
+	prevTime = CoreBackend::Clock::Now();
 }
 
 int SpriteSheet::UpdateFrame(float dt) {
@@ -62,7 +62,7 @@ int SpriteSheet::UpdateFrame(float dt) {
 
 void SpriteSheet::Release() {
 	for (auto handle : frames) {
-		DeleteGraph(handle);
+		CoreBackend::Texture::Release(handle);
 	}
 	frames.clear();
 	_handle = -1;

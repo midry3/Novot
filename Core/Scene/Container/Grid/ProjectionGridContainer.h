@@ -1,6 +1,7 @@
 #pragma once
 #include "GridContainer.h"
 #include <Scene/Shape/ColorPolygon.h>
+#include <Backend/Backend.h>
 
 enum class ProjectionType {
 	Orthographic, // Standard 2D orthogonal grid
@@ -28,7 +29,7 @@ protected:
 
 	// Grid base polygons
 	bool _showGridBase = true;
-	unsigned int _defaultCellColor = GetColor(100, 140, 200);
+	unsigned int _defaultCellColor = CoreBackend::Drawing::Color(100, 140, 200);
 	std::vector<unsigned int> _cellColors;
 	std::vector<std::shared_ptr<ColorPolygon>> _gridPolygons;
 

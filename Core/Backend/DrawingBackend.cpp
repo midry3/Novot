@@ -1,5 +1,6 @@
-#include "2D.h"
+#include <Graphic/2D.h>
 #include <DxLib.h>
+#include <Backend/Backend.h>
 
 namespace NovotRenderer {
 	void DrawLine(const Vector2D& p1, const Vector2D& p2, unsigned int color, int thickness) {
@@ -48,7 +49,7 @@ namespace NovotRenderer {
 			auto it = points.begin();
 			auto prev = it;
 			it++;
-			for (; it != points.end(); it++, prev++) {
+			for (; it not_eq points.end(); it++, prev++) {
 				DxLib::DrawLine(static_cast<int>(prev->x), static_cast<int>(prev->y), static_cast<int>(it->x), static_cast<int>(it->y), color);
 			}
 			DxLib::DrawLine(static_cast<int>(points.back().x), static_cast<int>(points.back().y), static_cast<int>(points.front().x), static_cast<int>(points.front().y), color);
@@ -72,7 +73,7 @@ namespace NovotRenderer {
 		float uMax, float vMax)
 	{
 		int width, height;
-		if (GetGraphSize(graphHandle, &width, &height) == -1)
+		if (CoreBackend::Texture::Size(graphHandle, &width, &height) == -1)
 		{
 			return;
 		}
@@ -108,7 +109,7 @@ namespace NovotRenderer {
 		}
 		if (not transFlag)
 		{
-			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			CoreBackend::Drawing::SetNoBlend();
 		}
 		SetUseTextureToShader(0, graphHandle);
 		SetUsePixelShader(pixelShaderHandle);
@@ -133,7 +134,7 @@ namespace NovotRenderer {
         float uMax, float vMax)
     {
         int width, height;
-        if (GetGraphSize(graphHandle, &width, &height) == -1)
+        if (CoreBackend::Texture::Size(graphHandle, &width, &height) == -1)
         {
             return;
         }
@@ -195,7 +196,7 @@ namespace NovotRenderer {
 
         if (not transFlag)
         {
-            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+            CoreBackend::Drawing::SetNoBlend();
         }
 
         SetUseTextureToShader(0, graphHandle);

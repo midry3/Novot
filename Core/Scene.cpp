@@ -7,6 +7,7 @@
 #include <Lua/LuaSceneScript.h>
 #include <Scene/Button/Button.h>
 #include <Scene/Texture/AnimatedSprite2D.h>
+#include <Backend/Backend.h>
 
 Scene::~Scene() {
 	delete _luaScript;
@@ -112,20 +113,20 @@ void Scene::BindLuaAnimatedSpriteEvents(Scene* target, const std::vector<std::pa
 
 void Scene::Draw() const {
 	if (not IsShouldDraw()) return;
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, GetAlpha());
-	SetDrawBright(static_cast<int>(modulate.x), static_cast<int>(modulate.y), static_cast<int>(modulate.z));
+	CoreBackend::Drawing::SetAlphaBlend(GetAlpha());
+	CoreBackend::Drawing::SetBrightness(static_cast<int>(modulate.x), static_cast<int>(modulate.y), static_cast<int>(modulate.z));
 	if (_pixelShader && not _constantBuffer.empty()) {
 		for (const auto& cb : _constantBuffer) {
-			SetShaderConstantBuffer(cb.handle, DX_SHADERTYPE_PIXEL, cb.slot);
+			CoreBackend::Shader::SetConstantBuffer(cb.handle, cb.slot);
 		}
 	}
 	_Draw();
 #if defined(_DEBUG)
 	if (PropertyManager.IsDebugMode()) {
-		NovotRenderer::DrawPoint(GetDrawYSortPoint(), GetColor(255, 0, 0), 10);
+		NovotRenderer::DrawPoint(GetDrawYSortPoint(), CoreBackend::Drawing::Color(255, 0, 0), 10);
 	}
 #endif
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	CoreBackend::Drawing::SetNoBlend();
 }
 
 SharedPtr<Scene> Scene::GetChild(int index) const {
@@ -231,8 +232,8 @@ Vector3D Scene::GetModulate() const {
 	}
 }
 
-Vector2D Scene::GetThisSize() const {
-	return Vec2D_0;
+const Vector2D& Scene::GetThisSize() const {
+	return GetRawSize() * GetScale();
 }
 
 Vector2D Scene::GetSize() const {

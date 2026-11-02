@@ -2,6 +2,7 @@
 #include <PropertyManager.h>
 #include <NovotCore.h>
 #include <Graphic/2D.h>
+#include <Backend/Backend.h>
 
 void Sprite2D::_Release() {
 	if (_texture) {
@@ -29,13 +30,13 @@ void Sprite2D::_Draw() const {
 			s.y,
 			GetRotation(),
 			_handle,
-			TRUE,
+			1,
 			pShader->GetHandle(),
 			uMin, vMin, uMax, vMax
 		);
 	}
 	else {
-		DrawRotaGraph3(
+		CoreBackend::Drawing::DrawSprite(
 			static_cast<int>(pos.x + cx_in_image * std::abs(s.x)),
 			static_cast<int>(pos.y + cy_in_image * std::abs(s.y)),
 			cx_in_image,
@@ -44,7 +45,7 @@ void Sprite2D::_Draw() const {
 			s.y,
 			GetRotation(),
 			_handle,
-			TRUE
+			1
 		);
 	}
 }

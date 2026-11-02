@@ -1,5 +1,6 @@
 #include "FormatTextLabel.h"
 #include <Graphic/2D.h>
+#include <Backend/Backend.h>
 
 namespace {
 	size_t GetCharacterLength(const std::string& value, size_t index) {
@@ -91,7 +92,7 @@ void FormatTextLabel::ParseText() {
 
 	int lineSpacing = _fontSize;
 	if (_fontHandle != -1) {
-		int space = GetFontLineSpaceToHandle(_fontHandle);
+		int space = CoreBackend::Drawing::FontLineSpace(_fontHandle);
 		if (space > 0) lineSpacing = space;
 	}
 
@@ -133,11 +134,11 @@ void FormatTextLabel::ParseText() {
 
 			int charWidth = 0;
 			if (_fontHandle != -1) {
-				charWidth = GetDrawNStringWidthToHandle(
+				charWidth = CoreBackend::Drawing::MeasureText(
 					character.c_str(),
 					static_cast<int>(character.size()),
 					_fontHandle,
-					FALSE
+					0
 				);
 			}
 
@@ -186,7 +187,7 @@ void FormatTextLabel::_Draw() const {
 
 	for (const auto& segment : _segments) {
 		const auto segmentPosition = GetDrawPoint(segment.position);
-		DrawRotaStringToHandle(
+		CoreBackend::Drawing::RenderText(
 			static_cast<int>(segmentPosition.x),
 			static_cast<int>(segmentPosition.y),
 			s.x, s.y,
@@ -195,12 +196,12 @@ void FormatTextLabel::_Draw() const {
 			segment.color,
 			_fontHandle,
 			segment.color,
-			FALSE,
+			0,
 			segment.text.c_str()
 		);
 		if (segment.underline) {
-			const double underlineOffset = GetFontLineSpaceToHandle(_fontHandle) - 2;
-			const double underlineWidth = GetDrawNStringWidthToHandle(segment.text.c_str(), static_cast<int>(segment.text.size()), _fontHandle, FALSE);
+			const double underlineOffset = CoreBackend::Drawing::FontLineSpace(_fontHandle) - 2;
+			const double underlineWidth = CoreBackend::Drawing::MeasureText(segment.text.c_str(), static_cast<int>(segment.text.size()), _fontHandle, 0);
 			const auto underlineStart = GetDrawPoint(segment.position + Vector2D(0, underlineOffset));
 			const auto underlineEnd = GetDrawPoint(segment.position + Vector2D(underlineWidth, underlineOffset));
 			NovotRenderer::DrawLine(underlineStart, underlineEnd, segment.color, static_cast<int>(4 * s.y));

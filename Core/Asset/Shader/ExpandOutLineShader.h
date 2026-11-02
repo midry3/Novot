@@ -1,6 +1,6 @@
 #pragma once
 #include "PixelShader.h"
-#include <DxLib.h>
+#include <Backend/Backend.h>
 
 struct alignas(16) ExpandOutLineShaderParam
 {
@@ -27,8 +27,8 @@ protected:
 public:
 	static const ExpandOutLineShaderBuffer CreateConstantBuffer() {
 		ExpandOutLineShaderBuffer buffer;
-		buffer.handle = CreateShaderConstantBuffer(sizeof(ExpandOutLineShaderParam));
-		buffer.param = static_cast<ExpandOutLineShaderParam*>(GetBufferShaderConstantBuffer(buffer.handle));
+		buffer.handle = CoreBackend::Shader::CreateBuffer(sizeof(ExpandOutLineShaderParam));
+		buffer.param = static_cast<ExpandOutLineShaderParam*>(CoreBackend::Shader::Buffer(buffer.handle));
 		return buffer;
 	}
 };

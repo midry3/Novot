@@ -1,4 +1,5 @@
 #pragma once
+#include <Backend/Backend.h>
 #include "PixelShader.h"
 
 struct alignas(16) OutLineShaderParam {
@@ -22,8 +23,8 @@ protected:
 public:
 	static const OutLineShaderBuffer CreateConstantBuffer() {
 		OutLineShaderBuffer buffer;
-		buffer.handle = CreateShaderConstantBuffer(sizeof(OutLineShaderParam));
-		buffer.param = static_cast<OutLineShaderParam*>(GetBufferShaderConstantBuffer(buffer.handle));
+		buffer.handle = CoreBackend::Shader::CreateBuffer(sizeof(OutLineShaderParam));
+		buffer.param = static_cast<OutLineShaderParam*>(CoreBackend::Shader::Buffer(buffer.handle));
 		return buffer;
 	}
 };

@@ -2,10 +2,11 @@
 #include <Camera.h>
 #include <Scene/Shape/ColorRect.h>
 #include <Algorithm/Search.h>
+#include <Backend/Backend.h>
 
 void _SceneManager::Init() {
 	_transEffect = std::make_shared<ColorRect>();
-	_transEffect->SetColor(GetColor(0, 0, 0))
+	_transEffect->SetColor(CoreBackend::Drawing::Color(0, 0, 0))
 		->SetSize(Vector2D(1920, 1080));
 }
 

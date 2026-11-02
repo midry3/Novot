@@ -352,7 +352,8 @@
     <ClCompile Include="Core\Collision\MouseCollision.cpp" />
     <ClCompile Include="Core\Collision\RayCast.cpp" />
     <ClCompile Include="Core\Collision\Terrain.cpp" />
-    <ClCompile Include="Core\Graphic\2D.cpp" />
+    <ClCompile Include="Core\Backend\DrawingBackend.cpp" />
+    <ClCompile Include="Core\Backend\Backend.cpp" />
     <ClCompile Include="Core\Scene\Container\Grid\GridContainer.cpp" />
     <ClCompile Include="Core\Input\KeyMapping.cpp" />
     <ClCompile Include="Core\Asset\Sound\Sound.cpp" />
@@ -430,6 +431,7 @@
     <ClInclude Include="Core\Event\Signal.h" />
     <ClInclude Include="Core\Event\StateMachine.h" />
     <ClInclude Include="Core\Graphic\2D.h" />
+    <ClInclude Include="Core\Backend\Backend.h" />
     <ClInclude Include="Core\Math\Polygon.h" />
     <ClInclude Include="Core\Scene\Container\Grid\GridContainer.h" />
     <ClInclude Include="Core\Scene\Container\Grid\ProjectionGridContainer.h" />

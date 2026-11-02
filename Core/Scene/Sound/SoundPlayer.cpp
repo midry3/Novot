@@ -1,8 +1,9 @@
 #include "SoundPlayer.h"
+#include <Backend/Backend.h>
 
 void SoundPlayer::_Update(float dt) {
 	if (_sound) {
-		ChangeVolumeSoundMem(_volume, _sound->GetHandle());
+		CoreBackend::Sound::SetVolume(_sound->GetHandle(), _volume);
 	}
 }
 
@@ -17,7 +18,7 @@ SoundPlayer* SoundPlayer::SetSound(const std::shared_ptr<Sound>& sound) {
 
 SoundPlayer* SoundPlayer::SetVolume(int volume) {
 	_volume = Clamp(volume, 0, NORMAL_VOLUME);
-	ChangeVolumeSoundMem(_volume, _sound->GetHandle());
+	CoreBackend::Sound::SetVolume(_sound->GetHandle(), _volume);
 	return this;
 }
 
@@ -44,7 +45,7 @@ float SoundPlayer::GetVolumeRatio() const {
 }
 
 bool SoundPlayer::IsPlaying() const {
-	return _sound ? CheckSoundMem(_sound->GetHandle()) == TRUE : false;
+	return _sound ? CoreBackend::Sound::IsPlaying(_sound->GetHandle()) : false;
 }
 
 void  SoundPlayer::Play() {

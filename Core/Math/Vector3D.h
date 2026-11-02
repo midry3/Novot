@@ -24,3 +24,5 @@ public:
 		return Vector3D(x / a, y / a, z / a);
 	}
 };
+
+using Vec3 = Vector3D;

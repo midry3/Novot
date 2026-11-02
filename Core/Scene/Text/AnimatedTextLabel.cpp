@@ -1,6 +1,7 @@
 #include "AnimatedTextLabel.h"
 #include <Graphic/2D.h>
 #include <cmath>
+#include <Backend/Backend.h>
 
 namespace {
 	size_t GetCharacterLength(const std::string& value, size_t index) {
@@ -52,8 +53,8 @@ void AnimatedTextLabel::_RebuildCharacters() {
 	_elapsedTime = 0.0;
 	if (_fontHandle == -1 || text.empty()) return;
 
-	const int lineSpacing = GetFontLineSpaceToHandle(_fontHandle) > 0
-		? GetFontLineSpaceToHandle(_fontHandle)
+	const int lineSpacing = CoreBackend::Drawing::FontLineSpace(_fontHandle) > 0
+		? CoreBackend::Drawing::FontLineSpace(_fontHandle)
 		: _fontSize;
 	int line = 0;
 	int lineWidth = 0;
@@ -71,8 +72,8 @@ void AnimatedTextLabel::_RebuildCharacters() {
 
 		const size_t characterLength = GetCharacterLength(text, index);
 		const std::string character = text.substr(index, characterLength);
-		const int characterWidth = GetDrawNStringWidthToHandle(
-			character.c_str(), static_cast<int>(character.size()), _fontHandle, FALSE
+		const int characterWidth = CoreBackend::Drawing::MeasureText(
+			character.c_str(), static_cast<int>(character.size()), _fontHandle, 0
 		);
 		if (_width > 0 && lineWidth > 0 && lineWidth + characterWidth > _width) {
 			++line;
@@ -114,7 +115,7 @@ void AnimatedTextLabel::_Draw() const {
 		}
 
 		const auto characterPosition = GetDrawPoint(character.position + Vector2D(0, offset));
-		DrawRotaStringToHandle(
+		CoreBackend::Drawing::RenderText(
 			static_cast<int>(characterPosition.x),
 			static_cast<int>(characterPosition.y),
 			currentScale.x, currentScale.y,
@@ -123,7 +124,7 @@ void AnimatedTextLabel::_Draw() const {
 			foregroundColor,
 			_fontHandle,
 			foregroundColor,
-			FALSE,
+			0,
 			character.text.c_str()
 		);
 	}

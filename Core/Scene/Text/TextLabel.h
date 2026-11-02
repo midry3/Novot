@@ -1,5 +1,6 @@
 #pragma once
 #include <Scene.h>
+#include <Backend/Backend.h>
 
 class TextLabel : public Scene {
 protected:
@@ -15,11 +16,11 @@ protected:
 public:
 	static String DefaultFont;
 	String text;
-	unsigned int foregroundColor = GetColor(255, 255, 255);
+	unsigned int foregroundColor = CoreBackend::Drawing::Color(255, 255, 255);
 
-	Vector2D GetThisSize() const override {
+	const Vector2D& GetRawSize() const override {
 		if (text.size() == 0 || _fontSize == 0) return Vec2D_0;
-		return Vector2D(_width, text.size() / (_width / _fontSize)) * GetScale();
+		return Vector2D(_width, text.size() / (_width / _fontSize));
 	}
 
 	TextLabel* BeginSetting() {
@@ -57,9 +58,9 @@ public:
 		if (_isNowSetting) return;
 
 		if (_fontHandle != -1) {
-			DeleteFontToHandle(_fontHandle);
+			CoreBackend::Drawing::DeleteFont(_fontHandle);
 		}
-		_fontHandle = CreateFontToHandle(_fontName.c_str(), _fontSize, _fontThickness);
+		_fontHandle = CoreBackend::Drawing::CreateTextFont(_fontName.c_str(), _fontSize, _fontThickness);
 	}
 
 	TextLabel* SetFont(const std::string fontName) {

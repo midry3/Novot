@@ -32,5 +32,3 @@ using String = std::string;
 using Path = fs::path;
 using Int = int;
 using Double = double;
-
-using Vec2 = Vector2D;

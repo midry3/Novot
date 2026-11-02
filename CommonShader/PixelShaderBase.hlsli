@@ -1,3 +1,4 @@
+
 #pragma once
 
 Texture2D Texture0 : register(t0);
@@ -11,3 +12,5 @@ struct PS_INPUT
     float2 UV : TEXCOORD0;
     float2 SubUV : TEXCOORD1;
 };
+
+

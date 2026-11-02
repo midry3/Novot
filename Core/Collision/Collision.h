@@ -4,6 +4,7 @@
 #include <vector>
 #include <Scene/Texture/Sprite2D.h>
 #include <Camera.h>
+#include <Backend/Backend.h>
 
 class Collision : public VisualDebugScene {
 protected:
@@ -16,8 +17,8 @@ protected:
 #ifdef _DEBUG
 	void _Draw() const override;
 	void _Load() override;
-	const unsigned int DEBUG_COLLIDING_COLOR = GetColor(220, 100, 100);
-	const unsigned int DEBUG_NOT_COLLIDING_COLOR = GetColor(100, 100, 220);
+	const unsigned int DEBUG_COLLIDING_COLOR = CoreBackend::Drawing::Color(220, 100, 100);
+	const unsigned int DEBUG_NOT_COLLIDING_COLOR = CoreBackend::Drawing::Color(100, 100, 220);
 	int _collidingCount = 0;
 #else
 	bool isPassable;
@@ -53,12 +54,22 @@ public:
 		(layers.push_back(l), ...);
 		return this;
 	}
+
+	[[nodiscard ]] bool HasLayer(int layer) const {
+		return std::find(layers.begin(), layers.end(), layer) != layers.end();
+	}
+
 	template <typename... Masks>
 		requires (std::convertible_to<Masks, int> && ...)
 	Collision* AddMasks(Masks... m) {
 		(masks.push_back(m), ...);
 		return this;
 	}
+
+	[[nodiscard ]] bool HasMask(int layer) const {
+		return std::find(masks.begin(), masks.end(), layer) != masks.end();
+	}
+
 	void ChangeVertice(int index, const Vector2D& newVertex) {
 		if (index >= 0 && index < static_cast<int>(vertices.size())) {
 			vertices[index] = newVertex;

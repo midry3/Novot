@@ -1,14 +1,15 @@
 #include "Sound.h"
 #include <NovotCore.h>
+#include <Backend/Backend.h>
 
 void Sound::Play() {
 	Load();
 	if (IsLoaded()) {
 		if (isLoop) {
-			PlaySoundMem(_handle, DX_PLAYTYPE_LOOP, TRUE);
+			CoreBackend::Sound::Play(_handle, true);
 		}
 		else {
-			PlaySoundMem(_handle, DX_PLAYTYPE_BACK, TRUE);
+			CoreBackend::Sound::Play(_handle, false);
 		}
 	}
 }
@@ -18,9 +19,9 @@ int Sound::Load() {
 		return _handle;
 	}
 	auto data = GetData();
-	_handle = LoadSoundMemByMemImage(
+	_handle = CoreBackend::Sound::Load(
 		data.data(),
-		data.size()
+		static_cast<int>(data.size())
 	);
 	if (_handle == -1) {
 		_handle = -2;
@@ -36,14 +37,14 @@ void Sound::Pause() {
 
 void Sound::Stop() {
 	if (IsLoaded()) {
-		StopSoundMem(_handle);
+		CoreBackend::Sound::Stop(_handle);
 	}
 }
 
 void Sound::Release() {
 	if (IsLoaded()) {
-		StopSoundMem(_handle);
-		DeleteSoundMem(_handle);
+		CoreBackend::Sound::Stop(_handle);
+		CoreBackend::Sound::Release(_handle);
 		_handle = -1;
 	}
 }

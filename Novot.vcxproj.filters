@@ -99,7 +99,10 @@
     <ClCompile Include="Core\Scene\Container\Grid\GridContainer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Graphic\2D.cpp">
+    <ClCompile Include="Core\Backend\DrawingBackend.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Backend\Backend.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Core\Asset\Shader\PixelShader.cpp">
@@ -408,6 +411,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Core\Graphic\2D.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Backend\Backend.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Core\Event\StateMachine.h">

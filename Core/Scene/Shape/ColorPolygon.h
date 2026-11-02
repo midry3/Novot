@@ -1,13 +1,14 @@
 #pragma once
 #include <Scene.h>
 #include <Math/Polygon.h>
+#include <Backend/Backend.h>
 
 class ColorPolygon : public Scene {
 protected:
 	PolygonInfo _polygon;
 	void _Draw() const override;
 public:
-	unsigned int color = GetColor(255, 255, 255);
+	unsigned int color = CoreBackend::Drawing::Color(255, 255, 255);
 
 	ColorPolygon* SetColor(unsigned int c) {
 		color = c;

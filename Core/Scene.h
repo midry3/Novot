@@ -307,7 +307,8 @@ public:
 		return _ySortEnabled;
 	}
 	[[nodiscard]] Vector2D GetSize() const;
-	[[nodiscard]] virtual Vector2D GetThisSize() const;
+	[[nodiscard]] virtual const Vector2D& GetRawSize() const { return Vec2D_0; }
+	[[nodiscard]] const Vector2D& GetThisSize() const;
 	template <std::derived_from<Scene> T>
 	std::shared_ptr<T> CreateScene() {
 		auto scene = std::make_shared<T>();

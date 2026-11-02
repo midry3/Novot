@@ -1,11 +1,11 @@
 #include "KeyInput.h"
 #include <algorithm>
-#include <DxLib.h>
+#include <Backend/Backend.h>
 
 void _KeyInput::Update() {
 	std::copy(std::begin(_currentKeyState), std::end(_currentKeyState), std::begin(_prevKeyState));
-	GetHitKeyStateAll(_currentKeyState);
-	_justPressedKey = GetInputChar(TRUE);
+	CoreBackend::Keyboard::State(_currentKeyState);
+	_justPressedKey = CoreBackend::Keyboard::Character();
 }
 
 bool _KeyInput::IsKeyPressing(int key) {

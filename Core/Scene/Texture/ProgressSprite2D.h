@@ -12,8 +12,8 @@ public:
 		_animationTime = time;
 		return this;
 	}
-	[[nodiscard]] Vector2D GetThisSize() const override {
-		return Vector2D(_size.x * _actualProgress, _size.y) * GetScale();
+	const Vector2D& GetRawSize() const override {
+		return Vector2D(_size.x * _actualProgress, _size.y);
 	}
 	[[nodiscard]] double GetProgress() const {
 		return _actualProgress;

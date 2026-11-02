@@ -1,15 +1,15 @@
 #include "Mouse.h"
 #include <NovotCore.h>
-#include <DxLib.h>
 #include <Camera.h>
+#include <Backend/Backend.h>
 
 void  _Mouse::UpdateMouseEvent() {
 	_handled = false;
 	int x, y;
-	auto input = GetMouseInput();
+	auto input = CoreBackend::MouseInput::Buttons();
 	auto preEvent = _currentMouseEvent;
-	GetMousePoint(&x, &y);
-	auto offset = GetMouseWheelRotVol();
+	CoreBackend::MouseInput::Position(&x, &y);
+	auto offset = CoreBackend::MouseInput::Wheel();
 	if (KeyMapping.IsActionPressing(DefautKeyMapping::KEY_SHIFT)) {
 		_currentMouseEvent.scrollOffset = Vector2D(static_cast<double>(offset), 0);
 	}
@@ -22,17 +22,17 @@ void  _Mouse::UpdateMouseEvent() {
 	_currentMouseEvent.position = Vector2D(static_cast<double>(x), static_cast<double>(y));
 	_currentMouseEvent.globalPosition = Camera.ScreenToWorld(_currentMouseEvent.position);
 	_currentMouseEvent.delta = _currentMouseEvent.position - preEvent.position;
-	if (input & MOUSE_INPUT_LEFT) {
+	if (CoreBackend::MouseInput::IsLeft(input)) {
 		_currentMouseEvent.button = MouseButton::Left;
 		_currentMouseEvent.state = MouseButtonState::Pressed;
 		if (_eventsEnabled) LeftPressed.Emit(_currentMouseEvent);
 	}
-	else if (input & MOUSE_INPUT_RIGHT) {
+	else if (CoreBackend::MouseInput::IsRight(input)) {
 		_currentMouseEvent.button = MouseButton::Right;
 		_currentMouseEvent.state = MouseButtonState::Pressed;
 		if (_eventsEnabled) RightPressed.Emit(_currentMouseEvent);
 	}
-	else if (input & MOUSE_INPUT_MIDDLE) {
+	else if (CoreBackend::MouseInput::IsMiddle(input)) {
 		_currentMouseEvent.button = MouseButton::Middle;
 		_currentMouseEvent.state = MouseButtonState::Pressed;
 		if (_eventsEnabled) MiddlePressed.Emit(_currentMouseEvent);
