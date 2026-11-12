@@ -6,6 +6,7 @@
 #include <Scene/Texture/Sprite2D.h>
 #include <Camera.h>
 #include <Backend/Backend.h>
+#include <cmath>
 
 class MouseCollision : public VisualDebugScene {
 protected:
@@ -75,7 +76,38 @@ public:
 		vertices.clear();
 	}
 	Vector2D Vertex2Global(const Vector2D& v) const {
-		return GetGlobalPosition() + v * GetScale();
+		Vector2D targetV = v;
+		const Vector2D s = GetScale();
+
+		if (not parent.expired()) {
+			auto p = parent.lock();
+			Vector2D frameSize(0, 0);
+			for (const auto& child : p->GetChildScenes()) {
+				if (auto sprite = std::dynamic_pointer_cast<Sprite2D>(child)) {
+					frameSize = sprite->GetRawSize();
+					if (frameSize.x > 0 || frameSize.y > 0) break;
+				}
+			}
+			if (s.x < 0) {
+				targetV.x = (frameSize.x > 0) ? (frameSize.x - targetV.x) : -targetV.x;
+			}
+			if (s.y < 0) {
+				targetV.y = (frameSize.y > 0) ? (frameSize.y - targetV.y) : -targetV.y;
+			}
+		}
+		else {
+			if (s.x < 0) targetV.x = -targetV.x;
+			if (s.y < 0) targetV.y = -targetV.y;
+		}
+
+		const Vector2D scaledVertex(targetV.x * std::abs(s.x), targetV.y * std::abs(s.y));
+		const double angle = GetRotation();
+		const double cosine = std::cos(angle);
+		const double sine = std::sin(angle);
+		return GetGlobalPosition() + Vector2D(
+			scaledVertex.x * cosine - scaledVertex.y * sine,
+			scaledVertex.x * sine + scaledVertex.y * cosine
+		);
 	}
 	std::vector<Vector2D> GetEdges() const;
 	Vector2D GetNearestEdge(const Vector2D& point) const;
