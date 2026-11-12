@@ -11,6 +11,7 @@ cbuffer OutLineShaderParam : register(b4)
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float4 color = Texture0.Sample(Sampler0, input.UV);
+    color.rgb *= input.Diffuse.rgb;
     float2 texelSize = (1.0f / TextureSize) * OutlineWidth;
     float alpha = -4.0 * color.a;
     

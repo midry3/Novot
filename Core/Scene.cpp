@@ -75,6 +75,11 @@ void Scene::Update(float dt) {
 	if (SceneManager.IsCancelUpdate()) {
 		return;
 	}
+	const auto scenesCopy = _scenes;
+	for (auto it=scenesCopy.rbegin(); it!=scenesCopy.rend(); ++it) {
+		(*it)->Update(dt);
+	}
+
 	if (IsShouldDraw()) {
 		if (IsUIMode()) {
 			SceneManager.AddDrawUITarget(shared_from_this());
@@ -82,10 +87,6 @@ void Scene::Update(float dt) {
 		else {
 			SceneManager.AddDrawTarget(shared_from_this());
 		}
-	}
-	const auto scenesCopy = _scenes;
-	for (auto it=scenesCopy.rbegin(); it!=scenesCopy.rend(); ++it) {
-		(*it)->Update(dt);
 	}
 }
 
@@ -212,7 +213,7 @@ Scene* Scene::SetGlobalPosition(const Vector2D& pos) {
 }
 
 Vector2D Scene::GetScale() const {
-	if (parent.expired()) {
+	if (parent.expired() || _ignoreParentScale) {
 		return scale;
 	}
 	else {

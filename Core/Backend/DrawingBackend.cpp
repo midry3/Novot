@@ -97,12 +97,17 @@ namespace NovotRenderer {
 		vertices[5].pos = VGet(static_cast<float>(x), static_cast<float>(y + height), 0.0f);
 		vertices[5].u = uMin;
 		vertices[5].v = vMax;
-		const COLOR_U8 whiteColor = GetColorU8(255, 255, 255, 255);
+		const COLOR_U8 modulateColor = GetColorU8(
+			CoreBackend::Drawing::GetBrightnessRed(),
+			CoreBackend::Drawing::GetBrightnessGreen(),
+			CoreBackend::Drawing::GetBrightnessBlue(),
+			255
+		);
 		const COLOR_U8 specColor = GetColorU8(0, 0, 0, 0);
 		for (auto& v : vertices)
 		{
 			v.rhw = 1.0f;
-			v.dif = whiteColor;
+			v.dif = modulateColor;
 			v.spc = specColor;
 			v.su = v.u;
 			v.sv = v.v;
@@ -182,13 +187,18 @@ namespace NovotRenderer {
         vertices[5].u = uMin;
         vertices[5].v = vMax;
 
-        const COLOR_U8 whiteColor = GetColorU8(255, 255, 255, 255);
+        const COLOR_U8 modulateColor = GetColorU8(
+            CoreBackend::Drawing::GetBrightnessRed(),
+            CoreBackend::Drawing::GetBrightnessGreen(),
+            CoreBackend::Drawing::GetBrightnessBlue(),
+            255
+        );
         const COLOR_U8 specColor = GetColorU8(0, 0, 0, 0);
 
         for (auto& v : vertices)
         {
             v.rhw = 1.0f;
-            v.dif = whiteColor;
+            v.dif = modulateColor;
             v.spc = specColor;
             v.su = v.u;
             v.sv = v.v;

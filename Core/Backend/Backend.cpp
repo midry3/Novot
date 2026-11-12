@@ -2,9 +2,23 @@
 #include <DxLib.h>
 
 namespace CoreBackend {
+    namespace {
+        int brightnessRed = 255;
+        int brightnessGreen = 255;
+        int brightnessBlue = 255;
+    }
+
     void Drawing::SetAlphaBlend(int alpha) { SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha); }
     void Drawing::SetNoBlend() { SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); }
-    void Drawing::SetBrightness(int red, int green, int blue) { SetDrawBright(red, green, blue); }
+    void Drawing::SetBrightness(int red, int green, int blue) {
+        brightnessRed = red;
+        brightnessGreen = green;
+        brightnessBlue = blue;
+        SetDrawBright(red, green, blue);
+    }
+    int Drawing::GetBrightnessRed() { return brightnessRed; }
+    int Drawing::GetBrightnessGreen() { return brightnessGreen; }
+    int Drawing::GetBrightnessBlue() { return brightnessBlue; }
     void Drawing::DrawSprite(int x, int y, int cx, int cy, double sx, double sy, double angle, int handle, int trans) { DrawRotaGraph3(x, y, cx, cy, sx, sy, angle, handle, trans); }
     void Drawing::DrawSpriteRegion(int x, int y, int sourceX, int sourceY, int width, int height, int cx, int cy, double sx, double sy, double angle, int handle, int trans) { DrawRectRotaGraph3(x, y, sourceX, sourceY, width, height, cx, cy, sx, sy, angle, handle, trans); }
     void Drawing::RenderText(int x, int y, double sx, double sy, int ex, int ey, double angle, unsigned int color, int font, unsigned int edge, int vertical, const char* text) { DrawRotaStringToHandle(x, y, sx, sy, ex, ey, angle, color, font, edge, vertical, text); }

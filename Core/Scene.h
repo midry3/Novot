@@ -29,6 +29,7 @@ protected:
 	int _ySortOffset = 0;
 	bool visible = true;
 	bool _isIgnoreParentAlpha = false;
+	bool _ignoreParentScale = false;
 	bool _ySortEnabled = false;
 	bool _isEnabled = true;
 	bool _ignoreCamera = false;
@@ -111,6 +112,10 @@ public:
 	}
 	Scene* SetScale(const Vector2D& s) {
 		scale = s;
+		return this;
+	}
+	Scene* IgnoreParentScale() {
+		_ignoreParentScale = true;
 		return this;
 	}
 	[[nodiscard]] Vector2D GetScale() const;

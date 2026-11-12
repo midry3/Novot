@@ -30,6 +30,7 @@ float SampleAlpha(float2 uv)
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float4 color = Texture0.Sample(Sampler0, input.UV);
+    color.rgb *= input.Diffuse.rgb;
 
     // ------------------------------------------------------------
     // アニメーション時間

@@ -7,6 +7,9 @@ namespace CoreBackend {
         static void SetAlphaBlend(int alpha);
         static void SetNoBlend();
         static void SetBrightness(int red, int green, int blue);
+        static int GetBrightnessRed();
+        static int GetBrightnessGreen();
+        static int GetBrightnessBlue();
         static void DrawSprite(int x, int y, int cx, int cy, double sx, double sy, double angle, int handle, int trans);
         static void DrawSpriteRegion(int x, int y, int sourceX, int sourceY, int width, int height, int cx, int cy, double sx, double sy, double angle, int handle, int trans);
         static void RenderText(int x, int y, double sx, double sy, int ex, int ey, double angle, unsigned int color, int font, unsigned int edge, int vertical, const char* text);
