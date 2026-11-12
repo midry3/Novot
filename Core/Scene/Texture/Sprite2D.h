@@ -34,6 +34,7 @@ public:
 	~Sprite2D() = default;
 	virtual Sprite2D* SetTexture(const std::shared_ptr<Texture>& texture) {
 		this->_texture = texture;
+		_handle = -1;
 		AdjustSize();
 		TextureChanged.Emit();
 		return this;

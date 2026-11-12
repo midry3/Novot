@@ -273,10 +273,13 @@ public:
 		}
 		return _isUI;
 	}
-	void DeleteScene(int index) {
+	virtual void DeleteScene(int index) {
+		if (index < 0 || index >= static_cast<int>(_scenes.size())) {
+			return;
+		}
 		_scenes.erase(_scenes.begin() + index);
 	}
-	void DeleteScene(std::shared_ptr<Scene> scene) {
+	virtual void DeleteScene(std::shared_ptr<Scene> scene) {
 		std::erase_if(_scenes, [&scene](const std::shared_ptr<Scene>& s){ return s == scene; });
 	}
 	void DeleteFromParent() {

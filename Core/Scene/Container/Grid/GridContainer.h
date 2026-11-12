@@ -58,6 +58,29 @@ public:
 		UpdateCellSize();
 		return this;
 	}
+	void DeleteScene(int index) override {
+		if (index < 0 || index >= static_cast<int>(_scenes.size())) {
+			return;
+		}
+		auto scene = _scenes[index];
+		_scenes.erase(_scenes.begin() + index);
+		std::erase_if(_gridScenes, [&scene](const std::weak_ptr<Scene>& gridScene) {
+			return gridScene.lock() == scene;
+		});
+		UpdateCellSize();
+	}
+	void DeleteScene(std::shared_ptr<Scene> scene) override {
+		if (not scene) {
+			return;
+		}
+		std::erase_if(_scenes, [&scene](const std::shared_ptr<Scene>& child) {
+			return child == scene;
+		});
+		std::erase_if(_gridScenes, [&scene](const std::weak_ptr<Scene>& gridScene) {
+			return gridScene.lock() == scene;
+		});
+		UpdateCellSize();
+	}
 	template <std::derived_from<Scene> T>
 	std::shared_ptr<T> CreateScene() {
 		auto scene = std::make_shared<T>();

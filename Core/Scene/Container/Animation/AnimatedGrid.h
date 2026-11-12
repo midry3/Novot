@@ -34,6 +34,8 @@ protected:
 			_cellSize = Vector2D(_size.x, _size.y / (_matrixSize.y + _bookedCount));
 		}
 	}
+
+	void AnimateReflow();
 public:
 	Signal<> BookCompleted;
 	Vector2D GetNextCellPosition() const {
@@ -72,5 +74,7 @@ public:
 		return this;
 	}
 
+	void DeleteScene(int index) override;
+	void DeleteScene(std::shared_ptr<Scene> scene) override;
 	void Book(int num);
 };
