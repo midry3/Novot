@@ -159,7 +159,9 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Animation\AnimationMath.cpp" />
     <ClCompile Include="Core\Input\KeyInput.cpp" />
+    <ClCompile Include="Core\Scene\Text\TextInput.cpp" />
     <ClCompile Include="ThirdParty\Lua\src\lzio.c">
       <CompileAs>CompileAsC</CompileAs>
       <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
@@ -387,6 +389,7 @@
     <ClCompile Include="Novot.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Animation\AnimationMath.h" />
     <ClInclude Include="Core\Input\KeyInput.h" />
     <ClInclude Include="Core\Lua\LuaSceneLoader.h" />
     <ClInclude Include="Core\Lua\LuaSceneScript.h" />
@@ -411,6 +414,7 @@
     <ClInclude Include="Core\Scene\Texture\ProgressSprite2D.h" />
     <ClInclude Include="Core\Scene\Text\FormatTextLabel.h" />
     <ClInclude Include="Core\Scene\Text\AnimatedTextLabel.h" />
+    <ClInclude Include="Core\Scene\Text\TextInput.h" />
     <ClInclude Include="Core\Scene\Text\TextLabel.h" />
     <ClInclude Include="Core\Scene\Util\PageController.h" />
     <ClInclude Include="Core\String\FontManager.h" />

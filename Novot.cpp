@@ -7,6 +7,7 @@
 #include <chrono>
 #include <EffekseerForDXLib.h>
 #include <Graphic/2D.h>
+#include <Backend/Backend.h>
 
 namespace Novot {
 	int Init() {
@@ -72,6 +73,10 @@ namespace Novot {
 			Mouse.UpdateMouseEvent();
 			SceneManager.Update(dt);
 			UpdateEffekseer2D(dt);
+
+			if (_screenPixelShader) {
+				CoreBackend::Shader::UpdateConstantBuffer(_constantBufferHandle);
+			}
 		}
 	}
 

@@ -16,6 +16,7 @@ public:
 	SoundPlayer* SetVolume(int volume);
 	SoundPlayer* SetVolume(float volume);
 	SoundPlayer* SetVolume(double volume);
+	SoundPlayer* AnimateVolume(int toVolume, float duration);
 	SoundPlayer* SetLoop(bool loop=true);
 	[[nodiscard]] int GetVolume() const;
 	[[nodiscard]] float GetVolumeRatio() const;

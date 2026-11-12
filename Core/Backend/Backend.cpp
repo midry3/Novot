@@ -12,6 +12,11 @@ namespace CoreBackend {
     int Drawing::FontLineSpace(int font) { return GetFontLineSpaceToHandle(font); }
     int Drawing::CreateTextFont(const char* name, int size, int thickness) { return CreateFontToHandle(name, size, thickness); }
     void Drawing::DeleteFont(int font) { DeleteFontToHandle(font); }
+	int Drawing::CreateDrawScreen(int width, int height) { return MakeScreen(width, height, TRUE); }
+	int Drawing::GetCurrentDrawScreen() { return GetDrawScreen(); }
+	void Drawing::SetDrawScreen(int handle) { DxLib::SetDrawScreen(handle); }
+	void Drawing::ClearDrawScreen() { DxLib::ClearDrawScreen(); }
+	void Drawing::DeleteDrawScreen(int handle) { DeleteGraph(handle); }
     unsigned int Drawing::Color(int red, int green, int blue) { return GetColor(red, green, blue); }
 
     int Texture::Load(const void* data, int size) { return CreateGraphFromMem(data, size); }
@@ -49,4 +54,5 @@ namespace CoreBackend {
     int Shader::CreateBuffer(std::size_t size) { return CreateShaderConstantBuffer(static_cast<int>(size)); }
     void* Shader::Buffer(int handle) { return GetBufferShaderConstantBuffer(handle); }
     void Shader::SetConstantBuffer(int handle, int slot) { SetShaderConstantBuffer(handle, DX_SHADERTYPE_PIXEL, slot); }
+	void Shader::UpdateConstantBuffer(int handle) { UpdateShaderConstantBuffer(handle); }
 }

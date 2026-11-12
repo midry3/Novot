@@ -11,7 +11,9 @@ protected:
 	std::vector<Vector2D> areaVertices;
 	void _Load() override;
 public:
-	Signal<const MouseEvent&> LeftPressed, LeftReleased, MiddlePressed, MiddleReleased, RightPressed, RightReleased, Entered, Exited;
+
+	Signal<const MouseEvent&> LeftPressed, LeftReleased, MiddlePressed, MiddleReleased, RightPressed, RightReleased, Entered, Exited, Scrolled, Moved;
+	
 	Button() = default;
 	~Button() = default;
 	template<typename... Args>

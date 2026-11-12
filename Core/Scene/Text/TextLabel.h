@@ -1,27 +1,35 @@
 #pragma once
 #include <Scene.h>
+#include <Collision/MouseCollision.h>
 #include <Backend/Backend.h>
 
 class TextLabel : public Scene {
 protected:
+	int _screenHandle = -1;
 	int _fontHandle = -1;
 	int _fontSize = 24;
 	int _fontThickness = 3;
-	String _fontName = "";
-	int _width = -1;
+	int _yScrollOffset = 0;
+	String _fontName = "", _text = "";
+	int _width = -1, _height = -1;
+	mutable Vector2D _rawSizeCache;
 	bool _isNowSetting = false;
+
+	SharedPtr<MouseCollision> _mouseCollision;
+
 	void _Load() override;
 	void _Draw() const override;
 	void _Release() override;
 public:
+	Signal<const String&> TextChanged;
+
 	static String DefaultFont;
-	String text;
 	unsigned int foregroundColor = CoreBackend::Drawing::Color(255, 255, 255);
 
-	const Vector2D& GetRawSize() const override {
-		if (text.size() == 0 || _fontSize == 0) return Vec2D_0;
-		return Vector2D(_width, text.size() / (_width / _fontSize));
-	}
+	const Vector2D& GetRawSize() const override;
+
+	TextLabel* UpdateDrawScreen();
+	TextLabel* AdjustMouseCollisionArea();
 
 	TextLabel* BeginSetting() {
 		_isNowSetting = true;
@@ -35,12 +43,14 @@ public:
 	}
 
 	virtual TextLabel* SetText(const std::string& newText) {
-		text = newText;
+		_text = newText;
+		TextChanged.Emit(_text);
 		return this;
 	}
 
 	virtual TextLabel* AddText(const std::string& additionalText) {
-		text += additionalText;
+		_text += additionalText;
+		TextChanged.Emit(_text);
 		return this;
 	}
 
@@ -83,10 +93,19 @@ public:
 
 	TextLabel* SetWidth(int width) {
 		_width = width;
+		UpdateDrawScreen();
+		AdjustMouseCollisionArea();
+		return this;
+	}
+
+	TextLabel* SetHeight(int height) {
+		_height = height;
+		UpdateDrawScreen();
+		AdjustMouseCollisionArea();
 		return this;
 	}
 
 	void Clear() {
-		text.clear();
+		_text.clear();
 	}
 };

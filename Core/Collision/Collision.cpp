@@ -9,6 +9,13 @@ void Collision::_Update(float dt) {
 	if (not enabled || not _needsUpdate) return;
 	std::list<std::weak_ptr<Collision>> currentCollisions;
 	auto collisions = CollisionManager.GetAllColliding(*this);
+	for (const auto& contact : TakePhysicalContacts()) {
+		if (auto col = contact.lock()) {
+			if (std::find(collisions.begin(), collisions.end(), col) == collisions.end()) {
+				collisions.push_back(col);
+			}
+		}
+	}
 #ifdef _DEBUG
 	_collidingCount = collisions.size();
 #endif
@@ -17,11 +24,11 @@ void Collision::_Update(float dt) {
 	}
 	else {
 		for (auto col : collisions) {
-			if (std::find_if(collidingWith.begin(), collidingWith.end(), [&col](const std::weak_ptr<Collision>& c) { return !c.expired() && c.lock() == col; }) == collidingWith.end()) {
+			if (std::find_if(collidingWith.begin(), collidingWith.end(), [&col](const std::weak_ptr<Collision>& c) { return not c.expired() && c.lock() == col; }) == collidingWith.end()) {
 				CollideStarted.Emit(*col);
 			}
 			currentCollisions.push_back(col);
-			collidingWith.remove_if([&col](const std::weak_ptr<Collision>& c) { return !c.expired() && c.lock() == col; });
+			collidingWith.remove_if([&col](const std::weak_ptr<Collision>& c) { return not c.expired() && c.lock() == col; });
 			Colliding.Emit(*col);
 		}
 	}

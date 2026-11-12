@@ -28,4 +28,10 @@ void Button::_Load() {
 	collision->Exited.Connect([this](const MouseEvent& event) {
 		Exited.Emit(event);
 		});
+	collision->Scrolled.Connect([this](const MouseEvent& event) {
+		Scrolled.Emit(event);
+		});
+	collision->Moved.Connect([this](const MouseEvent& event) {
+		Moved.Emit(event);
+		});
 }

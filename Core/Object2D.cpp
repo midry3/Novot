@@ -90,12 +90,21 @@ SimulationResult Object2D::Simulation(float dt) {
 	};
 	auto collidesAt = [&](const Vector2D& candidate) {
 		placeAt(candidate);
-		return CollisionManager.IsCollidingWithWall(*collision);
+		const auto walls = CollisionManager.GetAllCollidingWall(*collision);
+		for (const auto& wall : walls) {
+			collision->RegisterPhysicalContact(wall);
+			wall->RegisterPhysicalContact(collision);
+		}
+		return not walls.empty();
 	};
 
 	for (int attempt = 0; attempt < 8; ++attempt) {
 		placeAt(nextPosition);
 		const auto walls = CollisionManager.GetAllCollidingWall(*collision);
+		for (const auto& wall : walls) {
+			collision->RegisterPhysicalContact(wall);
+			wall->RegisterPhysicalContact(collision);
+		}
 		if (walls.empty()) break;
 		Vector2D shortestTranslation{};
 		double shortestDistance = std::numeric_limits<double>::infinity();

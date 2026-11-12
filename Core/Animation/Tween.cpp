@@ -1,6 +1,7 @@
 #include "Tween.h"
 #include <Math/Utils.h>
 #include <algorithm>
+#include "AnimationMath.h"
 
 std::shared_ptr<Tween> TweenGroup::CreateTween(const TweenTarget& target, TweenValue end, double duration, Easing::EasingFunction easing, bool restore) {
 	auto t = std::make_shared<Tween>(target, end, duration);
@@ -72,10 +73,10 @@ void Tween::Update(float dt) {
 	elapsedTime += dt;
 	double t = (std::min)(1.0, elapsedTime / duration);
 	if (std::holds_alternative<Vector2D>(start)) {
-		SetTweenTargetValue(target, _startVector + (_endVector - _startVector) * _easing(t));
+		SetTweenTargetValue(target, Lerp(_startVector, _endVector, t, _easing));
 	}
 	else {
-		SetTweenTargetValue(target, _startd + (_endd - _startd) * _easing(t));
+		SetTweenTargetValue(target, Lerp(_startd, _endd, t, _easing));
 	}
 	if (1.0 <= t) {
 		if (std::holds_alternative<Vector2D>(end)) {
@@ -86,6 +87,9 @@ void Tween::Update(float dt) {
 		}
 		isFinished = true;
 		Completed.Emit();
+	}
+	else {
+		Updated.Emit();
 	}
 }
 

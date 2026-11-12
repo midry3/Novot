@@ -6,13 +6,14 @@
 
 class State {
 private:
-	std::vector<int> _blackList;
+	std::vector<int> _blackList, _whiteList;
 
 public:
 	Signal<> Entered, Exited;
 
 	State& Block(const int state);
-	bool CanTransTo(const int state) const;
+	State& Allow(const int state);
+	[[nodiscard]] bool IsAccept(const int state) const;
 
 	void operator-=(const int state) {
 		Block(state);
@@ -49,7 +50,7 @@ public:
 		return *this;
 	}
 	void ChangeState(int newState) {
-		if (currentState == newState || not _states[currentState].CanTransTo(newState)) return;
+		if (currentState == newState || not _states[currentState].IsAccept(newState) || not _states[newState].IsAccept(currentState)) return;
 		if (currentState < _states.size()) {
 			_states[currentState].Exited.Emit();
 		}

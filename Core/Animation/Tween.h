@@ -81,7 +81,7 @@ protected:
 		}
 	}
 public:
-	Signal<> Completed;
+	Signal<> Completed, Updated;
 	bool isFinished = false;
 	Tween() = default;
 	Tween(const TweenTarget& target, TweenValue end, double duration) : duration(duration), elapsedTime(0), start(GetTweenTargetValue(target)), end(end), rawEnd(end), target(target) {}
@@ -89,6 +89,10 @@ public:
 	Tween* From(TweenValue start);
 	Tween* OnComplete(const std::function<void()>& callback) {
 		Completed.Connect(callback);
+		return this;
+	}
+	Tween* OnUpdate(const std::function<void()>& callback) {
+		Updated.Connect(callback);
 		return this;
 	}
 	Tween* SetEasing(const Easing::EasingFunction& easing) {

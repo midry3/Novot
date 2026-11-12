@@ -51,7 +51,7 @@ void AnimatedTextLabel::_Release() {
 void AnimatedTextLabel::_RebuildCharacters() {
 	_characters.clear();
 	_elapsedTime = 0.0;
-	if (_fontHandle == -1 || text.empty()) return;
+	if (_fontHandle == -1 || _text.empty()) return;
 
 	const int lineSpacing = CoreBackend::Drawing::FontLineSpace(_fontHandle) > 0
 		? CoreBackend::Drawing::FontLineSpace(_fontHandle)
@@ -59,9 +59,9 @@ void AnimatedTextLabel::_RebuildCharacters() {
 	int line = 0;
 	int lineWidth = 0;
 
-	for (size_t index = 0; index < text.size();) {
-		if (text[index] == '\r' || text[index] == '\n') {
-			if (text[index] == '\r' && index + 1 < text.size() && text[index + 1] == '\n') {
+	for (size_t index = 0; index < _text.size();) {
+		if (_text[index] == '\r' || _text[index] == '\n') {
+			if (_text[index] == '\r' && index + 1 < _text.size() && _text[index + 1] == '\n') {
 				++index;
 			}
 			++index;
@@ -70,8 +70,8 @@ void AnimatedTextLabel::_RebuildCharacters() {
 			continue;
 		}
 
-		const size_t characterLength = GetCharacterLength(text, index);
-		const std::string character = text.substr(index, characterLength);
+		const size_t characterLength = GetCharacterLength(_text, index);
+		const std::string character = _text.substr(index, characterLength);
 		const int characterWidth = CoreBackend::Drawing::MeasureText(
 			character.c_str(), static_cast<int>(character.size()), _fontHandle, 0
 		);

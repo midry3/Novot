@@ -1,5 +1,6 @@
 #include "SoundPlayer.h"
 #include <Backend/Backend.h>
+#include <Animation/Tween.h>
 
 void SoundPlayer::_Update(float dt) {
 	if (_sound) {
@@ -28,6 +29,20 @@ SoundPlayer* SoundPlayer::SetVolume(float volume) {
 }
 SoundPlayer* SoundPlayer::SetVolume(double volume) {
 	SetVolume(static_cast<int>(volume * NORMAL_VOLUME));
+	return this;
+}
+
+SoundPlayer* SoundPlayer::AnimateVolume(int toVolume, float duration) {
+	const int fromVolume = _volume;
+	const int volumeDelta = toVolume - fromVolume;
+	if (duration <= 0.0f || volumeDelta == 0) {
+		SetVolume(toVolume);
+		return this;
+	}
+	CreateTweenGroup()->CreateTween(&_volume, toVolume, duration)
+		->OnUpdate([this]() {
+		SetVolume(_volume);
+			});
 	return this;
 }
 

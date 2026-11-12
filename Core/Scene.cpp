@@ -66,6 +66,9 @@ void Scene::Update(float dt) {
 		return;
 	}
 	_Update(dt);
+	for (const auto& cb : _constantBuffer) {
+		CoreBackend::Shader::UpdateConstantBuffer(cb.handle);
+	}
 	if (_luaScript) {
 		_luaScript->Update(dt);
 	}

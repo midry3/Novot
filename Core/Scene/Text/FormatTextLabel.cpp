@@ -32,13 +32,13 @@ namespace {
 }
 
 FormatTextLabel* FormatTextLabel::SetText(const std::string& newText) {
-	text = newText;
+	_text = newText;
 	ParseText();
 	return this;
 }
 
 FormatTextLabel* FormatTextLabel::AddText(const std::string& additionalText) {
-	text += additionalText;
+	_text += additionalText;
 	ParseText();
 	return this;
 }
@@ -51,7 +51,7 @@ FormatTextLabel* FormatTextLabel::SetFormat(const std::string& key, const TextFo
 
 void FormatTextLabel::ParseText() {
 	_segments.clear();
-	if (text.empty()) return;
+	if (_text.empty()) return;
 
 	if (_fontHandle == -1) {
 		ApplyFont();
@@ -65,22 +65,22 @@ void FormatTextLabel::ParseText() {
 	std::vector<RawSegment> rawSegments;
 
 	size_t i = 0;
-	while (i < text.size()) {
-		size_t nextOpen = text.find('{', i);
+	while (i < _text.size()) {
+		size_t nextOpen = _text.find('{', i);
 		if (nextOpen == std::string::npos) {
-			rawSegments.push_back({ text.substr(i), foregroundColor, false });
+			rawSegments.push_back({ _text.substr(i), foregroundColor, false });
 			break;
 		}
 		if (nextOpen > i) {
-			rawSegments.push_back({ text.substr(i, nextOpen - i), foregroundColor, false });
+			rawSegments.push_back({ _text.substr(i, nextOpen - i), foregroundColor, false });
 		}
-		size_t closePos = text.find('}', nextOpen);
+		size_t closePos = _text.find('}', nextOpen);
 		if (closePos == std::string::npos) {
-			rawSegments.push_back({ text.substr(nextOpen), foregroundColor, false });
+			rawSegments.push_back({ _text.substr(nextOpen), foregroundColor, false });
 			break;
 		}
 
-		std::string key = text.substr(nextOpen + 1, closePos - nextOpen - 1);
+		std::string key = _text.substr(nextOpen + 1, closePos - nextOpen - 1);
 		if (_formats.contains(key)) {
 			rawSegments.push_back({ _formats[key].text, _formats[key].color, true });
 		}

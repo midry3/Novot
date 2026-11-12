@@ -5,11 +5,26 @@ State& State::Block(const int state) {
 	return *this;
 }
 
-bool State::CanTransTo(const int state) const {
-	for (const auto& blockedState : _blackList) {
-		if (blockedState == state) {
-			return false;
+State& State::Allow(const int state) {
+	_whiteList.push_back(state);
+	return *this;
+}
+
+bool State::IsAccept(const int state) const {
+	if (_whiteList.empty()) {
+		for (const auto& blockedState : _blackList) {
+			if (blockedState == state) {
+				return false;
+			}
 		}
+		return true;
 	}
-	return true;
+	else {
+		for (const auto& allowedState : _whiteList) {
+			if (allowedState == state) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

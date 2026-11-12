@@ -168,6 +168,12 @@ public:
 		rotation = turn * 2 * PI;
 		return this;
 	}
+	[[nodiscard]] const double GetRotationDegree() const {
+		return GetRotation() * 180.0 / PI;
+	}
+	[[nodiscard]] const double GetRotationTurn() const {
+		return GetRotation() / (2 * PI);
+	}
 	Scene* SetRotationCenter(const Vector2D& center) {
 		rotationCenter = center;
 		return this;
@@ -219,6 +225,9 @@ public:
 	}
 	Scene* SetPixelShader(std::shared_ptr<PixelShader> shader) {
 		_pixelShader = shader;
+		if (not _pixelShader) {
+			ClearPixelShaderConstantBuffer();
+		}
 		return this;
 	}
 	template <std::derived_from<PixelShader> T>
@@ -232,6 +241,10 @@ public:
 			handle,
 			slot
 			});
+		return this;
+	}
+	Scene* ClearPixelShaderConstantBuffer() {
+		_constantBuffer.clear();
 		return this;
 	}
 	[[nodiscard]] std::shared_ptr<PixelShader> GetParentPixelShader() const {

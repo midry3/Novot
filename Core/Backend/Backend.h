@@ -13,6 +13,11 @@ namespace CoreBackend {
         static int MeasureText(const char* text, int length, int font, int vertical = 0);
         static int FontLineSpace(int font);
         static int CreateTextFont(const char* name, int size, int thickness);
+		static int CreateDrawScreen(int width, int height);
+		static int GetCurrentDrawScreen();
+		static void ClearDrawScreen();
+		static void SetDrawScreen(int handle);
+		static void DeleteDrawScreen(int handle);
         static void DeleteFont(int font);
         static unsigned int Color(int red, int green, int blue);
     };
@@ -70,5 +75,6 @@ namespace CoreBackend {
         static int CreateBuffer(std::size_t size);
         static void* Buffer(int handle);
         static void SetConstantBuffer(int handle, int slot);
+        static void UpdateConstantBuffer(int handle);
     };
 }

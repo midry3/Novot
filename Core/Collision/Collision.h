@@ -10,6 +10,7 @@ class Collision : public VisualDebugScene {
 protected:
 	std::vector<int> layers, masks;
 	std::list<std::weak_ptr<Collision>> collidingWith;
+	std::list<std::weak_ptr<Collision>> physicalContacts;
 	bool enabled = true;
 	bool _isColliding = false;
 	bool _needsUpdate = true;
@@ -143,6 +144,14 @@ public:
 	Collision* SetPassable(bool passable) {
 		isPassable = passable;
 		return this;
+	}
+	void RegisterPhysicalContact(const std::shared_ptr<Collision>& other) {
+		if (other) physicalContacts.push_back(other);
+	}
+	std::list<std::weak_ptr<Collision>> TakePhysicalContacts() {
+		auto contacts = std::move(physicalContacts);
+		physicalContacts.clear();
+		return contacts;
 	}
 	bool CanPass() const {
 		return isPassable;

@@ -101,6 +101,20 @@ public:
 	Vector2D Abs() const {
 		return Vector2D(std::abs(x), std::abs(y));
 	}
+
+	template <typename T>
+	T* ToArray() const {
+		T arr[2];
+		arr[0] = static_cast<T>(x);
+		arr[1] = static_cast<T>(y);
+		return arr;
+	}
+
+	template <typename T>
+	void AssignToArray(T* target) const {
+		target[0] = static_cast<T>(x);
+		target[1] = static_cast<T>(y);
+	}
 };
 
 Vector2D operator*(int a, const Vector2D& v);
