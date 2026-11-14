@@ -25,7 +25,7 @@ public:
 	void EffectUpdate(float dt);
 	void Draw() const;
 	void EffectDraw() const;
-	void SetCurrentScene(std::shared_ptr<Scene> scene);
+	void SetCurrentScene(std::shared_ptr<Scene> scene, bool releaseScene = true);
 
 	template <std::derived_from<Scene> T>
 	std::shared_ptr<T> SetCurrentScene() {
@@ -57,6 +57,7 @@ public:
 		_cancelUpdate = false;
 	}
 	void TransSceneTo(std::shared_ptr<Scene> scene, double in = 2.0, double out = 2.0);
+	void NaturalTransSceneTo(std::shared_ptr<Scene> scene, double duration);
 	std::shared_ptr<Scene> GetCurrentScene() {
 		return currentScene;
 	}

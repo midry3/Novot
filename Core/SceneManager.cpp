@@ -10,8 +10,8 @@ void _SceneManager::Init() {
 		->SetSize(Vector2D(1920, 1080));
 }
 
-void _SceneManager::SetCurrentScene(std::shared_ptr<Scene> scene) {
-	if (currentScene != nullptr) {
+void _SceneManager::SetCurrentScene(std::shared_ptr<Scene> scene, bool releaseScene) {
+	if (currentScene != nullptr && releaseScene) {
 		currentScene->Release();
 		_cancelUpdate = true;
 	}
@@ -34,6 +34,10 @@ void _SceneManager::TransSceneTo(std::shared_ptr<Scene> scene, double in, double
 			DeleteEffectScene(_transEffect);
 				});
 		});
+}
+
+void _SceneManager::NaturalTransSceneTo(std::shared_ptr<Scene> scene, double duration) {
+
 }
 
 void _SceneManager::Update(float dt) {

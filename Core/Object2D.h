@@ -25,7 +25,7 @@ public:
 	std::shared_ptr<Collision> collision;
 	Vector2D scaleVelocity, velocity, acceleration;
 	Object2D() : scaleVelocity(0, 0), velocity(0, 0), acceleration(0, 0) {}
-	SimulationResult Simulation(float dt);
+	SimulationResult& Simulation(float dt);
 	void FixSimulation(SimulationResult result) {
 		_simulationResult = std::make_unique<SimulationResult>(result);
 	}

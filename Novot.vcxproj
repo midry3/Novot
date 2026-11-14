@@ -162,6 +162,7 @@
     <ClCompile Include="Core\Animation\AnimationMath.cpp" />
     <ClCompile Include="Core\Input\KeyInput.cpp" />
     <ClCompile Include="Core\Scene\Text\TextInput.cpp" />
+    <ClCompile Include="Core\Screen.cpp" />
     <ClCompile Include="ThirdParty\Lua\src\lzio.c">
       <CompileAs>CompileAsC</CompileAs>
       <AdditionalOptions>/std:c11 /Z7 %(AdditionalOptions)</AdditionalOptions>
@@ -417,6 +418,7 @@
     <ClInclude Include="Core\Scene\Text\TextInput.h" />
     <ClInclude Include="Core\Scene\Text\TextLabel.h" />
     <ClInclude Include="Core\Scene\Util\PageController.h" />
+    <ClInclude Include="Core\Screen.h" />
     <ClInclude Include="Core\String\FontManager.h" />
     <ClInclude Include="Core\String\NumberingText.h" />
     <ClInclude Include="Core\String\StringUtils.h" />

@@ -68,7 +68,7 @@ static bool GetMinimumTranslation(const Collision& moving, const Collision& obst
 	return true;
 }
 
-SimulationResult Object2D::Simulation(float dt) {
+SimulationResult& Object2D::Simulation(float dt) {
 	Vector2D nextPosition = position;
 	Vector2D nextVelocity = velocity;
 	const Vector2D nextAcceleration = acceleration;
