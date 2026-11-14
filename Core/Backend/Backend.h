@@ -19,6 +19,7 @@ namespace CoreBackend {
 		static int CreateDrawScreen(int width, int height);
 		static bool CaptureDrawScreen(int handle, int width, int height);
 		static int GetCurrentDrawScreen();
+        static int GetFrontDrawScreen();
 		static void ClearDrawScreen();
 		static void SetDrawScreen(int handle);
 		static void DeleteDrawScreen(int handle);

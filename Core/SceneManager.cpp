@@ -61,11 +61,12 @@ void _SceneManager::NaturalTransSceneTo(std::shared_ptr<Scene> scene, double dur
 		return;
 	}
 
-	const auto windowSize = PropertyManager.GetSettingWindowSize();
+	const auto windowSize = PropertyManager.GetRealWindowSize();
 	const int screenHandle = CoreBackend::Drawing::CreateDrawScreen(
 		static_cast<int>(windowSize.x),
 		static_cast<int>(windowSize.y)
 	);
+
 	if (screenHandle < 0 || not CoreBackend::Drawing::CaptureDrawScreen(
 		screenHandle,
 		static_cast<int>(windowSize.x),
@@ -77,7 +78,6 @@ void _SceneManager::NaturalTransSceneTo(std::shared_ptr<Scene> scene, double dur
 		SetCurrentScene(scene, releaseScene);
 		return;
 	}
-
 	const int targetAlpha = scene->alpha;
 	SetCurrentScene(scene, releaseScene);
 	scene->SetAlpha(0);

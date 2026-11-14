@@ -28,8 +28,15 @@ namespace CoreBackend {
     void Drawing::DeleteFont(int font) { DeleteFontToHandle(font); }
 	int Drawing::CreateDrawScreen(int width, int height) { return MakeScreen(width, height, TRUE); }
 	bool Drawing::CaptureDrawScreen(int handle, int width, int height) {
-		return GetDrawScreenGraph(0, 0, width - 1, height - 1, handle, TRUE) == 0;
+        const int currentScreen = GetCurrentDrawScreen();
+        SetDrawScreen(GetFrontDrawScreen());
+        const int res = GetDrawScreenGraph(0, 0, width, height, handle, TRUE);
+        SetDrawScreen(currentScreen);
+		return res  == 0;
 	}
+    int Drawing::GetFrontDrawScreen() {
+        return DX_SCREEN_FRONT;
+    }
 	int Drawing::GetCurrentDrawScreen() { return GetDrawScreen(); }
 	void Drawing::SetDrawScreen(int handle) { DxLib::SetDrawScreen(handle); }
 	void Drawing::ClearDrawScreen() { DxLib::ClearDrawScreen(); }
