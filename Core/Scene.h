@@ -42,6 +42,7 @@ protected:
 	virtual void _Draw() const {};
 public:
 	Signal<bool> VisibilityChanged;
+	Signal<> EnteredMainScene, ExitedMainScene;
 	int alpha = 255;
 	double rotation = 0.0;
 	Vector2D position, offset, scale, rotationCenter;

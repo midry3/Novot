@@ -56,8 +56,8 @@ public:
 	void ClearCancelUpdate() {
 		_cancelUpdate = false;
 	}
-	void TransSceneTo(std::shared_ptr<Scene> scene, double in = 2.0, double out = 2.0);
-	void NaturalTransSceneTo(std::shared_ptr<Scene> scene, double duration);
+	void TransSceneTo(std::shared_ptr<Scene> scene, double in = 2.0, double out = 2.0, bool releaseScene = true);
+	void NaturalTransSceneTo(std::shared_ptr<Scene> scene, double duration, bool releaseScene = true);
 	std::shared_ptr<Scene> GetCurrentScene() {
 		return currentScene;
 	}

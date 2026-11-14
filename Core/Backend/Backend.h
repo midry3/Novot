@@ -17,6 +17,7 @@ namespace CoreBackend {
         static int FontLineSpace(int font);
         static int CreateTextFont(const char* name, int size, int thickness);
 		static int CreateDrawScreen(int width, int height);
+		static bool CaptureDrawScreen(int handle, int width, int height);
 		static int GetCurrentDrawScreen();
 		static void ClearDrawScreen();
 		static void SetDrawScreen(int handle);

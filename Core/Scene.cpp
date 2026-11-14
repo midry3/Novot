@@ -59,6 +59,9 @@ void Scene::Release() {
 	for (const auto& s : scenesCopy) {
 		s->Release();
 	}
+	ReleaseAssets();
+	_scenes.clear();
+	_isLoaded = false;
 }
 
 void Scene::Update(float dt) {
