@@ -27,7 +27,8 @@ void ProgressSprite2D::_Draw() const {
 			_handle,
 			1,
 			pShader->GetHandle(),
-			uMin, vMin, uMin + progressWidth, vMax
+			uMin, vMin, uMin + progressWidth, vMax,
+			GetAlpha() / 255.0f
 		);
 	}
 	else {

@@ -32,7 +32,8 @@ void Sprite2D::_Draw() const {
 			_handle,
 			1,
 			pShader->GetHandle(),
-			uMin, vMin, uMax, vMax
+			uMin, vMin, uMax, vMax,
+			GetAlpha() / 255.0f
 		);
 	}
 	else {
@@ -55,4 +56,26 @@ void Sprite2D::ChangeStretch(StretchType type) {
 	if (_size.x != 0 && _size.y != 0) {
 		AdjustScale();
 	}
+}
+
+void Sprite2D::AdjustScale() {
+	Vector2D wsize;
+	float r;
+	switch (stretch) {
+	case StretchType::FIT:
+		wsize = PropertyManager.GetRealWindowSize();
+		r = Min(wsize.x / GetRawSize().x, wsize.y / GetRawSize().y);
+		SetScale(r);
+		break;
+	case StretchType::NONE:
+		break;
+	}
+}
+
+void  Sprite2D::AdjustSize() {
+	int x, y;
+	CoreBackend::Texture::Size(GetHandle(), &x, &y);
+	_size = Vec2(x, y);
+	_handle = GetHandle();
+	AdjustScale();
 }

@@ -1,11 +1,11 @@
 #pragma once
 #include "Singleton.h"
-#include <Scene.h>
+#include <LogicScene.h>
 #include <functional>
 #include <list>
 #include <memory>
 
-class Timer : public Scene {
+class Timer : public LogicScene {
 protected:
 	int loopNum;
 	double time, startTime;

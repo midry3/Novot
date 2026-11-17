@@ -8,9 +8,10 @@
 #include <Scene/Button/Button.h>
 #include <Scene/Texture/AnimatedSprite2D.h>
 #include <Backend/Backend.h>
+#include <LogicScene.h>
 
 Scene::~Scene() {
-	delete _luaScript;
+	//delete _luaScript;
 }
 
 bool Scene::IsShouldDraw() const {
@@ -31,9 +32,11 @@ void Scene::Clear() {
 
 void Scene::Load() {
 	if (_isLoaded) {
+		/*
 		if (_luaScript and not _luaScript->IsLoaded()) {
 			_luaScript->Load();
 		}
+		*/
 		return;
 	}
 	ID = SceneManager.GetID();
@@ -44,16 +47,20 @@ void Scene::Load() {
 		s->Load();
 	}
 	_isLoaded = true;
+	/*
 	if (_luaScript) {
 		_luaScript->Load();
 	}
+	*/
 }
 
 void Scene::Release() {
 	_Release();
+	/*
 	if (_luaScript) {
 		_luaScript->Release();
 	}
+	*/
 	
 	const auto scenesCopy = _scenes;
 	for (const auto& s : scenesCopy) {
@@ -68,12 +75,16 @@ void Scene::Update(float dt) {
 	if (SceneManager.IsCancelUpdate() || not _isEnabled) {
 		return;
 	}
-	_Update(dt);
-	for (const auto& cb : _constantBuffer) {
-		CoreBackend::Shader::UpdateConstantBuffer(cb.handle);
-	}
-	if (_luaScript) {
-		_luaScript->Update(dt);
+	if (_isUpdateEnabled) {
+		_Update(dt);
+		for (const auto& cb : _constantBuffer) {
+			CoreBackend::Shader::UpdateConstantBuffer(cb.handle);
+		}
+		/*
+		if (_luaScript) {
+			_luaScript->Update(dt);
+		}
+		*/
 	}
 	if (SceneManager.IsCancelUpdate()) {
 		return;
@@ -94,28 +105,30 @@ void Scene::Update(float dt) {
 }
 
 bool Scene::AttachLuaScript(const fs::path& path) {
-	delete _luaScript;
+	/*delete _luaScript;
 	_luaScript = new LuaSceneScript(this, path.string());
 	if (_isLoaded) {
 		return _luaScript->Load();
-	}
+	}*/
+	return false;
 	return true;
 }
 
 bool Scene::IsLuaScriptLoaded() const {
-	return _luaScript and _luaScript->IsLoaded();
+
+	return false;//_luaScript and _luaScript->IsLoaded();
 }
 
 void Scene::BindLuaButtonEvents(Scene* target, const std::vector<std::pair<std::string, std::string>>& events) {
-	if (_luaScript) {
+	/*if (_luaScript) {
 		_luaScript->BindButton(dynamic_cast<Button*>(target), events);
-	}
+	}*/
 }
 
 void Scene::BindLuaAnimatedSpriteEvents(Scene* target, const std::vector<std::pair<std::string, std::string>>& events) {
-	if (_luaScript) {
+	/*if (_luaScript) {
 		_luaScript->BindAnimatedSprite(dynamic_cast<AnimatedSprite2D*>(target), events);
-	}
+	}*/
 }
 
 void Scene::Draw() const {
@@ -141,6 +154,16 @@ SharedPtr<Scene> Scene::GetChild(int index) const {
 		return nullptr;
 	}
 	return _scenes[index];
+}
+
+std::vector<std::shared_ptr<Scene>> Scene::GetVisualScenes() const {
+	std::vector<std::shared_ptr<Scene>> visualScenes;
+	for (const auto& scene : _scenes) {
+		if (not std::dynamic_pointer_cast<LogicScene>(scene)) {
+			visualScenes.push_back(scene);
+		}
+	}
+	return visualScenes;
 }
 
 Vector2D Scene::GetParentGlobalPosition() const {

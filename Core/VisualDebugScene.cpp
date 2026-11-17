@@ -5,7 +5,9 @@ void VisualDebugScene::Update(float dt) {
 	if (SceneManager.IsCancelUpdate() || not _isEnabled) {
 		return;
 	}
-	_Update(dt);
+	if (_isUpdateEnabled) {
+		_Update(dt);
+	}
 	if (SceneManager.IsCancelUpdate()) {
 		return;
 	}

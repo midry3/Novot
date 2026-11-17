@@ -2,7 +2,7 @@
 #include "EasingFunction.h"
 #include <Math/Utils.h>
 #include <Event/Signal.h>
-#include <Scene.h>
+#include <LogicScene.h>
 #include <Math/Vector2D.h>
 #include <functional>
 #include <variant>
@@ -141,7 +141,7 @@ public:
 	}
 };
 
-class TweenGroup : public Scene {
+class TweenGroup : public LogicScene {
 protected:
 	std::vector<std::shared_ptr<Tween>> tweens;
 	int loopCount = 1;

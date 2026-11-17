@@ -50,7 +50,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     // 待機中
     if (currentCycleTime >= expandDuration)
     {
-        return color;
+        return float4(color.rgb, color.a * input.Diffuse.a);
     }
 
     // 現在の波の半径
@@ -191,5 +191,5 @@ float4 main(PS_INPUT input) : SV_TARGET
             finalOutlineAlpha
         );
 
-    return float4(finalRGB, finalA);
+    return float4(finalRGB, finalA * input.Diffuse.a);
 }

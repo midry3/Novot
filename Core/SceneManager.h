@@ -1,4 +1,6 @@
 #pragma once
+#include <deque>
+#include <functional>
 #include <memory>
 #include <Singleton.h>
 #include "Scene.h"
@@ -6,15 +8,31 @@
 
 class ColorRect;
 
+enum class SceneTransitionBehavior {
+	Queue,
+	QueueLatest,
+	Ignore
+};
+
 class _SceneManager : public Singleton<_SceneManager> {
 private:
+	using TransitionRequest = std::function<void()>;
+
 	std::shared_ptr<Scene> currentScene;
 	std::shared_ptr<Scene> nextScene;
 	std::vector<std::shared_ptr<Scene>> _effectScenes,  _drawTargets, _drawUITargets;
 	std::list<std::shared_ptr<Scene>> _ySortDrawTargets;
+	std::deque<TransitionRequest> _transitionQueue;
 	std::shared_ptr<ColorRect> _transEffect;
 	int _nextID = 0;
 	bool _cancelUpdate = false;
+	bool _isTransitioning = false;
+
+	void ExecuteTransition(TransitionRequest request, SceneTransitionBehavior behavior);
+	void CompleteTransition();
+	void SetCurrentSceneImmediate(std::shared_ptr<Scene> scene, bool releaseScene);
+	void TransSceneToImmediate(std::shared_ptr<Scene> scene, double in, double out, bool releaseScene);
+	void NaturalTransSceneToImmediate(std::shared_ptr<Scene> scene, double duration, bool releaseScene);
 
 #ifdef _DEBUG
 	std::vector<std::shared_ptr<Scene>> _drawDebugTargets;
@@ -28,11 +46,19 @@ public:
 	void SetCurrentScene(std::shared_ptr<Scene> scene, bool releaseScene = true);
 
 	template <std::derived_from<Scene> T>
-	std::shared_ptr<T> SetCurrentScene() {
+	std::shared_ptr<T> SetCurrentScene(
+		SceneTransitionBehavior behavior = SceneTransitionBehavior::Queue
+	) {
 		auto scene = std::make_shared<T>();
-		SetCurrentScene(scene);
+		SetCurrentScene(scene, true, behavior);
 		return scene;
 	}
+
+	void SetCurrentScene(
+		std::shared_ptr<Scene> scene,
+		bool releaseScene,
+		SceneTransitionBehavior behavior
+	);
 
 	void AddDrawTarget(std::shared_ptr<Scene> scene);
 
@@ -56,8 +82,19 @@ public:
 	void ClearCancelUpdate() {
 		_cancelUpdate = false;
 	}
-	void TransSceneTo(std::shared_ptr<Scene> scene, double in = 2.0, double out = 2.0, bool releaseScene = true);
-	void NaturalTransSceneTo(std::shared_ptr<Scene> scene, double duration, bool releaseScene = true);
+	void TransSceneTo(
+		std::shared_ptr<Scene> scene,
+		double in = 2.0,
+		double out = 2.0,
+		bool releaseScene = true,
+		SceneTransitionBehavior behavior = SceneTransitionBehavior::Queue
+	);
+	void NaturalTransSceneTo(
+		std::shared_ptr<Scene> scene,
+		double duration,
+		bool releaseScene = true,
+		SceneTransitionBehavior behavior = SceneTransitionBehavior::Queue
+	);
 	std::shared_ptr<Scene> GetCurrentScene() {
 		return currentScene;
 	}

@@ -24,7 +24,7 @@ protected:
 	std::vector<std::weak_ptr<TweenGroup>> _tweenGroups;
 	std::vector<std::weak_ptr<Timer>> _timers;
 	std::shared_ptr<PixelShader> _pixelShader;
-	LuaSceneScript* _luaScript = nullptr;
+	//LuaSceneScript* _luaScript = nullptr;
 	int ID = 0, ZIdex = 0;
 	int _ySortOffset = 0;
 	bool visible = true;
@@ -32,6 +32,7 @@ protected:
 	bool _ignoreParentScale = false;
 	bool _ySortEnabled = false;
 	bool _isEnabled = true;
+	bool _isUpdateEnabled = true;
 	bool _ignoreCamera = false;
 	bool _isUI = false;
 	Vector<ConstantBufferData>  _constantBuffer;
@@ -69,6 +70,15 @@ public:
 	}
 	[[nodiscard]] bool IsEnabled() const {
 		return _isEnabled;
+	}
+	void UpdateEneble() {
+		_isUpdateEnabled = true;
+	}
+	void UpdateDisable() {
+		_isUpdateEnabled = false;
+	}
+	[[nodiscard]] bool IsUpdateEnabled() const {
+		return _isUpdateEnabled;
 	}
 	Scene* SetName(const std::string& newName) {
 		_name = newName;
@@ -311,6 +321,7 @@ public:
 	[[nodiscard]] const std::vector<std::shared_ptr<Scene>>& GetChildScenes() const {
 		return _scenes;
 	}
+	[[nodiscard]] std::vector<std::shared_ptr<Scene>> GetVisualScenes() const;
 	[[nodiscard]] int GetChildSceneCount() const {
 		return static_cast<int>(_scenes.size());
 	}

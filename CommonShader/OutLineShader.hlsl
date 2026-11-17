@@ -29,5 +29,5 @@ float4 main(PS_INPUT input) : SV_TARGET
         GlowColor,
         blend_a * glow_strength
     );
-    return float4(final_color.rgb, saturate(color.a + outline_a));
+    return float4(final_color.rgb, saturate(color.a + outline_a) * input.Diffuse.a);
 }

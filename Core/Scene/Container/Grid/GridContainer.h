@@ -1,5 +1,6 @@
 #pragma once
 #include <Scene.h>
+#include <LogicScene.h>
 
 class GridContainer : public Scene {
 protected:
@@ -31,7 +32,6 @@ public:
 	GridContainer* SetMatrixSize(const Vector2D& size) {
 		_matrixSize = size;
 		UpdateCellSize();
-		_gridScenes.resize(static_cast<size_t>(size.x * size.y));
 		return this;
 	}
 	[[nodiscard]] const Vector2D& GetMatrixSize() const {
@@ -51,9 +51,10 @@ public:
 	}
 	GridContainer* AddScene(std::shared_ptr<Scene> scene) override {
 		scene->Load();
-		auto n = static_cast<size_t>(_scenes.size());
 		_scenes.push_back(scene);
-		_gridScenes[n] = scene;
+		if (not std::dynamic_pointer_cast<LogicScene>(scene)) {
+			_gridScenes.push_back(scene);
+		}
 		scene->SetParent(weak_from_this());
 		UpdateCellSize();
 		return this;
@@ -88,6 +89,6 @@ public:
 		return scene;
 	}
 	bool IsFull() const {
-		return _scenes.size() >= static_cast<size_t>(_matrixSize.x * _matrixSize.y);
+		return _gridScenes.size() >= static_cast<size_t>(_matrixSize.x * _matrixSize.y);
 	}
 };

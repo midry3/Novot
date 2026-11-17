@@ -29,10 +29,30 @@ void _SceneManager::Init() {
 }
 
 void _SceneManager::SetCurrentScene(std::shared_ptr<Scene> scene, bool releaseScene) {
-	if (currentScene != nullptr && releaseScene) {
-		currentScene->ExitedMainScene.Emit();
-		currentScene->Release();
+	SetCurrentScene(scene, releaseScene, SceneTransitionBehavior::Queue);
+}
+
+void _SceneManager::SetCurrentScene(
+	std::shared_ptr<Scene> scene,
+	bool releaseScene,
+	SceneTransitionBehavior behavior
+) {
+	ExecuteTransition(
+		[this, scene, releaseScene]() {
+			SetCurrentSceneImmediate(scene, releaseScene);
+		},
+		behavior
+	);
+}
+
+void _SceneManager::SetCurrentSceneImmediate(std::shared_ptr<Scene> scene, bool releaseScene) {
+	if (currentScene) {
 		_cancelUpdate = true;
+		currentScene->ExitedMainScene.Emit();
+
+		if (releaseScene) {
+			currentScene->Release();
+		}
 	}
 	currentScene = scene;
 	currentScene->Load();
@@ -41,23 +61,92 @@ void _SceneManager::SetCurrentScene(std::shared_ptr<Scene> scene, bool releaseSc
 	DebuggerRefreshSceneTree();
 }
 
-void _SceneManager::TransSceneTo(std::shared_ptr<Scene> scene, double in, double out, bool releaseScene) {
+void _SceneManager::ExecuteTransition(
+	TransitionRequest request,
+	SceneTransitionBehavior behavior
+) {
+	if (not _isTransitioning) {
+		request();
+		return;
+	}
+
+	if (behavior == SceneTransitionBehavior::Ignore) {
+		return;
+	}
+	if (behavior == SceneTransitionBehavior::QueueLatest) {
+		_transitionQueue.clear();
+	}
+	_transitionQueue.push_back(std::move(request));
+}
+
+void _SceneManager::CompleteTransition() {
+	_isTransitioning = false;
+	while (not _isTransitioning && not _transitionQueue.empty()) {
+		auto request = std::move(_transitionQueue.front());
+		_transitionQueue.pop_front();
+		request();
+	}
+}
+
+void _SceneManager::TransSceneTo(
+	std::shared_ptr<Scene> scene,
+	double in,
+	double out,
+	bool releaseScene,
+	SceneTransitionBehavior behavior
+) {
+	ExecuteTransition(
+		[this, scene, in, out, releaseScene]() {
+			_isTransitioning = true;
+			TransSceneToImmediate(scene, in, out, releaseScene);
+		},
+		behavior
+	);
+}
+
+void _SceneManager::TransSceneToImmediate(
+	std::shared_ptr<Scene> scene,
+	double in,
+	double out,
+	bool releaseScene
+) {
 	_transEffect->SetAlpha(0);
 	AddEffectScene(_transEffect);
 	auto tg = _transEffect->CreateTweenGroup();
 	tg->CreateTween(&_transEffect->alpha, 255, out)
 		->OnComplete([this, scene, in, releaseScene]() {
-		SetCurrentScene(scene, releaseScene);
+			SetCurrentSceneImmediate(scene, releaseScene);
 		auto tg2 = scene->CreateTweenGroup();
 		tg2->CreateTween(&_transEffect->alpha, 0, in)
 			->OnComplete([this]() {
 			DeleteEffectScene(_transEffect);
+				CompleteTransition();
 				});
 		});
 }
 
-void _SceneManager::NaturalTransSceneTo(std::shared_ptr<Scene> scene, double duration, bool releaseScene) {
+void _SceneManager::NaturalTransSceneTo(
+		std::shared_ptr<Scene> scene,
+		double duration,
+		bool releaseScene,
+		SceneTransitionBehavior behavior
+) {
+		ExecuteTransition(
+			[this, scene, duration, releaseScene]() {
+				_isTransitioning = true;
+				NaturalTransSceneToImmediate(scene, duration, releaseScene);
+			},
+			behavior
+		);
+}
+
+void _SceneManager::NaturalTransSceneToImmediate(
+		std::shared_ptr<Scene> scene,
+		double duration,
+		bool releaseScene
+) {
 	if (scene == nullptr || duration < 0.0) {
+			CompleteTransition();
 		return;
 	}
 
@@ -75,11 +164,12 @@ void _SceneManager::NaturalTransSceneTo(std::shared_ptr<Scene> scene, double dur
 		if (0 <= screenHandle) {
 			CoreBackend::Texture::Release(screenHandle);
 		}
-		SetCurrentScene(scene, releaseScene);
+		SetCurrentSceneImmediate(scene, releaseScene);
+		CompleteTransition();
 		return;
 	}
 	const int targetAlpha = scene->alpha;
-	SetCurrentScene(scene, releaseScene);
+	SetCurrentSceneImmediate(scene, releaseScene);
 	scene->SetAlpha(0);
 
 	auto transitionScreen = std::make_shared<NaturalTransitionScreen>(screenHandle);
@@ -89,6 +179,7 @@ void _SceneManager::NaturalTransSceneTo(std::shared_ptr<Scene> scene, double dur
 		->CreateTween(&transitionScreen->alpha, 0, duration)
 		->OnComplete([this, transitionScreen]() {
 			DeleteEffectScene(transitionScreen);
+			CompleteTransition();
 		});
 	scene->CreateTweenGroup()->CreateTween(&scene->alpha, targetAlpha, duration);
 }

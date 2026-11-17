@@ -7,7 +7,8 @@ void AnimatedUI::In(bool immediate) {
 	Enable();
 	InStarted();
 	const Vector2D& wsize = PropertyManager.GetSettingWindowSize();
-	for (const auto& scene : _scenes) {
+	for (const auto& scene : GetVisualScenes()) {
+		scene->UpdateEneble();
 		const auto& tg = scene->CreateTweenGroup();
 		if (immediate) {
 			scene->offset = Vec2D_0;
@@ -30,24 +31,26 @@ void AnimatedUI::Out(bool immediate) {
 	KillAllTimers();
 	OutStarted();
 	const Vector2D& wsize = PropertyManager.GetSettingWindowSize();
-	for (const auto& scene : _scenes) {
-		const auto& tg = scene->CreateTweenGroup();
-		const auto& xRate = scene->position.x / wsize.x;
-		const auto& yRate = scene->position.y / wsize.y;
-		if (yRate < xRate) {
+	for (const auto& scene : GetVisualScenes()) {
+		scene->UpdateDisable();
+		const auto& tg = CreateTweenGroup();
+		const auto& gpos = scene->GetGlobalPosition();
+		const auto& dx = GetNearest(gpos.x, 0.0, wsize.x) - gpos.x - scene->GetSize().x;
+		const auto& dy = GetNearest(gpos.y, 0.0, wsize.y) - gpos.y - scene->GetSize().y;
+		if (dx < dy) {
 			if (immediate) {
-				scene->offset.x = GetNearest(scene->position.x, 0.0, wsize.x) - scene->position.x;
+				scene->offset.x = dx;
 			}
 			else {
-				tg->CreateTween(&scene->offset.x, GetNearest(scene->position.x, 0.0, wsize.x) - scene->position.x, _outTime, _outEasing);
+				tg->CreateTween(&scene->offset.x, dx, _outTime, _outEasing);
 			}
 		}
 		else {
 			if (immediate) {
-				scene->offset.y = GetNearest(scene->position.y, 0.0, wsize.y) - scene->position.y;
+				scene->offset.y = dy;
 			}
 			else {
-				tg->CreateTween(&scene->offset.y, GetNearest(scene->position.y, 0.0, wsize.y) - scene->position.y, _outTime, _outEasing);
+				tg->CreateTween(&scene->offset.y, dy, _outTime, _outEasing);
 			}
 		}
 	}

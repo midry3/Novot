@@ -55,26 +55,8 @@ public:
 		}
 		return _handle;
 	}
-	void AdjustScale() {
-		Vector2D wsize;
-		float r;
-		switch (stretch) {
-		case StretchType::FIT:
-			wsize = PropertyManager.GetRealWindowSize();
-			r = (std::min)(wsize.x / _size.x, wsize.y / _size.y) / 2;
-			SetScale(Vector2D(r, r));
-			break;
-		case StretchType::NONE:
-			break;
-		}
-	}
-	void AdjustSize() {
-		int x, y;
-		CoreBackend::Texture::Size(GetHandle(), &x, &y);
-		_size = Vec2(x, y);
-		_handle = GetHandle();
-		AdjustScale();
-	}
+	void AdjustScale();
+	void AdjustSize();
 	const Vector2D& GetRawSize() const override {
 		return _size;
 	}

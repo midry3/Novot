@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="Core\Animation\AnimationMath.cpp" />
     <ClCompile Include="Core\Input\KeyInput.cpp" />
+    <ClCompile Include="Core\Scene\Button\TextureButton.cpp" />
     <ClCompile Include="Core\Scene\Text\TextInput.cpp" />
     <ClCompile Include="Core\Screen.cpp" />
     <ClCompile Include="ThirdParty\Lua\src\lzio.c">
@@ -406,6 +407,7 @@
     <ClInclude Include="Core\Data\StopWatch.h" />
     <ClInclude Include="Core\Event\DynamicSignal.h" />
     <ClInclude Include="Core\Math\Constants.h" />
+    <ClInclude Include="Core\Scene\Button\TextureButton.h" />
     <ClInclude Include="Core\Scene\Container\Animation\AnimatedGrid.h" />
     <ClInclude Include="Core\Scene\Container\Animation\AnimatedUI.h" />
     <ClInclude Include="Core\Scene\Shape\ColorPolygon.h" />

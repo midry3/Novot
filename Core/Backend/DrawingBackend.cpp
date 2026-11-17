@@ -1,6 +1,7 @@
 #include <Graphic/2D.h>
 #include <DxLib.h>
 #include <Backend/Backend.h>
+#include <algorithm>
 
 namespace NovotRenderer {
 	void DrawLine(const Vector2D& p1, const Vector2D& p2, unsigned int color, int thickness) {
@@ -70,7 +71,8 @@ namespace NovotRenderer {
 		int transFlag,
 		int pixelShaderHandle,
 		float uMin, float vMin,
-		float uMax, float vMax)
+		float uMax, float vMax,
+		float alpha)
 	{
 		int width, height;
 		if (CoreBackend::Texture::Size(graphHandle, &width, &height) == -1)
@@ -101,7 +103,7 @@ namespace NovotRenderer {
 			CoreBackend::Drawing::GetBrightnessRed(),
 			CoreBackend::Drawing::GetBrightnessGreen(),
 			CoreBackend::Drawing::GetBrightnessBlue(),
-			255
+			static_cast<int>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f)
 		);
 		const COLOR_U8 specColor = GetColorU8(0, 0, 0, 0);
 		for (auto& v : vertices)
@@ -136,7 +138,8 @@ namespace NovotRenderer {
         int transFlag,
         int pixelShaderHandle,
         float uMin, float vMin,
-        float uMax, float vMax)
+        float uMax, float vMax,
+        float alpha)
     {
         int width, height;
         if (CoreBackend::Texture::Size(graphHandle, &width, &height) == -1)
@@ -191,7 +194,7 @@ namespace NovotRenderer {
             CoreBackend::Drawing::GetBrightnessRed(),
             CoreBackend::Drawing::GetBrightnessGreen(),
             CoreBackend::Drawing::GetBrightnessBlue(),
-            255
+            static_cast<int>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f)
         );
         const COLOR_U8 specColor = GetColorU8(0, 0, 0, 0);
 
