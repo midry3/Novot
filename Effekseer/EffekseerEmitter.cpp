@@ -27,3 +27,9 @@ void EffekseerEmitter2D::Stop() {
 		StopEffekseer2DEffect(_effectHandle);
 	}
 }
+
+void EffekseerEmitter2D::SendTrigger(int index) {
+	if (_effect && _effectHandle >= 0) {
+		GetEffekseer2DManager()->SendTrigger(_effectHandle, index);
+	}
+}

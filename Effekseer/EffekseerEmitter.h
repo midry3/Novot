@@ -11,6 +11,7 @@ protected:
 public:
 	void Play();
 	void Stop();
+	void SendTrigger(int index);
 	EffekseerEmitter2D* SetEffect(std::string effect) {
 		_effect = LoadAsset<EffekseerAsset>(effect);
 		return this;
