@@ -72,11 +72,16 @@ void Scene::Release() {
 }
 
 void Scene::Update(float dt) {
+	Update(dt, dt);
+}
+
+void Scene::Update(float dt, float unscaledDt) {
 	if (SceneManager.IsCancelUpdate() || not _isEnabled) {
 		return;
 	}
+	const float updateDt = _ignoreTimeScale ? unscaledDt : dt;
 	if (_isUpdateEnabled) {
-		_Update(dt);
+		_Update(updateDt);
 		for (const auto& cb : _constantBuffer) {
 			CoreBackend::Shader::UpdateConstantBuffer(cb.handle);
 		}
@@ -91,7 +96,7 @@ void Scene::Update(float dt) {
 	}
 	const auto scenesCopy = _scenes;
 	for (auto it=scenesCopy.rbegin(); it!=scenesCopy.rend(); ++it) {
-		(*it)->Update(dt);
+		(*it)->Update(dt, unscaledDt);
 	}
 
 	if (IsShouldDraw()) {

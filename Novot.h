@@ -6,10 +6,20 @@
 #include <Asset/AssetManager.h>
 #include <Windows.h>
 #include <Asset/Model/MV1.h>
+#include <vector>
 
 namespace Novot {
-	static int _constantBufferHandle = -1, _constantBufferSlot = -1;
-	static std::shared_ptr<PixelShader> _screenPixelShader;
+	struct ScreenPixelShaderEffect {
+		int id = -1;
+		std::shared_ptr<PixelShader> shader;
+		int constantBufferHandle = -1;
+		int constantBufferSlot = -1;
+	};
+
+	static std::vector<ScreenPixelShaderEffect> _screenPixelShaders;
+	static std::vector<int> _screenPixelShaderScreens;
+	static int _nextScreenPixelShaderId = 0;
+	static Vector2D _screenShakeOffset;
 	static std::shared_ptr<MV1> _screenMaterial = nullptr;
 
 	/// <summary>
@@ -54,12 +64,21 @@ namespace Novot {
 	void SetBackgroundColor(const Vector3D& color);
 
 	void SetScreenMaterial(const std::shared_ptr<MV1>& material);
+	void SetScreenShake(const Vector2D& offset);
+	void ClearScreenShake();
 	void SetScreenPixelShader(const std::shared_ptr<PixelShader>& shader);
 	template <std::derived_from<PixelShader> T>
 	void SetScreenPixelShader() {
 		SetScreenPixelShader(std::make_shared<T>());
 	}
+	int AddScreenPixelShader(const std::shared_ptr<PixelShader>& shader);
+	template <std::derived_from<PixelShader> T>
+	int AddScreenPixelShader() {
+		return AddScreenPixelShader(std::make_shared<T>());
+	}
 	void SetConstantBufferToScreenPixelShader(int handle, int slot=4);
+	void SetConstantBufferToScreenPixelShader(int shaderId, int handle, int slot);
+	void RemoveScreenPixelShader(int shaderId);
 };
 
 using namespace Novot;

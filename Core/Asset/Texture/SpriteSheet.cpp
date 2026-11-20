@@ -29,7 +29,8 @@ int SpriteSheet::Load() {
 }
 
 void SpriteSheet::Init() {
-	currentFrameNumber = 0;
+	currentFrameNumber = isReverse ? frameCount - 1 : 0;
+	if (currentFrameNumber < 0) currentFrameNumber = 0;
 	elapsedTime = 0;
 	_isEmittedAnimationFinished = false;
 	prevTime = CoreBackend::Clock::Now();
@@ -43,13 +44,18 @@ int SpriteSheet::UpdateFrame(float dt) {
 		elapsedTime += dt * 1000;
 		if (frameInterval <= elapsedTime) {
 			if (isLoop) {
-				currentFrameNumber = (currentFrameNumber + 1) % frameCount;
+				currentFrameNumber = isReverse
+					? (currentFrameNumber - 1 + frameCount) % frameCount
+					: (currentFrameNumber + 1) % frameCount;
 			} else {
-				if (not _isEmittedAnimationFinished && currentFrameNumber == frameCount - 1) {
+				const int endFrame = isReverse ? 0 : frameCount - 1;
+				if (not _isEmittedAnimationFinished && currentFrameNumber == endFrame) {
 					AnimationFinished.Emit();
 					_isEmittedAnimationFinished = true;
 				}
-				currentFrameNumber = (std::min)(currentFrameNumber + 1, frameCount - 1);
+				currentFrameNumber = isReverse
+					? (std::max)(currentFrameNumber - 1, 0)
+					: (std::min)(currentFrameNumber + 1, frameCount - 1);
 			}
 			elapsedTime = 0;
 			FrameChanged.Emit(frames[currentFrameNumber]);

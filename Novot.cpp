@@ -45,6 +45,12 @@ namespace Novot {
 	}
 
 	void End() {
+		for (const auto screen : _screenPixelShaderScreens) {
+			DeleteGraph(screen);
+		}
+		_screenPixelShaderScreens.clear();
+		_screenPixelShaders.clear();
+		ClearScreenShake();
 		Effkseer_End();
 		DxLib_End();
 	}
@@ -56,6 +62,7 @@ namespace Novot {
 		KeyInput.Update();
 		TimerManager.Update(dt);
 
+		const float unscaledDt = dt;
 		bool shouldUpdate = !GameState.IsPaused();
 		if (GameState.IsStepFrameRequested()) {
 			shouldUpdate = true;
@@ -71,11 +78,13 @@ namespace Novot {
 
 		if (shouldUpdate) {
 			Mouse.UpdateMouseEvent();
-			SceneManager.Update(dt);
+			SceneManager.Update(dt, unscaledDt);
 			UpdateEffekseer2D(dt);
 
-			if (_screenPixelShader) {
-				CoreBackend::Shader::UpdateConstantBuffer(_constantBufferHandle);
+			for (const auto& effect : _screenPixelShaders) {
+				if (effect.constantBufferHandle != -1) {
+					CoreBackend::Shader::UpdateConstantBuffer(effect.constantBufferHandle);
+				}
 			}
 		}
 	}
@@ -96,13 +105,54 @@ namespace Novot {
 		_screenMaterial = material;
 	}
 
+	void SetScreenShake(const Vector2D& offset) {
+		_screenShakeOffset = offset;
+	}
+
+	void ClearScreenShake() {
+		_screenShakeOffset = Vector2D(0, 0);
+	}
+
 	void SetScreenPixelShader(const std::shared_ptr<PixelShader>& shader) {
-		_screenPixelShader = shader;
+		_screenPixelShaders.clear();
+		if (shader) {
+			AddScreenPixelShader(shader);
+		}
 	}
 
 	void SetConstantBufferToScreenPixelShader(int handle, int slot) {
-		_constantBufferHandle = handle;
-		_constantBufferSlot = slot;
+		if (_screenPixelShaders.empty()) return;
+		auto& effect = _screenPixelShaders.back();
+		effect.constantBufferHandle = handle;
+		effect.constantBufferSlot = slot;
+	}
+
+	int AddScreenPixelShader(const std::shared_ptr<PixelShader>& shader) {
+		if (not shader) return -1;
+		const int id = _nextScreenPixelShaderId++;
+		_screenPixelShaders.push_back({
+			id,
+			shader,
+			-1,
+			-1
+		});
+		return id;
+	}
+
+	void SetConstantBufferToScreenPixelShader(int shaderId, int handle, int slot) {
+		for (auto& effect : _screenPixelShaders) {
+			if (effect.id == shaderId) {
+				effect.constantBufferHandle = handle;
+				effect.constantBufferSlot = slot;
+				return;
+			}
+		}
+	}
+
+	void RemoveScreenPixelShader(int shaderId) {
+		std::erase_if(_screenPixelShaders, [shaderId](const ScreenPixelShaderEffect& effect) {
+			return effect.id == shaderId;
+		});
 	}
 
 	int StartGame() {
@@ -145,22 +195,44 @@ namespace Novot {
 			if (ClearDrawScreen() != 0) {
 				break;
 			}
-			if (_screenPixelShader) {
-				SetShaderConstantBuffer(_constantBufferHandle, DX_SHADERTYPE_PIXEL, _constantBufferSlot);
-				NovotRenderer::DrawGraphShader(
-					0,
-					0,
-					screen,
-					TRUE,
-					_screenPixelShader->GetHandle()
-				);
+			const int shakeX = static_cast<int>(_screenShakeOffset.x);
+			const int shakeY = static_cast<int>(_screenShakeOffset.y);
+			if (not _screenPixelShaders.empty()) {
+				while (_screenPixelShaderScreens.size() + 1 < _screenPixelShaders.size()) {
+					_screenPixelShaderScreens.push_back(MakeScreen(wsize.x, wsize.y));
+				}
+				int source = screen;
+				for (size_t index = 0; index < _screenPixelShaders.size(); ++index) {
+					const bool isLast = index + 1 == _screenPixelShaders.size();
+					const int destination = isLast
+						? DX_SCREEN_BACK
+						: _screenPixelShaderScreens[index];
+					SetDrawScreen(destination);
+					ClearDrawScreen();
+					const auto& effect = _screenPixelShaders[index];
+					if (effect.constantBufferHandle != -1) {
+						SetShaderConstantBuffer(
+							effect.constantBufferHandle,
+							DX_SHADERTYPE_PIXEL,
+							effect.constantBufferSlot
+						);
+					}
+					NovotRenderer::DrawGraphShader(
+						shakeX,
+						shakeY,
+						source,
+						TRUE,
+						effect.shader->GetHandle()
+					);
+					source = destination;
+				}
 			}
 			else {
 				DrawExtendGraph(
-					0,
-					0,
-					wsize.x,
-					wsize.y,
+					shakeX,
+					shakeY,
+					wsize.x + shakeX,
+					wsize.y + shakeY,
 					screen,
 					TRUE
 				);

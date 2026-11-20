@@ -35,6 +35,7 @@ protected:
 	bool _isUpdateEnabled = true;
 	bool _ignoreCamera = false;
 	bool _isUI = false;
+	bool _ignoreTimeScale = false;
 	Vector<ConstantBufferData>  _constantBuffer;
 
 	virtual void _Load() {};
@@ -55,6 +56,7 @@ public:
 	[[nodiscard]] bool IsShouldDraw() const;
 	virtual void Load();
 	virtual void Update(float dt);
+	void Update(float dt, float unscaledDt);
 	virtual void Release();
 	bool AttachLuaScript(const fs::path& path);
 	bool IsLuaScriptLoaded() const;
@@ -223,6 +225,13 @@ public:
 	Scene* IgnoreCamera() {
 		_ignoreCamera = true;
 		return this;
+	}
+	Scene* SetIgnoreTimeScale(bool ignore) {
+		_ignoreTimeScale = ignore;
+		return this;
+	}
+	[[nodiscard]] bool IsIgnoringTimeScale() const {
+		return _ignoreTimeScale;
 	}
 	[[nodiscard]] bool IsIgnoringCamera() const {
 		if (parent.expired()) {

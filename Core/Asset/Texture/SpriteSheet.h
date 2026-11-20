@@ -8,6 +8,7 @@
 class SpriteSheet : public Asset {
 protected:
 	bool isLoop = true;
+	bool isReverse = false;
 	bool isPaused = false;
 	std::vector<int> frames;
 	std::shared_ptr<Texture> texture;
@@ -51,6 +52,12 @@ public:
 	void GetUVRect(float& uMin, float& vMin, float& uMax, float& vMax) const;
 	void SetLoop(bool loop) {
 		isLoop = loop;
+	}
+	void SetReverse(bool reverse) {
+		isReverse = reverse;
+	}
+	[[nodiscard]] bool IsReverse() const {
+		return isReverse;
 	}
 	void Release() override;
 	void Init();

@@ -1,10 +1,11 @@
 #pragma once
 #include "Sprite2D.h"
 #include <Asset/Texture/SpriteSheetManager.h>
+#include <optional>
 
 class AnimatedSprite2D : public Sprite2D {
 protected:
-	int _currentAnimation = 0;
+	int _currentAnimation = -1;
 	SpriteSheetManager _spriteSheetManager;
 	Vector<String> _animationNames;
 	void _Load() override;
@@ -15,25 +16,30 @@ public:
 	int GetCurrentAnimation() const {
 		return _currentAnimation;
 	}
-	AnimatedSprite2D* Play(const int index, bool loop = false) {
+	[[nodiscard]] Vector2D* GetPositionPointer() {
+		return &position;
+	}
+	AnimatedSprite2D* Play(const int index, std::optional<bool> loop = std::nullopt, bool reverse = false) {
 		auto spriteSheet = _spriteSheetManager.GetSpriteSheet(index);
 		if (not spriteSheet) {
 			return this;
 		}
 		_currentAnimation = index;
-		_spriteSheetManager.SetCurrentAnimation(_currentAnimation);
-		if (loop) {
-			spriteSheet->SetLoop(true);
+		if (loop.has_value()) {
+			spriteSheet->SetLoop(*loop);
 		}
+		spriteSheet->SetReverse(reverse);
+		spriteSheet->Init();
+		_spriteSheetManager.SetCurrentAnimation(_currentAnimation);
 		SetScale(spriteSheet->GetScale());
 		_spriteSheetManager.Play();
 		AnimationChanged(_currentAnimation);
 		return this;
 	}
-	AnimatedSprite2D* Play(const String& anim, bool loop = false) {
+	AnimatedSprite2D* Play(const String& anim, std::optional<bool> loop = std::nullopt, bool reverse = false) {
 		auto it = std::find(_animationNames.begin(), _animationNames.end(), anim);
 		if (it != _animationNames.end()) {
-			return Play(std::distance(_animationNames.begin(), it), loop);
+			return Play(std::distance(_animationNames.begin(), it), loop, reverse);
 		}
 		return this;
 	}

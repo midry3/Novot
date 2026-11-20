@@ -40,6 +40,7 @@ private:
 public:
 	void Init();
 	void Update(float dt);
+	void Update(float dt, float unscaledDt);
 	void EffectUpdate(float dt);
 	void Draw() const;
 	void EffectDraw() const;

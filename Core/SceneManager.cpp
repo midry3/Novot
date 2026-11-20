@@ -185,6 +185,10 @@ void _SceneManager::NaturalTransSceneToImmediate(
 }
 
 void _SceneManager::Update(float dt) {
+	Update(dt, dt);
+}
+
+void _SceneManager::Update(float dt, float unscaledDt) {
 	_drawTargets.clear();
 	_ySortDrawTargets.clear();
 	_drawUITargets.clear();
@@ -193,9 +197,12 @@ void _SceneManager::Update(float dt) {
 #endif
 	if (currentScene != nullptr) {
 		ClearCancelUpdate();
-		currentScene->Update(dt);
+		currentScene->Update(dt, unscaledDt);
 	}
-	EffectUpdate(dt);
+	const auto effectScenesCopy = _effectScenes;
+	for (const auto& effectScene : effectScenesCopy) {
+		effectScene->Update(dt, unscaledDt);
+	}
 }
 
 void _SceneManager::EffectUpdate(float dt) {
