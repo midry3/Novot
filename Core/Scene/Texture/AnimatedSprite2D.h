@@ -60,4 +60,5 @@ public:
 		return _spriteSheetManager.GetCurrentFrameSize();
 	}
 	[[nodiscard]] void GetUVRect(float& uMin, float& vMin, float& uMax, float& vMax) const override;
+	[[nodiscard]] bool IsReversed();
 };

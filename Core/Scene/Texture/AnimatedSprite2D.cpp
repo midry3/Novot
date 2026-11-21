@@ -35,3 +35,10 @@ void AnimatedSprite2D::GetUVRect(float& uMin, float& vMin, float& uMax, float& v
 		Sprite2D::GetUVRect(uMin, vMin, uMax, vMax);
 	}
 }
+
+bool AnimatedSprite2D::IsReversed() {
+	if (auto sheet = _spriteSheetManager.GetCurrentSpriteSheet()) {
+		return sheet->IsReverse();
+	}
+	return false;
+}
