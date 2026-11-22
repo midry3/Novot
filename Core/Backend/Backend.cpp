@@ -64,10 +64,33 @@ namespace CoreBackend {
     void Keyboard::State(char* state) { GetHitKeyStateAll(state); }
     int Keyboard::Character() { return GetInputChar(TRUE); }
 
-    void Window::SetSize(int width, int height) { SetGraphMode(width, height, 32); DxLib::SetWindowSize(width, height); }
+	int Window::_lastWindowWidth = 1280;
+	int Window::_lastWindowHeight = 720;
+
+    void Window::SetSize(int width, int height) {
+        SetGraphMode(width, height, 32);
+        DxLib::SetWindowSize(width, height);
+		_lastWindowWidth = width;
+		_lastWindowHeight = height;
+    }
     void Window::Size(int* width, int* height) { GetWindowSize(width, height); }
     bool Window::IsWindowed() { return GetWindowModeFlag() not_eq 0; }
-    void Window::SetMode(bool windowed) { ChangeWindowMode(windowed ? TRUE : FALSE); SetDrawScreen(DX_SCREEN_BACK); }
+    void Window::SetMode(bool windowed) {
+        ChangeWindowMode(windowed ? TRUE : FALSE);
+        if (windowed) {
+            DxLib::SetWindowSize(_lastWindowWidth, _lastWindowHeight);
+        }
+        else {
+            int w, h;
+            Display::GetDisplaySize(&w, &h);
+            DxLib::SetWindowSize(w, h);
+        }
+        SetMouseDispFlag(TRUE);
+    }
+
+	void Display::GetDisplaySize(int* width, int* height) {
+		GetDefaultState(width, height, NULL);
+	}
 
     unsigned int Clock::Tick() { return GetTickCount64(); }
     int Clock::Now() { return GetNowCount(); }

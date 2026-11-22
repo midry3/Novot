@@ -57,11 +57,17 @@ namespace CoreBackend {
         static int Character();
     };
     class Window {
+    private:
+		static int _lastWindowWidth, _lastWindowHeight;
     public:
         static void SetSize(int width, int height);
         static void Size(int* width, int* height);
         static bool IsWindowed();
         static void SetMode(bool windowed);
+    };
+    class Display {
+    public:
+        static void GetDisplaySize(int* width, int* height);
     };
     class Clock {
     public:

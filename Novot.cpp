@@ -16,6 +16,8 @@ namespace Novot {
 		SetDrawScreen(DX_SCREEN_BACK);
 		SetAlwaysRunFlag(TRUE);
 		SetChangeScreenModeGraphicsSystemResetFlag(FALSE);
+		SetFullScreenResolutionMode(DX_FSRESOLUTIONMODE_BORDERLESS_WINDOW);
+		SetFullScreenScalingMode(DX_FSSCALINGMODE_NEAREST);
 		auto wsize = PropertyManager.GetSettingWindowSize();
 		SetGraphMode(wsize.x, wsize.y, 32);
 		SetWindowSize(wsize.x, wsize.y);
@@ -28,6 +30,7 @@ namespace Novot {
 			DxLib_End();
 			return -1;
 		}
+
 		Effekseer_SetGraphicsDeviceLostCallbackFunctions();
 		Effekseer_Set2DSetting(wsize.x, wsize.y);
 

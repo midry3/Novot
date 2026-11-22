@@ -219,10 +219,10 @@ void _SceneManager::Draw() const {
 	for (const auto& scene : _ySortDrawTargets) {
 		scene->Draw();
 	}
+	EffectDraw();
 	for (auto it = _drawUITargets.rbegin(); it != _drawUITargets.rend(); ++it) {
 		(*it)->Draw();
 	}
-	EffectDraw();
 #ifdef _DEBUG
 	DrawDebug();
 #endif
